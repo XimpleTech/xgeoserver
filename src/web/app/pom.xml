@@ -201,7 +201,7 @@
             <phase>clean</phase>
             <configuration>
               <tasks>
-  <delete dir="${webappSourceDirectory}/data" />
+                <delete dir="${webappSourceDirectory}/data" />
               </tasks>
             </configuration>
             <goals>

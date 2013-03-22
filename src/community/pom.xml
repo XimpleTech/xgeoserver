@@ -148,7 +148,7 @@
       <modules>
         <module>authkey</module>
         <module>css</module>
-	<module>dds</module>
+	      <module>dds</module>
         <module>printing</module>
         <module>release</module>
         <module>ftp</module>

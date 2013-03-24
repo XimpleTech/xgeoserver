@@ -46,7 +46,6 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.time.TimeSeriesDataItem;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.HorizontalAlignment;
 
 public abstract class ActivityChartBasePanel extends Panel {
     

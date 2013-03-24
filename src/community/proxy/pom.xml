@@ -10,12 +10,12 @@
   <parent>
     <groupId>org.geoserver</groupId>
     <artifactId>community</artifactId>
-    <version>2.3-SNAPSHOT</version>
+    <version>2.3.x-SNAPSHOT</version>
   </parent>
   <groupId>org.geoserver.community</groupId>
   <artifactId>proxy</artifactId>
   <packaging>jar</packaging>
-  <version>2.3-SNAPSHOT</version>
+  <version>2.3.x-SNAPSHOT</version>
   <name>HTTP Proxy Extension</name>
   
   <repositories>
@@ -40,13 +40,13 @@
     </dependency>
     <dependency>
       <groupId>com.mockrunner</groupId>
-      <artifactId>mockrunner</artifactId>
+      <artifactId>mockrunner-jdk1.5-j2ee1.3</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.restlet</groupId>
       <artifactId>org.restlet.ext.fileupload</artifactId>
-      <version>1.0.5</version>
+      <!--version>1.0.5</version-->
     </dependency>
   </dependencies>
 </project>

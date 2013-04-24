@@ -1548,7 +1548,7 @@
 
  <properties>
   <gs.version>2.3.x-SNAPSHOT</gs.version>
-  <gt.version>9.0.x</gt.version>
+  <gt.version>9.1.x</gt.version>
   <gwc.version>1.4-SNAPSHOT</gwc.version>
   <spring.version>3.1.4.RELEASE</spring.version>
   <spring.security.version>3.1.2.RELEASE</spring.security.version>

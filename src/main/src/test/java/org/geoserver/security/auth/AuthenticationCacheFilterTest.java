@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.geoserver.data.test.SystemTestData;
 import org.geoserver.security.GeoServerSecurityFilterChain;
 import org.geoserver.security.GeoServerSecurityManager;
 import org.geoserver.security.config.BasicAuthenticationFilterConfig;
@@ -53,8 +54,20 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
     public final static String testFilterName4 = "requestHeaderTestFilter";
     public final static String testFilterName5 = "basicAuthTestFilterWithRememberMe";
     public final static String testFilterName8 = "x509TestFilter";
+    
+    @Override
+    protected void onSetUp(SystemTestData testData) throws Exception {
+        super.onSetUp(testData);
+        
+        BasicAuthenticationFilterConfig config = new BasicAuthenticationFilterConfig();
+        config.setClassName(GeoServerBasicAuthenticationFilter.class.getName());
+        config.setUseRememberMe(false);
+        config.setName(testFilterName);
+        
+        getSecurityManager().saveFilter(config);
 
-
+    }
+    
     Authentication getAuth(String filterName, String user, Integer idleTime, Integer liveTime) {
         
         Map<String,byte[]> map= getCache().cache.get(filterName);
@@ -110,15 +123,6 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
     public void testBasicAuth() throws Exception{
         
                 
-        BasicAuthenticationFilterConfig config = new BasicAuthenticationFilterConfig();
-        config.setClassName(GeoServerBasicAuthenticationFilter.class.getName());
-        config.setUseRememberMe(false);
-        config.setName(testFilterName);
-
-        // TODO: Disable Test - Ximple
-        if (true) return;
-
-        getSecurityManager().saveFilter(config);
         prepareFilterChain(pattern,testFilterName);            
             
 
@@ -445,7 +449,10 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
         assertEquals(HttpServletResponse.SC_FORBIDDEN,response.getErrorCode());
         Authentication auth = getAuth(testFilterName4, testUserName,null,null);
         assertNull(auth);
-        assertNull(SecurityContextHolder.getContext().getAuthentication());        
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        
+        updateUser("ug1", testUserName, true);
+        
         // Test anonymous
         insertAnonymousFilter();
         request= createRequest("/foo/bar");
@@ -740,7 +747,7 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
     @Test
     public void testX509Auth() throws Exception{
 
-        X509CertificateAuthenticationFilterConfig config =
+        X509CertificateAuthenticationFilterConfig config = 
                 new X509CertificateAuthenticationFilterConfig();        
         config.setClassName(GeoServerX509CertificateAuthenticationFilter.class.getName());        
         config.setName(testFilterName8);
@@ -765,9 +772,7 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
         assertEquals(HttpServletResponse.SC_FORBIDDEN,response.getErrorCode());
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         
-        // TODO: Disable Test - Ximple
-        if (true) return;
-
+        
         for (org.geoserver.security.config.X509CertificateAuthenticationFilterConfig.RoleSource rs : 
             org.geoserver.security.config.X509CertificateAuthenticationFilterConfig.RoleSource.values()) {
             getCache().removeAll();
@@ -836,6 +841,8 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
         assertNull(auth);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         
+        updateUser("ug1", testUserName, true);
+        
         // Test anonymous
         insertAnonymousFilter();
         request= createRequest("/foo/bar");
@@ -852,12 +859,6 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
     @Test
     @RunTestSetup
     public void testCascadingFilters() throws Exception{
-
-        BasicAuthenticationFilterConfig bconfig = new BasicAuthenticationFilterConfig();
-        bconfig.setClassName(GeoServerBasicAuthenticationFilter.class.getName());
-        bconfig.setUseRememberMe(false);
-        bconfig.setName(testFilterName);
-        getSecurityManager().saveFilter(bconfig);
 
         
         DigestAuthenticationFilterConfig config = new DigestAuthenticationFilterConfig();

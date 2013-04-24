@@ -889,6 +889,11 @@ public class GeoServerSystemTestSupport extends GeoServerBaseTestSupport<SystemT
         return new ByteArrayInputStream( response.getOutputStreamContent().getBytes() );
     }
     
+    protected InputStream get( String path, String charset ) throws Exception {
+        MockHttpServletResponse response = getAsServletResponse(path, charset);
+        return new ByteArrayInputStream( response.getOutputStreamContent().getBytes() );
+    }
+
     /**
      * Executes an ows request using the GET method.
      *
@@ -1184,7 +1189,12 @@ public class GeoServerSystemTestSupport extends GeoServerBaseTestSupport<SystemT
     throws Exception {
         return dom(get(path), skipDTD);
     }
-    
+
+    protected Document getAsDOM(final String path, final boolean skipDTD, final String charSet)
+    throws Exception {
+        return dom(get(path, charSet), skipDTD);
+    }
+
     /**
      * Executes an ows request using the POST method with key value pairs 
      * form encoded, returning the result as a dom.

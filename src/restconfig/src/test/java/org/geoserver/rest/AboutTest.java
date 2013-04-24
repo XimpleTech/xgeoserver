@@ -7,7 +7,10 @@ package org.geoserver.rest;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -43,10 +46,16 @@ public class AboutTest extends GeoServerSystemTestSupport {
         }
     }
 
+    private static String getDefaultCharSet() {
+        OutputStreamWriter writer = new OutputStreamWriter(new ByteArrayOutputStream());
+        String enc = writer.getEncoding();
+        return enc;
+    }
+
     @Test
     public void testGetVersionsAsXML() throws Exception {
         // make the request, parsing the result as a dom
-        Document dom = getAsDOM("/rest/about/version.xml");
+        Document dom = getAsDOM("/rest/about/version.xml", true, "UTF-8");
 
         checkXMLModel(dom);
     }
@@ -54,7 +63,7 @@ public class AboutTest extends GeoServerSystemTestSupport {
     @Test
     public void testGetManifestsAsXML() throws Exception {
         // make the request, parsing the result as a dom
-        Document dom = getAsDOM("/rest/about/manifest.xml");
+        Document dom = getAsDOM("/rest/about/manifest.xml", true, "UTF-8");
 
         checkXMLModel(dom);
     }
@@ -62,7 +71,7 @@ public class AboutTest extends GeoServerSystemTestSupport {
     @Test
     public void testGetAsVersionsHTML() throws Exception {
         // make the request, parsing the result into a Dom object
-        Document dom = getAsDOM("/rest/about/version");
+        Document dom = getAsDOM("/rest/about/version", true, "UTF-8");
 
         checkHTMLModel(dom);
     }

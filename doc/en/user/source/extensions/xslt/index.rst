@@ -115,7 +115,7 @@ And here is a type specific one, leveraging knowlegde about the input attributes
 .. note:: While writing the XSLT always remember to declare all prefixes used in the sheet in the ``stylesheet`` element, otherwise you might encounter hard to understand error messages
 
 Rest configuration
-==================
+------------------
 
 Transformations can be created, updated and deleted via the REST api (normally, this requires administrator privileges). 
 Each transformation is represented with the same XML format used on disk, but with two variants:

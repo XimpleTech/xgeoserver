@@ -1118,6 +1118,7 @@ public class GeoServerSystemTestSupport extends GeoServerBaseTestSupport<SystemT
         request.setContentType(contentType);
         request.setBodyContent(body);
         request.setHeader("Content-type",  contentType );
+        request.setCharacterEncoding("UTF-8");
 
         return dispatch(request);
     }

@@ -44,6 +44,6 @@
  <properties> 
     <!-- Relative to online test modules -->
     <app-schema-test-dir>../app-schema-test</app-schema-test-dir>
-</properties> 
+ </properties>
 
 </project>

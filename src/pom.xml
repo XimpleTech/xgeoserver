@@ -1238,7 +1238,7 @@
      <excludes>
       <exclude>${test.exclude.pattern}</exclude>
      </excludes>
-     <forkMode>once</forkMode>
+     <forkCount>${surefire.forkNumber}</forkCount>
      <argLine>-Xmx${test.maxHeapSize} -XX:MaxPermSize=${test.maxPermSize} -enableassertions ${jvm.opts} -Djava.awt.headless=${java.awt.headless} -Dsun.java2d.d3d=${sun.java2d.d3d}-DremoteOwsTests=${remoteOwsTests} -DquietTests=${quietTests} -Dorg.geotools.image.test.enabled=${image.tests} -Dorg.geotools.image.test.interactive=${interactive.image}</argLine>
      <enableAssertions>true</enableAssertions>
      <printSummary>true</printSummary>

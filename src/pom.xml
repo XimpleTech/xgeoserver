@@ -1580,6 +1580,7 @@
   <javac.maxHeapSize>256m</javac.maxHeapSize>
   <image.tests>true</image.tests>
   <interactive.tests>false</interactive.tests>
+  <surefire.forkNumber>1</surefire.forkNumber>
  </properties>
 
  <profiles>

@@ -1567,7 +1567,7 @@
   <jvm.opts></jvm.opts>
   <jalopy.phase>disabled</jalopy.phase>
   <jalopy.srcExcludesPattern>disabled</jalopy.srcExcludesPattern>
-  <test.maxHeapSize>512M</test.maxHeapSize>
+  <test.maxHeapSize>640M</test.maxHeapSize>
   <test.maxPermSize>128M</test.maxPermSize>
   <test.excludedGroups></test.excludedGroups>
   <test.exclude.pattern>none</test.exclude.pattern>
@@ -1577,7 +1577,7 @@
   <build.timestamp>${maven.build.timestamp}</build.timestamp>
   <build.hudsonId>-1</build.hudsonId>
   <fork.javac>true</fork.javac>
-  <javac.maxHeapSize>256m</javac.maxHeapSize>
+  <javac.maxHeapSize>384m</javac.maxHeapSize>
   <image.tests>true</image.tests>
   <interactive.tests>false</interactive.tests>
   <surefire.forkNumber>1</surefire.forkNumber>

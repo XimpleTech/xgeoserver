@@ -65,13 +65,18 @@ public interface CatalogVisitor {
     void visit( StyleInfo style );
     
     /**
+     * Visits a xmark.
+     */
+    void visit( XMarkInfo xmark );
+
+    /**
      * Visits a layer group..
      */
     void visit( LayerGroupInfo layerGroup );
 
     /**
      * Visits a WMS layer resource
-     * @param wmsLayerInfoImpl
+     * @param wmsLayer
      */
     void visit(WMSLayerInfo wmsLayer);
 }

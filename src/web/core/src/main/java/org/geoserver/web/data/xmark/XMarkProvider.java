@@ -1,11 +1,31 @@
 package org.geoserver.web.data.xmark;
 
-/**
- * Created with IntelliJ IDEA.
- * User: ulysseskao
- * Date: 13/5/6
- * Time: 下午2:39
- * To change this template use File | Settings | File Templates.
- */
-public class XMarkProvider {
+import java.util.Arrays;
+import java.util.List;
+
+import org.geoserver.catalog.XMarkInfo;
+import org.geoserver.web.wicket.GeoServerDataProvider;
+
+public class XMarkProvider extends GeoServerDataProvider<XMarkInfo> {
+    public static Property<XMarkInfo> NAME =
+        new BeanProperty<XMarkInfo>( "name", "name" );
+
+    public static Property<XMarkInfo> WORKSPACE =
+            new BeanProperty<XMarkInfo>( "workspace", "workspace.name" );
+
+    static List PROPERTIES = Arrays.asList(NAME, WORKSPACE);
+
+    public XMarkProvider() {
+        setSort(NAME.getName(), true);
+    }
+
+    @Override
+    protected List<Property<XMarkInfo>> getProperties() {
+        return PROPERTIES;
+    }
+
+    @Override
+    protected List<XMarkInfo> getItems() {
+        return getCatalog().getXMarks();
+    }
 }

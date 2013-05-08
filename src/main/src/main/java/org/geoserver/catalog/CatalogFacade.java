@@ -722,7 +722,7 @@ public interface CatalogFacade {
      * if no such style could be found.
      * 
      * @param workspace The workspace containing the style; non {@code null}, use
-     *        {@value #ANY_WORKSPACE} or {@link #NO_WORKSPACE} as appropriate.
+     *        {@value CatalogFacade##ANY_WORKSPACE} or {@link #NO_WORKSPACE} as appropriate.
      * @param name The name of the style to return.
      */
     StyleInfo getStyleByName(WorkspaceInfo workspace, String name);
@@ -781,4 +781,81 @@ public interface CatalogFacade {
     public <T extends CatalogInfo> CloseableIterator<T> list(final Class<T> of,
             final Filter filter, @Nullable Integer offset, @Nullable Integer count,
             @Nullable SortBy sortOrder);
+
+    //
+    // XMarks
+    //
+    /**
+     * Adds a xmark to persistent storage.
+     */
+    XMarkInfo add(XMarkInfo xmark);
+
+    /**
+     * Removes a xmark from persistent storage.
+     */
+    void remove(XMarkInfo xmark);
+
+    /**
+     * Persists any modifications to a xmark to persistent storage.
+     * <p>
+     * DAO implementations are responsible for triggering a {@link CatalogModifyEvent} by calling
+     * {@link Catalog#fireModified(CatalogInfo, List, List, List)}. This is the responsibility of
+     * the dao because it is best suited to knowing and tracking which attributes of the object have
+     * changed.
+     * </p>
+     */
+    void save(XMarkInfo xmark);
+
+    /**
+     * Detaches a xmark from the underlying persistence layer.
+     * <p>
+     * "Detaching" is specific to the underlying storage engine. But in general when an object
+     * is detached any proxies or uninitialized state of the object should be resolved.
+     * </p>
+     *
+     *  @see Catalog#detach(XMarkInfo)
+     */
+    XMarkInfo detach(XMarkInfo xmark);
+
+    /**
+     * Loads a xmark from persistent storage by specifying its identifier.
+     *
+     * @param id The unique identifier of the xmark.
+     *
+     * @return The xmark, or <code>null</code> if no such style exists
+     */
+    XMarkInfo getXMark(String id);
+
+    /**
+     * Loads a xmark from persistent storage by specifying its name.
+     *
+     * @param name The name of the xmark.
+     *
+     * @return The style, or <code>null</code> if no such style exists
+     */
+    XMarkInfo getXMarkByName(String name);
+
+    /**
+     * Returns the xmark matching a particular name in the specified workspace, or <code>null</code>
+     * if no such style could be found.
+     *
+     * @param workspace The workspace containing the style; non {@code null}, use
+     *        {@value CatalogFacade##ANY_WORKSPACE} or {@link #NO_WORKSPACE} as appropriate.
+     * @param name The name of the xmark to return.
+     */
+    XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name);
+
+    /**
+     * Loads all styles from persistent storage.
+     *
+     * @return A list of styles, possibly empty.
+     */
+    List<XMarkInfo> getXMarks();
+
+    /**
+     * All styles in the specified workspace.
+     *
+     * @param workspace The workspace containing styles.
+     */
+    List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace);
 }

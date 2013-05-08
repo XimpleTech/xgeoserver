@@ -1,11 +1,16 @@
 package org.geoserver.catalog;
 
-/**
- * Created with IntelliJ IDEA.
- * User: ulysseskao
- * Date: 13/5/7
- * Time: 上午1:06
- * To change this template use File | Settings | File Templates.
- */
+import java.util.logging.Logger;
+
+import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.renderer.style.XShapeMarkFactory;
+import org.geotools.util.logging.Logging;
+
 public class XMarks {
+    /** logger */
+    static Logger LOGGER = Logging.getLogger("org.geoserver.wms");
+
+    static int XML_LOOKAHEAD = 8192;
+
+    // static XShapeMarkFactory factory = XShapeMarkFactory.loadXMarks();
 }

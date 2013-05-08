@@ -78,6 +78,8 @@ import org.geotools.gml2.GML;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.jdbc.VirtualTable;
 import org.geotools.referencing.CRS;
+import org.geotools.renderer.style.XShapeMarkFactory;
+import org.geotools.renderer.style.XShapeMarks;
 import org.geotools.styling.Style;
 import org.geotools.util.SoftValueHashMap;
 import org.geotools.util.logging.Logging;
@@ -157,6 +159,7 @@ public class ResourcePool {
     Map<String, GridCoverageReader>  coverageReaderCache;
     Map<CoverageHintReaderKey, GridCoverageReader> hintCoverageReaderCache;
     Map<StyleInfo,Style> styleCache;
+    Map<XMarkInfo,XShapeMarks> xmarkCache;
     List<Listener> listeners;
     ThreadPoolExecutor coverageExecutor;
     CatalogRepository repository;
@@ -194,6 +197,7 @@ public class ResourcePool {
         
         wmsCache = createWmsCache();
         styleCache = createStyleCache();
+        xmarkCache = createXMarkCache();
 
         listeners = new CopyOnWriteArrayList<Listener>();
     }
@@ -1247,7 +1251,7 @@ public class ResourcePool {
      * </p>
      * 
      * @param info The grid coverage metadata.
-     * @param envelope The section of the coverage to load. 
+     * @param env The section of the coverage to load.
      * @param hints Hints to use while loading the coverage.
      * 
      * @throws IOException Any errors that occur loading the coverage.
@@ -1269,7 +1273,7 @@ public class ResourcePool {
      * </p>
      * 
      * @param info The grid coverage metadata.
-     * @param envelope The section of the coverage to load. 
+     * @param env The section of the coverage to load.
      * @param hints Hints to use while loading the coverage.
      * 
      * @throws IOException Any errors that occur loading the coverage.
@@ -1586,7 +1590,7 @@ public class ResourcePool {
      * Deletes a style from the configuration.
      * 
      * @param style The configuration for the style.
-     * @param purge Whether to delete the file from disk.
+     * @param purgeFile Whether to delete the file from disk.
      * 
      */
     public void deleteStyle( StyleInfo style, boolean purgeFile ) throws IOException {
@@ -1860,6 +1864,11 @@ public class ResourcePool {
         public void visit(StyleInfo style) {
             clear(style);
         }
+
+        @Override
+        public void visit(XMarkInfo xmark) {
+            clear(xmark);
+        }
     }
     
     void fireDisposed(DataStoreInfo dataStore, DataAccess da) {
@@ -1922,6 +1931,155 @@ public class ResourcePool {
         void disposed(FeatureTypeInfo featureType, FeatureType ft);
     }
 
+    public Map<XMarkInfo, XShapeMarks> getXmarkCache() {
+        return xmarkCache;
+    }
+
+    protected Map<XMarkInfo, XShapeMarks> createXMarkCache() {
+        return new HashMap<XMarkInfo, XShapeMarks>();
+    }
+
     
+    /**
+     * Returns a xmark resource, caching the result.
+     * <p>
+     * The resource is loaded by parsing {@link XMarkInfo#getFilename()} as an 
+     * SLD.
+     * </p>
+     * @param info The xmark metadata.
+     * 
+     * @throws IOException Any parsing errors.
+     */
+    public XShapeMarks getXMark( XMarkInfo info ) throws IOException {
+        XShapeMarks xmarks = xmarkCache.get( info );
+        if ( xmarks == null ) {
+            synchronized (xmarkCache) {
+                xmarks = xmarkCache.get( info );
+                if ( xmarks == null ) {
+                    
+                    //JD: it is important that we call the SLDParser(File) constructor because
+                    // if not the sourceURL will not be set which will mean it will fail to 
+                    //resolve relative references to online resources
+                    File xmarkFile = dataDir().findXMarkXMLFile(info);
+                    if ( xmarkFile == null ){
+                        throw new IOException( "No such file: " + info.getFilename());
+                    }
+
+                    XShapeMarkFactory.loadXMarks(xmarkFile);
+                    xmarks = XShapeMarkFactory.getCurrentMarks().get(xmarkFile.toString());
+                    // xmarks = XMarks.xmark(XMarks.parse(xmarkFile, null, info.getXMarkVersion()));
+                    
+                    //set the name of the xmark to be the name of hte xmark metadata
+                    // remove this when wms works off xmark info
+                    xmarks.setName( info.getName() );
+                    xmarkCache.put( info, xmarks );
+                }
+            }
+        }
+        
+        return xmarks;
+    }
+    
+    /**
+     * Clears a xmark resource from the cache.
+     * 
+     * @param info The xmark metadata.
+     */
+    public void clear(XMarkInfo info) {
+        xmarkCache.remove( info );
+    }
+    
+    /**
+     * Reads a raw xmark from persistence.
+     *
+     * @param xmarkInfo The configuration for the xmark.
+     * 
+     * @return A reader for the xmark.
+     */
+    public BufferedReader readXMark( XMarkInfo xmarkInfo ) throws IOException {
+        File xmarkFile = dataDir().findXMarkXMLFile(xmarkInfo);
+        if( xmarkFile == null ) {
+            throw new IOException( "No such file: " + xmarkInfo.getFilename() );
+        }
+        return new BufferedReader( new InputStreamReader( new FileInputStream( xmarkFile ) ) );
+        
+    }
+    
+    /**
+     * Serializes a xmark to configuration.
+     * 
+     * @param info The configuration for the xmark.
+     * @param xmark The xmark object.
+     * 
+     */
+    public void writeXMark( XMarkInfo info, XShapeMarks xmark ) throws IOException {
+        writeXMark(info, xmark, false);
+    }
+    
+    /**
+     * Serializes a xmark to configuration optionally formatting the xmark when writing it.
+     * 
+     * @param info The configuration for the xmark.
+     * @param xmarks The xmark object.
+     * @param format Whether to format the xmark
+     */
+    public void writeXMark( XMarkInfo info, XShapeMarks xmarks, boolean format) throws IOException {
+        synchronized ( xmarkCache ) {
+            File xmarkFile = dataDir().findOrCreateXMarkXMLFile(info);
+            BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( xmarkFile ) );
+            
+            try {
+                // TODO: Ximple Mark Encode
+                // Marks.encode(XMarks.xml(xmarks), info.getSLDVersion(), format, out);
+                clear(info);
+            }
+            finally {
+                out.close();
+            }
+        }
+    }
+    
+    /**
+     * Writes a raw xmark to configuration.
+     * 
+     * @param xmark The configuration for the style.
+     * @param in input stream representing the raw a style.
+     * 
+     */
+    public void writeXMark( XMarkInfo xmark, InputStream in ) throws IOException {
+        synchronized ( xmarkCache ) {
+            File xmarkFile = dataDir().findOrCreateXMarkXMLFile(xmark);
+            BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( xmarkFile ) );
+            
+            try {
+                IOUtils.copy( in, out );
+                out.flush();
+                
+                clear(xmark);
+            }
+            finally {
+                out.close();
+            }
+        }
+    }
+    
+    /**
+     * Deletes a xmark from the configuration.
+     * 
+     * @param xmark The configuration for the xmark.
+     * @param purgeFile Whether to delete the file from disk.
+     * 
+     */
+    public void deleteXMark( XMarkInfo xmark, boolean purgeFile ) throws IOException {
+        synchronized ( xmarkCache ) {
+           
+            if( purgeFile ){
+                File xmarkFile = dataDir().findXMarkXMLFile(xmark);
+                if(xmarkFile != null && xmarkFile.exists() ){
+                    xmarkFile.delete();
+                }
+            }
+        }
+    }
     
 }

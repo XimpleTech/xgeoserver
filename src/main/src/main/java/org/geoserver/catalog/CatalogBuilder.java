@@ -249,6 +249,18 @@ public class CatalogBuilder {
     }
 
     /**
+     * Updates a style with the properties of another.
+     *
+     * @param original
+     *            The style being updated.
+     * @param update
+     *            The style containing the new values.
+     */
+    public void updateXMark(XMarkInfo original, XMarkInfo update) {
+        update(original, update, XMarkInfo.class);
+    }
+
+    /**
      * Update method which uses reflection to grab property values from one object and set them on
      * another.
      * <p>

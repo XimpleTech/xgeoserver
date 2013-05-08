@@ -12,6 +12,7 @@ import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 
 /**
  * A convenience implementation of InfoValidator with all methods implemented
@@ -36,6 +37,9 @@ public abstract class AbstractCatalogValidator implements CatalogValidator {
     }
 
     public void validate(StyleInfo style, boolean isNew) {
+    }
+
+    public void validate(XMarkInfo xmark, boolean isNew) {
     }
 
     public void validate(LayerGroupInfo layerGroup, boolean isNew) {

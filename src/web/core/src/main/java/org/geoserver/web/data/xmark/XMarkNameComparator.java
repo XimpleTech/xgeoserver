@@ -1,11 +1,12 @@
 package org.geoserver.web.data.xmark;
 
-/**
- * Created with IntelliJ IDEA.
- * User: ulysseskao
- * Date: 13/5/6
- * Time: 下午4:56
- * To change this template use File | Settings | File Templates.
- */
-public class XMarkNameComparator {
+import java.util.Comparator;
+
+import org.geoserver.catalog.XMarkInfo;
+
+public class XMarkNameComparator implements Comparator<XMarkInfo> {
+    @Override
+    public int compare(XMarkInfo xMarkInfo, XMarkInfo xMarkInfo2) {
+        return xMarkInfo.getName().compareToIgnoreCase(xMarkInfo2.getName());
+    }
 }

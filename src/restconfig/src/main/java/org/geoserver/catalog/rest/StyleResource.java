@@ -14,10 +14,12 @@ import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogBuilder;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.StyleInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geoserver.rest.RestletException;
 import org.geoserver.rest.format.DataFormat;
 import org.geoserver.rest.format.MediaTypes;
+import org.geotools.renderer.style.XShapeMark;
 import org.geotools.styling.Style;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
@@ -231,7 +233,7 @@ public class StyleResource extends AbstractCatalogResource {
              */
             catalog.save(s);
         }
-        
+
         LOGGER.info( "PUT style " + style);
     }
 

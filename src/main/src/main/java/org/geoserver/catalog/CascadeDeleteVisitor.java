@@ -227,6 +227,11 @@ public class CascadeDeleteVisitor implements CatalogVisitor {
         catalog.remove(style);
     }
 
+    public void visit(XMarkInfo xmark) {
+        // finally remove the style
+        catalog.remove(xmark);
+    }
+
     public void visit(LayerGroupInfo layerGroupToRemove) {
         // remove layerGroupToRemove references from other groups
         List<LayerGroupInfo> groups = catalog.getLayerGroups();

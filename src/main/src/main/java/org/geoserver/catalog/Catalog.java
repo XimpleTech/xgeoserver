@@ -1546,7 +1546,7 @@ public interface Catalog extends CatalogInfo {
     /**
      * Returns a workspace by name, or <code>null</code> if no such workspace
      * exists.
-     * @param The name of the store, or null or {@link #DEFAULT} to get the default workspace
+     * @param name of the store, or null or {@link #DEFAULT} to get the default workspace
      */
     WorkspaceInfo getWorkspaceByName( String name );
 
@@ -1671,7 +1671,7 @@ public interface Catalog extends CatalogInfo {
      * 
      * @return the single object of the given {@code type} that matches the given filter, or
      *         {@code null} if no object matches the provided filter.
-     * @throws IllegalArgumentExeption if more than one object of type {@code T} match the provided
+     * @throws IllegalArgumentException if more than one object of type {@code T} match the provided
      *         filter.
      */
     <T extends CatalogInfo> T get(Class<T> type, Filter filter) throws IllegalArgumentException;
@@ -1745,7 +1745,7 @@ public interface Catalog extends CatalogInfo {
      * @param of the type of catalog objects to return. Super interfaces of concrete catalog objects
      *        are allowed (such as {@code StoreInfo.class} and {@code ResourceInfo.class}, although
      *        the more generic {@code Info.class} and {@code CatalogInfo.class} are not.
-     * @param filter the query predicate, use {@link Predicates#ACCEPT_ALL} if needed, {@code null}
+     * @param filter the query predicate, use {@link org.geoserver.catalog.Predicates#acceptAll()} if needed, {@code null}
      *        is not accepted.
      * @param offset {@code null} to return an iterator starting at the first matching object,
      *        otherwise an integer {@code >= 0} to return an iterator positioned at the specified
@@ -1771,4 +1771,104 @@ public interface Catalog extends CatalogInfo {
      */
     public void removeListeners(Class listenerClass);
 
+    /**
+     * Adds a new xmark.
+     * 
+     */
+    void add(XMarkInfo xmark);
+
+    /**
+     * Validate a xmark.
+     *
+     * @param xmark the xmarkInfo to be validated
+     * @param isNew a boolean; if true then an existing xmark with the same
+     *     name will cause a validation error.
+     * 
+     * @returns List<RuntimeException> non-empty if validation fails
+     */
+    List<RuntimeException> validate(XMarkInfo xmark, boolean isNew);
+
+    /**
+     * Removes a xmark.
+     */
+    void remove(XMarkInfo xmark);
+
+    /**
+     * Saves a xmark which has been modified.
+     */
+    void save(XMarkInfo xmark);
+    
+    /**
+     * Detatches the xmark from the catalog.
+     * <p>
+     * This method does not remove the object from the catalog, it "unnattaches" the object 
+     * resolving any proxies.
+     * </p>
+     * <p>
+     * In the even the specified object does not exist in the catalog it itself should be returned,
+     * this method should never return null.
+     * </p>
+     */
+    XMarkInfo detach(XMarkInfo xmark);
+    
+    /**
+     * Returns the xmark matching a particular id, or <code>null</code> if no
+     * such xmark could be found.
+     */
+    XMarkInfo getXMark(String id);
+
+    /**
+     * Returns the xmark matching a particular name in the specified workspace, or <code>null</code> 
+     * if no such xmark could be found.
+     * 
+     * @param workspaceName The name of the workspace containing the xmark, {@code null} stands for a global xmark.
+     * @param name The name of the xmark to return.
+     */
+    XMarkInfo getXMarkByName(String workspaceName, String name);
+
+    /**
+     * Returns the xmark matching a particular name in the specified workspace, or <code>null</code> 
+     * if no such xmark could be found.
+     * 
+     * @param workspace The workspace containing the xmark, {@code null} stands for a global xmark.
+     * @param name The name of the xmark to return.
+     */
+    XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name);
+    
+    /**
+     * Returns the global xmark matching a particular name, or <code>null</code> if no such xmark
+     * could be found.
+     * <p>
+     * Note this is a convenient method for {@link #getXMarkByName(WorkspaceInfo, String)} with a
+     * {@code null} workspace argument.
+     * </p>
+     * 
+     * @param name The name of the xmark to return.
+     */
+    XMarkInfo getXMarkByName(String name);
+
+    /**
+     * All xmarks in the catalog.
+     * <p>
+     * The resulting list should not be used to add or remove xmarks, the methods
+     * {@link #add(XMarkInfo)} and {@link #remove(XMarkInfo)} are used for that
+     * purpose.
+     *  </p>
+     */
+    List<XMarkInfo> getXMarks();
+
+    /**
+     * All xmarks in the specified workspace.
+     * 
+     * @param workspaceName The name of the workspace containing xmarks.
+     */
+    List<XMarkInfo> getXMarksByWorkspace(String workspaceName);
+
+    /**
+     * All xmarks in the specified workspace.
+     * 
+     * @param workspace The workspace containing xmarks.
+     */
+    List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace);
+    
 }

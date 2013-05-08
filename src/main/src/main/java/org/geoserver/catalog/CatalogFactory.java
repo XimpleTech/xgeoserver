@@ -91,6 +91,11 @@ public interface CatalogFactory {
     StyleInfo createStyle();
 
     /**
+     * Creates a new xmark.
+     */
+    XMarkInfo createXMark();
+
+    /**
      * Creates new namespace.
      * 
      */

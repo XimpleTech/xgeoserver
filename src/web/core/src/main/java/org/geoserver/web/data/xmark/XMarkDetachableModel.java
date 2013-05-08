@@ -1,11 +1,19 @@
 package org.geoserver.web.data.xmark;
 
-/**
- * Created with IntelliJ IDEA.
- * User: ulysseskao
- * Date: 13/5/6
- * Time: 下午4:49
- * To change this template use File | Settings | File Templates.
- */
-public class XMarkDetachableModel {
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.geoserver.catalog.XMarkInfo;
+import org.geoserver.web.GeoServerApplication;
+
+public class XMarkDetachableModel extends LoadableDetachableModel {
+
+    String id;
+
+    public XMarkDetachableModel(XMarkInfo xmark) {
+        this.id = xmark.getId();
+    }
+
+    @Override
+    protected Object load() {
+        return GeoServerApplication.get().getCatalog().getXMark(id);
+    }
 }

@@ -4,11 +4,11 @@
 
  <parent>
   <groupId>org.geoserver</groupId>
-  <artifactId>community</artifactId>
+  <artifactId>extension</artifactId>
   <version>2.3.x-SNAPSHOT</version>
  </parent>
 
- <groupId>org.geoserver.community</groupId>
+ <groupId>org.geoserver.extension</groupId>
  <artifactId>inspire</artifactId>
  <packaging>jar</packaging>
  <version>2.3.x-SNAPSHOT</version>
@@ -41,6 +41,13 @@
    <classifier>tests</classifier>
    <scope>test</scope>
    <version>${project.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>org.geoserver.web</groupId>
+    <artifactId>web-core</artifactId>
+    <version>${project.version}</version>
+    <classifier>tests</classifier>
+    <scope>test</scope>
   </dependency>
   <dependency>
     <groupId>com.mockrunner</groupId>

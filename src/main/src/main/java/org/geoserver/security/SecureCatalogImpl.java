@@ -35,6 +35,7 @@ import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WMSLayerInfo;
 import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.event.CatalogListener;
 import org.geoserver.catalog.impl.AbstractDecorator;
 import org.geoserver.catalog.util.CloseableIterator;
@@ -751,8 +752,7 @@ public class SecureCatalogImpl extends AbstractDecorator<Catalog> implements Cat
      * has to a specific resource considering the read/write access, the security
      * mode, and the filtering status
      * @param user
-     * @param canRead
-     * @param canWrite
+     * @param info
      * @param resourceName
      * @return
      */
@@ -1007,7 +1007,7 @@ public class SecureCatalogImpl extends AbstractDecorator<Catalog> implements Cat
      * workspaces the user can access
      * 
      * @param user
-     * @param namespaces
+     * @param workspaces
      * 
      * @return
      */
@@ -1479,5 +1479,65 @@ public class SecureCatalogImpl extends AbstractDecorator<Catalog> implements Cat
 
     public void removeListeners(Class listenerClass) {
         delegate.removeListeners(listenerClass);
+    }
+
+    @Override
+    public void add(XMarkInfo xmark) {
+        delegate.add(xmark);
+    }
+
+    @Override
+    public XMarkInfo detach(XMarkInfo xmark) {
+        return delegate.detach(xmark);
+    }
+
+    @Override
+    public XMarkInfo getXMark(String id) {
+        return delegate.getXMark(id);
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(String name) {
+        return delegate.getXMarkByName(name);
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name) {
+        return delegate.getXMarkByName(workspace, name);
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(String workspaceName, String name) {
+        return delegate.getXMarkByName(workspaceName, name);
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarks() {
+        return delegate.getXMarks();
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace) {
+        return delegate.getXMarksByWorkspace(workspace);
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarksByWorkspace(String workspaceName) {
+        return delegate.getXMarksByWorkspace(workspaceName);
+    }
+
+    @Override
+    public void remove(XMarkInfo xmark) {
+        delegate.remove(xmark);
+    }
+
+    @Override
+    public void save(XMarkInfo xmark) {
+        delegate.save(xmark);
+    }
+
+    @Override
+    public List<RuntimeException> validate(XMarkInfo xmark, boolean isNew) {
+        return delegate.validate(xmark, isNew);
     }
 }

@@ -25,6 +25,16 @@
             <groupId>org.geoscript</groupId>
             <artifactId>geoscript-js</artifactId>
             <version>0.16-SNAPSHOT</version>
+            <exclusions>
+              <exclusion>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-jdbc-spatialite</artifactId>
+              </exclusion>
+              <exclusion>
+                <groupId>org.geotools</groupId>
+                <artifactId>gt-swing</artifactId>
+              </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.geoserver.script</groupId>

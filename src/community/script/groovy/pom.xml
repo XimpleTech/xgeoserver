@@ -46,7 +46,15 @@
         <groupId>org.geotools</groupId>
         <artifactId>gt-xsd-kml</artifactId>
       </exclusion>
+      <exclusion>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-imagepyramid</artifactId>
+      </exclusion>
     </exclusions>
+  </dependency>
+  <dependency>
+    <groupId>org.geotools</groupId>
+    <artifactId>gt-imagepyramid</artifactId>
   </dependency>
   <dependency>
    <groupId>org.geotools</groupId>
@@ -71,7 +79,6 @@
    <dependency>
     <groupId>org.geotools</groupId>
     <artifactId>gt-process-geometry</artifactId>
-    <version>${gt.version}</version>
    </dependency>
   <dependency>
    <groupId>net.sf.json-lib</groupId>
@@ -99,6 +106,7 @@
             <version>1.4</version>
             <configuration>
                 <providerSelection>1.8</providerSelection>
+                <source/>
             </configuration>
             <dependencies>
                 <dependency>

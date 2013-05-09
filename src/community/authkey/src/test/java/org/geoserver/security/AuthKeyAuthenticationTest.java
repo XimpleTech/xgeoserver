@@ -49,7 +49,7 @@ public class AuthKeyAuthenticationTest extends AbstractAuthenticationProviderTes
         
         AuthenticationKeyFilterConfig config = new AuthenticationKeyFilterConfig();         
         config.setClassName(GeoServerAuthenticationKeyFilter.class.getName());                
-        config.setName(filterName);        
+        config.setName(filterName);
         config.setUserGroupServiceName("ug1");
         config.setAuthKeyParamName(authKeyUrlParam);
         config.setAuthKeyMapperName("propertyMapper");
@@ -158,7 +158,7 @@ public class AuthKeyAuthenticationTest extends AbstractAuthenticationProviderTes
         
         AuthenticationKeyFilterConfig config = new AuthenticationKeyFilterConfig();         
         config.setClassName(GeoServerAuthenticationKeyFilter.class.getName());                
-        config.setName(filterName);        
+        config.setName(filterName);
         config.setUserGroupServiceName("ug1");
         config.setAuthKeyParamName(authKeyUrlParam);
         config.setAuthKeyMapperName("userPropertyMapper");

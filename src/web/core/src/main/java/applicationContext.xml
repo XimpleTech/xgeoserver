@@ -419,5 +419,17 @@
   <bean id="wicketEnvVariableInjector" class="org.geoserver.web.WicketEnvironmentVariableCallback"/>
   
   <bean id="adminRequestCallback" class="org.geoserver.web.AdminRequestWicketCallback"/>
- 
+
+  <!-- XMark Data Config -->
+  <bean id="xmarkMenuPage" class="org.geoserver.web.MenuPageInfo">
+    <property name="id" value="xmark.manager"/>
+    <property name="titleKey" value="xmark.title"/>
+    <property name="descriptionKey" value="XMarkPage.description"/>
+    <property name="componentClass" value="org.geoserver.web.data.xmark.XMarkPage"/>
+    <property name="category" ref="dataCategory"/>
+    <property name="icon" value="../../img/icons/silk/folder.png"/>
+    <property name="order" value="30"/>
+    <property name="authorizer" ref="workspaceAdminAuthorizer"/>
+  </bean>
+
 </beans>

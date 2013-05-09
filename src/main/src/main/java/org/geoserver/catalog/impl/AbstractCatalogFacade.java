@@ -22,6 +22,7 @@ import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.ows.util.OwsUtils;
 
 public abstract class AbstractCatalogFacade implements CatalogFacade {
@@ -156,6 +157,10 @@ public abstract class AbstractCatalogFacade implements CatalogFacade {
 
     protected void resolve(StyleInfo style) {
         setId(style);
+    }
+
+    protected void resolve(XMarkInfo xmark) {
+        setId(xmark);
     }
 
     protected void resolve(MapInfo map) {

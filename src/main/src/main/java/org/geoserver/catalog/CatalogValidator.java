@@ -67,6 +67,17 @@ public interface CatalogValidator {
     void validate(StyleInfo style, boolean isNew);
 
     /**
+     * Validate a xmark.
+     *
+     * @param xmark the StyleInfo to be validated
+     * @param isNew a boolean; if true then the style is not expected to
+     *     already exist in the catalog.
+     *
+     * @throws RuntimeError if validation fails
+     */
+    void validate(XMarkInfo xmark, boolean isNew);
+
+    /**
      * Validate a layergroup.
      *
      * @param layerGroup the LayerGroupInfo to be validated

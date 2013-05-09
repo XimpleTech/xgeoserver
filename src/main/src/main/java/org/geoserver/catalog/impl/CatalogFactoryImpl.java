@@ -23,6 +23,7 @@ import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WMSLayerInfo;
 import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 
 public class CatalogFactoryImpl implements CatalogFactory {
 
@@ -98,6 +99,10 @@ public class CatalogFactoryImpl implements CatalogFactory {
 
     public StyleInfo createStyle() {
         return new StyleInfoImpl(catalog);
+    }
+
+    public XMarkInfo createXMark() {
+        return new XMarkInfoImpl(catalog);
     }
 
     public Object create(Class clazz) {

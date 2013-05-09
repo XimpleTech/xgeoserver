@@ -222,6 +222,11 @@ public class CascadeRemovalReporter implements CatalogVisitor {
         add(style, ModificationType.DELETE);
     }
 
+    public void visit(XMarkInfo xmark) {
+        // add the xmark
+        add(xmark, ModificationType.DELETE);
+    }
+
     public void visit(LayerGroupInfo layerGroupToRemove) {
         List<LayerGroupInfo> groups = catalog.getLayerGroups();
         for (LayerGroupInfo group : groups) {

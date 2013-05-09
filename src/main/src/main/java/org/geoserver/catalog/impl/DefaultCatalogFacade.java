@@ -27,11 +27,11 @@ import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.MapInfo;
 import org.geoserver.catalog.NamespaceInfo;
-import org.geoserver.catalog.Predicates;
 import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.util.CloseableIterator;
 import org.geoserver.catalog.util.CloseableIteratorAdapter;
 import org.geoserver.ows.util.OwsUtils;
@@ -98,6 +98,11 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
      * styles
      */
     protected List<StyleInfo> styles = new CopyOnWriteArrayList<StyleInfo>();
+
+    /**
+     * xmarks
+     */
+    protected List<XMarkInfo> xmarks = new CopyOnWriteArrayList<XMarkInfo>();
 
     /**
      * the catalog
@@ -926,6 +931,7 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
         if ( layerGroups != null ) layerGroups.clear();
         if ( maps != null ) maps.clear();
         if ( styles != null ) styles.clear();
+        if ( xmarks != null ) xmarks.clear();
     }
     
     public void resolve() {
@@ -963,7 +969,15 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
         for ( StyleInfo s : styles ) {
             resolve(s);
         }
-        
+
+        //xmarks
+        if ( xmarks == null ) {
+            xmarks = new ArrayList<XMarkInfo>();
+        }
+        for ( XMarkInfo x : xmarks ) {
+            resolve(x);
+        }
+
         //resources
         if ( resources == null ) {
             resources = new MultiHashMap();    
@@ -1011,6 +1025,7 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
             other.maps = maps;
             other.layerGroups = layerGroups;
             other.styles = styles;
+            other.xmarks = xmarks;
         }
         else {
             //do a manual import
@@ -1042,6 +1057,7 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
             }
             
             for (StyleInfo s : styles) { dao.add(s); }
+            for (XMarkInfo x : xmarks) { dao.add(x); }
             for (LayerInfo l : layers) { dao.add(l); }
             for (LayerGroupInfo lg : layerGroups) { dao.add(lg); }
             for (MapInfo m : maps) { dao.add(m); }
@@ -1124,6 +1140,119 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
         return new CloseableIteratorAdapter<T>(iterator);
     }
 
+    //
+    // XMarks
+    //
+    public XMarkInfo add(XMarkInfo xmark) {
+        resolve(xmark);
+        synchronized(xmarks) {
+            xmarks.add(xmark);
+        }
+        return ModificationProxy.create(xmark, XMarkInfo.class);
+    }
+
+    public void remove(XMarkInfo xmark) {
+        synchronized(xmarks) {
+            xmarks.remove(unwrap(xmark));
+        }
+    }
+
+    public void save(XMarkInfo xmark) {
+        saved(xmark);
+    }
+
+    public XMarkInfo detach(XMarkInfo xmark) {
+        return xmark;
+    }
+
+    public XMarkInfo getXMark(String id) {
+        for (Iterator s = xmarks.iterator(); s.hasNext();) {
+            XMarkInfo xmark = (XMarkInfo) s.next();
+            if (id.equals(xmark.getId())) {
+                return ModificationProxy.create(xmark,XMarkInfo.class);
+            }
+        }
+
+        return null;
+    }
+
+    public XMarkInfo getXMarkByName(String name) {
+        for (Iterator s = xmarks.iterator(); s.hasNext();) {
+            XMarkInfo xmark = (XMarkInfo) s.next();
+            if (null == xmark.getWorkspace() && name.equals(xmark.getName())) {
+                return ModificationProxy.create(xmark, XMarkInfo.class);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name) {
+        if (null == workspace) {
+            throw new NullPointerException("workspace");
+        }
+        if (null == name) {
+            throw new NullPointerException("name");
+        }
+        if (workspace == ANY_WORKSPACE) {
+            //do an exhaustive search through all workspaces
+            ArrayList<XMarkInfo> matches = new ArrayList();
+            for (Iterator i = xmarks.iterator(); i.hasNext();) {
+                XMarkInfo xmark = (XMarkInfo) i.next();
+                if ( name.equals(xmark.getName()) ) {
+                    matches.add( xmark );
+                }
+            }
+
+            if ( matches.size() == 1 ) {
+                return ModificationProxy.create( matches.get( 0 ), XMarkInfo.class);
+            }
+        }
+        else {
+            for (Iterator i = xmarks.iterator(); i.hasNext();) {
+                XMarkInfo xmark = (XMarkInfo) i.next();
+                if (name.equals(xmark.getName())) {
+                    if (xmark.getWorkspace() != null && xmark.getWorkspace().equals(workspace) ||
+                        xmark.getWorkspace() == null && workspace == NO_WORKSPACE) {
+                        return ModificationProxy.create( xmark, XMarkInfo.class );
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<XMarkInfo> getXMarks() {
+        return ModificationProxy.createList(new ArrayList<XMarkInfo>(xmarks), XMarkInfo.class);
+    }
+
+    public List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace) {
+        //TODO: support ANY_WORKSPACE?
+
+        if ( workspace == null ) {
+            workspace = getDefaultWorkspace();
+        }
+
+        List<XMarkInfo> matches = new ArrayList<XMarkInfo>();
+
+        for (Iterator s = xmarks.iterator(); s.hasNext();) {
+            XMarkInfo xmark = (XMarkInfo) s.next();
+            boolean match = false;
+            if (workspace == NO_WORKSPACE) {
+                match = xmark.getWorkspace() == null;
+            }
+            else {
+                match = workspace.equals(xmark.getWorkspace());
+            }
+            if (match) {
+                matches.add(xmark);
+            }
+        }
+
+        return ModificationProxy.createList(matches,XMarkInfo.class);
+    }
+
     public <T extends CatalogInfo> Iterable<T> iterable(final Class<? super T> of,
             final Filter filter, final SortBy sortBy) {
         List<T> all;
@@ -1143,6 +1272,8 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
             all = (List<T>) getLayerGroups();
         } else if (StyleInfo.class.isAssignableFrom(of)) {
             all = (List<T>) getStyles();
+        } else if (XMarkInfo.class.isAssignableFrom(of)) {
+            all = (List<T>) getXMarks();
         } else if (MapInfo.class.isAssignableFrom(of)) {
             all = (List<T>) getMaps();
         } else {

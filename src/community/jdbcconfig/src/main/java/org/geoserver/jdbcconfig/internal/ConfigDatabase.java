@@ -47,6 +47,7 @@ import org.geoserver.catalog.impl.ModificationProxy;
 import org.geoserver.catalog.impl.ResourceInfoImpl;
 import org.geoserver.catalog.impl.StoreInfoImpl;
 import org.geoserver.catalog.impl.StyleInfoImpl;
+import org.geoserver.catalog.impl.XMarkInfoImpl;
 import org.geoserver.catalog.util.CloseableIterator;
 import org.geoserver.catalog.util.CloseableIteratorAdapter;
 import org.geoserver.config.GeoServer;
@@ -781,7 +782,7 @@ public class ConfigDatabase {
         }
         real = ModificationProxy.unwrap(real);
         if (real instanceof StyleInfoImpl || real instanceof StoreInfoImpl
-                || real instanceof ResourceInfoImpl) {
+                || real instanceof ResourceInfoImpl || real instanceof XMarkInfoImpl) {
             OwsUtils.set(real, "catalog", catalog);
         }
         if (real instanceof ResourceInfoImpl) {
@@ -806,7 +807,7 @@ public class ConfigDatabase {
     }
 
     /**
-     * @param type
+     * @param clazz
      * @return immutable list of results
      */
     public <T extends Info> List<T> getAll(final Class<T> clazz) {

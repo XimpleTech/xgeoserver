@@ -31,6 +31,7 @@ import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.impl.CatalogImpl;
 import org.geoserver.catalog.impl.ClassMappings;
 import org.geoserver.catalog.impl.ModificationProxy;
@@ -763,6 +764,62 @@ public class JDBCCatalogFacade implements CatalogFacade {
     }
 
     /**
+     * @see org.geoserver.catalog.CatalogFacade#add(org.geoserver.catalog.XMarkInfo)
+     */
+    @Override
+    public XMarkInfo add(XMarkInfo xmark) {
+        return addInternal(xmark);
+    }
+
+    /**
+     * @see org.geoserver.catalog.CatalogFacade#remove(org.geoserver.catalog.XMarkInfo)
+     */
+    @Override
+    public void remove(XMarkInfo xmark) {
+        db.remove(xmark);
+    }
+
+    /**
+     * @see org.geoserver.catalog.CatalogFacade#save(org.geoserver.catalog.XMarkInfo)
+     */
+    @Override
+    public void save(XMarkInfo xmark) {
+        saveInternal(xmark, XMarkInfo.class);
+    }
+
+    /**
+     * @see org.geoserver.catalog.CatalogFacade#detach(org.geoserver.catalog.XMarkInfo)
+     */
+    @Override
+    public XMarkInfo detach(XMarkInfo xmark) {
+        return xmark;
+    }
+
+    /**
+     * @see org.geoserver.catalog.CatalogFacade#getXMark(java.lang.String)
+     */
+    @Override
+    public XMarkInfo getXMark(String id) {
+        return db.getById(id, XMarkInfo.class);
+    }
+
+    /**
+     * @see org.geoserver.catalog.CatalogFacade#getXMarkByName(java.lang.String)
+     */
+    @Override
+    public XMarkInfo getXMarkByName(String name) {
+        return getXMarkByName(NO_WORKSPACE, name);
+    }
+
+    /**
+     * @see org.geoserver.catalog.CatalogFacade#getXMarks()
+     */
+    @Override
+    public List<XMarkInfo> getXMarks() {
+        return db.getAll(XMarkInfo.class);
+    }
+    
+    /**
      * @see org.geoserver.catalog.CatalogFacade#dispose()
      */
     @Override
@@ -854,6 +911,44 @@ public class JDBCCatalogFacade implements CatalogFacade {
         return db.queryAsList(StyleInfo.class, filter, null, null, null);
     }
 
+    @Override
+    public XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name) {
+        checkNotNull(workspace,
+                "workspace is null. Did you mean CatalogFacade.ANY_WORKSPACE or CatalogFacade.NO_WORKSPACE?");
+        checkNotNull(name, "name");
+
+        Filter nameFilter = equal("name", name);
+        Filter wsFilter;
+        if (workspace == NO_WORKSPACE) {
+            wsFilter = isNull("workspace.id");
+        } else if (workspace == ANY_WORKSPACE) {
+            wsFilter = acceptAll();
+        } else {
+            wsFilter = equal("workspace.id", workspace.getId());
+        }
+
+        Filter filter = and(nameFilter, wsFilter);
+        XMarkInfo info = findUnique(XMarkInfo.class, filter);
+        return info;
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace) {
+        if (workspace == null) {
+            workspace = getDefaultWorkspace();
+        }
+        if (workspace == null) {
+            return Collections.emptyList();
+        }
+        Filter filter;
+        if (NO_WORKSPACE == workspace) {
+            filter = isNull("workspace.id");
+        } else {
+            filter = equal("workspace.id", workspace.getId());
+        }
+        return db.queryAsList(XMarkInfo.class, filter, null, null, null);
+    }
+
     /**
      * @see org.geoserver.catalog.CatalogFacade#syncTo(org.geoserver.catalog.CatalogFacade)
      */
@@ -878,6 +973,10 @@ public class JDBCCatalogFacade implements CatalogFacade {
 
         for (StyleInfo s : getStyles()) {
             other.add(s);
+        }
+
+        for (XMarkInfo x : getXMarks()) {
+            other.add(x);
         }
 
         for (LayerInfo l : getLayers()) {
@@ -925,7 +1024,7 @@ public class JDBCCatalogFacade implements CatalogFacade {
 
     /**
      * @see org.geoserver.catalog.CatalogFacade#count(java.lang.Class,
-     *      org.geoserver.catalog.Predicate)
+     *      org.opengis.filter.Filter)
      */
     @Override
     public <T extends CatalogInfo> int count(Class<T> of, Filter filter) {
@@ -940,7 +1039,7 @@ public class JDBCCatalogFacade implements CatalogFacade {
 
     /**
      * @see org.geoserver.catalog.CatalogFacade#list(java.lang.Class,
-     *      org.geoserver.catalog.Predicate, java.lang.Integer, java.lang.Integer)
+     *      org.opengis.filter.Filter, java.lang.Integer, java.lang.Integer)
      */
     @Override
     public <T extends CatalogInfo> CloseableIterator<T> list(final Class<T> of,

@@ -22,6 +22,7 @@ import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.platform.GeoServerResourceLoader;
 
 /**
@@ -126,7 +127,7 @@ public class GeoServerDataDirectory {
     }
     
     /**
-     * Returns a directory under the {@link #dataRoot()} directory, if the directory does not exist
+     * Returns a directory under the {@link #dataRoot(boolean)} directory, if the directory does not exist
      * null will be returned.
      */
     public File findDataDir( String... location ) throws IOException {
@@ -134,7 +135,7 @@ public class GeoServerDataDirectory {
     }
     
     /**
-     * Returns a directory under the {@link #dataRoot()} directory, if the directory does not exist 
+     * Returns a directory under the {@link #dataRoot(boolean)} directory, if the directory does not exist
      * it will be created.
      */
     public File findOrCreateDataDir( String... location ) throws IOException {
@@ -147,7 +148,7 @@ public class GeoServerDataDirectory {
     }
     
     /**
-     * Returns a file under the {@link #dataRoot()} directory, if the file does not exist null is 
+     * Returns a file under the {@link #dataRoot(boolean)} directory, if the file does not exist null is
      * returned.
      */
     public File findDataFile( String... location ) throws IOException {
@@ -155,7 +156,7 @@ public class GeoServerDataDirectory {
     }
     
     /**
-     * Returns a file under the {@link #dataRoot()} directory, if the file does not exist it a file
+     * Returns a file under the {@link #dataRoot(boolean)} directory, if the file does not exist it a file
      * object will still be returned.
      */
     public File findOrResolveDataFile( String... location ) throws IOException {
@@ -195,7 +196,7 @@ public class GeoServerDataDirectory {
     }
 
     /**
-     * Returns a directory under the {@link #securityRoot()} directory, if the directory does not 
+     * Returns a directory under the {@link #securityRoot(boolean)} directory, if the directory does not
      * exist null will be returned.
      */
     public File findSecurityDir(String... location) throws IOException {
@@ -203,7 +204,7 @@ public class GeoServerDataDirectory {
     }
 
     /**
-     * Returns a directory under the {@link #securityRoot()} directory, if the directory does not 
+     * Returns a directory under the {@link #securityRoot(boolean)} directory, if the directory does not
      * exist it will be created.
      */
     public File findOrCreateSecurityDir(String... location) throws IOException {
@@ -252,7 +253,7 @@ public class GeoServerDataDirectory {
      * Returns the directory for the specified workspace, if the directory does not exist it will be
      * created.
      * 
-     * @param create If set to true the directory will be created when it does not exist.
+     * @param ws If set to true the directory will be created when it does not exist.
      */
     public File findOrCreateWorkspaceDir( WorkspaceInfo ws ) throws IOException {
         return workspaceDir(true,ws); 
@@ -763,4 +764,29 @@ public class GeoServerDataDirectory {
         return d.exists() ? d : null;
     }
 
+    public File findXMarkXMLFile(XMarkInfo xmk) throws IOException {
+        return xmarkXMLFile(false, xmk);
+    }
+
+    File xmarkXMLFile(boolean create, XMarkInfo xmk) throws IOException {
+        File xmkdir = xmarkDir(create, xmk);
+        return xmkdir != null ? file(new File( xmkdir, xmk.getFilename()),create) : null;
+    }
+
+    File xmarkDir(boolean create, XMarkInfo xmk) throws IOException {
+        return xmarkDir(create, xmk.getWorkspace());
+    }
+
+    File xmarkDir(boolean create, WorkspaceInfo ws) throws IOException {
+        File base = ws != null ? workspaceDir(true, ws) : null;
+        File d = resourceLoader.find( base, "xmarks" );
+        if ( d == null && create ) {
+            d = resourceLoader.createDirectory( base, "xmarks" );
+        }
+        return d;
+    }
+
+    public File findOrCreateXMarkXMLFile(XMarkInfo xmk) throws IOException {
+        return xmarkXMLFile(true, xmk);
+    }
 }

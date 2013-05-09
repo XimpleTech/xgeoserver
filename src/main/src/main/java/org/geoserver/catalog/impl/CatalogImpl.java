@@ -41,6 +41,7 @@ import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WMSLayerInfo;
 import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.event.CatalogAddEvent;
 import org.geoserver.catalog.event.CatalogEvent;
 import org.geoserver.catalog.event.CatalogListener;
@@ -1353,6 +1354,110 @@ public class CatalogImpl implements Catalog {
         }
     }
 
+    @Override
+    public void add(XMarkInfo xmark) {
+        validate(xmark,true);
+        XMarkInfo added = facade.add(resolve(xmark));
+        added(added);
+    }
+
+    @Override
+    public List<RuntimeException> validate(XMarkInfo xmark, boolean isNew) {
+        if ( isNull(xmark.getName()) ) {
+            throw new NullPointerException( "XMark name must not be null");
+        }
+        if ( isNull(xmark.getFilename()) ) {
+            throw new NullPointerException( "XMark fileName must not be null");
+        }
+
+        WorkspaceInfo ws = xmark.getWorkspace();
+        XMarkInfo existing = getXMarkByName( ws, xmark.getName() );
+        if ( existing != null && (isNew || !existing.getId().equals( xmark.getId() ) )) {
+            // null workspace can cause xmark in any workspace to be returned, check that
+            // workspaces match
+            WorkspaceInfo ews = existing.getWorkspace();
+            String msg =  "XMark named '" +  xmark.getName() +"' already exists";
+            if (ews != null) {
+                msg += " in workspace " + ews.getName();
+            }
+            throw new IllegalArgumentException(msg);
+        }
+
+        return postValidate(xmark, isNew);
+    }
+
+    @Override
+    public void remove(XMarkInfo xmark) {
+        facade.remove(xmark);
+        removed(xmark);
+    }
+
+    @Override
+    public void save(XMarkInfo xmark) {
+        validate(xmark,false);
+        facade.save(xmark);
+    }
+
+    @Override
+    public XMarkInfo detach(XMarkInfo xmark) {
+        return detached(xmark, facade.detach(xmark));
+    }
+
+    @Override
+    public XMarkInfo getXMark(String id) {
+        return facade.getXMark(id);
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(String workspaceName, String name) {
+        if (workspaceName == null) {
+            return getXMarkByName((WorkspaceInfo)null, name);
+        }
+
+        WorkspaceInfo workspace = getWorkspaceByName(workspaceName);
+        if (workspace != null) {
+            return getXMarkByName(workspace, name);
+        }
+        return null;
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name) {
+        if (workspace == null) {
+            workspace = DefaultCatalogFacade.NO_WORKSPACE;
+        }
+        XMarkInfo xmark = facade.getXMarkByName(workspace, name);
+        return xmark;
+    }
+
+    @Override
+    public XMarkInfo getXMarkByName(String name) {
+        return getXMarkByName((WorkspaceInfo) null, name);
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarks() {
+        return facade.getXMarks();
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarksByWorkspace(String workspaceName) {
+        WorkspaceInfo workspace = null;
+        if ( workspaceName != null ) {
+            workspace = getWorkspaceByName(workspaceName);
+            if ( workspace == null ) {
+                return Collections.EMPTY_LIST;
+            }
+        }
+
+        return getXMarksByWorkspace(workspace);
+    }
+
+    @Override
+    public List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace) {
+        return facade.getXMarksByWorkspace(workspace);
+    }
+
     public Iterator search(String cql) {
         // TODO Auto-generated method stub
         return null;
@@ -1573,6 +1678,11 @@ public class CatalogImpl implements Catalog {
         return style;
     }
     
+    protected XMarkInfo resolve(XMarkInfo xmark) {
+        ((XMarkInfoImpl)xmark).setCatalog( this );
+        return xmark;
+    }
+
     protected MapInfo resolve(MapInfo map) {
         resolveCollections(map);
         return map;
@@ -1658,6 +1768,10 @@ public class CatalogImpl implements Catalog {
             validator.validate(style, isNew);
         }
 
+        public void visit(XMarkInfo xmark) {
+            validator.validate(xmark, isNew);
+        }
+
         public void visit(LayerGroupInfo layerGroup) {
             validator.validate(layerGroup, isNew);
         }
@@ -1698,6 +1812,8 @@ public class CatalogImpl implements Catalog {
             resolve((StoreInfo) info);
         } else if (info instanceof StyleInfo) {
             resolve((StyleInfo) info);
+        } else if (info instanceof XMarkInfo) {
+            resolve((XMarkInfo) info);
         } else if (info instanceof WorkspaceInfo) {
             resolve((WorkspaceInfo) info);
         } else {

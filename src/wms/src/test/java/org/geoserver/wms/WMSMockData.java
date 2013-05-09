@@ -22,6 +22,7 @@ import org.geoserver.catalog.impl.LayerInfoImpl;
 import org.geoserver.catalog.impl.NamespaceInfoImpl;
 import org.geoserver.catalog.impl.StyleInfoImpl;
 import org.geoserver.catalog.impl.WorkspaceInfoImpl;
+import org.geoserver.catalog.impl.XMarkInfoImpl;
 import org.geoserver.config.GeoServer;
 import org.geoserver.config.impl.GeoServerImpl;
 import org.geoserver.config.impl.GeoServerInfoImpl;
@@ -39,6 +40,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.renderer.style.XShapeMarks;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
 import org.opengis.feature.simple.SimpleFeature;
@@ -78,6 +80,8 @@ public class WMSMockData {
 
     private StyleInfoImpl defaultStyle;
 
+    private XMarkInfoImpl defaultXMark;
+
     private GetMapOutputFormat mockMapProducer;
 
     private GeoServer mockGeoServer;
@@ -115,6 +119,18 @@ public class WMSMockData {
         defaultStyle.setId("defaultStyleId");
         defaultStyle.setName("defaultStyleName");
         catalog.add(defaultStyle);
+
+        defaultXMark = new XMarkInfoImpl(catalog) {
+            @Override
+            public XShapeMarks getXMark() throws IOException {
+                XShapeMarks xmarks = new XShapeMarks();
+                return xmarks;
+            }
+        };
+        defaultXMark.setFilename("defaultXMarkFileName");
+        defaultXMark.setId("defaultXMarkId");
+        defaultXMark.setName("defaultXMarkName");
+        catalog.add(defaultXMark);
 
         // coverageStoreInfo = new CoverageStoreInfoImpl(catalog);
         // coverageInfo = new CoverageInfoImpl(catalog);

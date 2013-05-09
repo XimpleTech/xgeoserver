@@ -13,7 +13,7 @@ import org.geoserver.web.data.style.StyleDetachableModel;
 import org.geoserver.web.wicket.GeoServerDataProvider;
 
 /**
- * A {@link GeoServerDataProvider} provider for styles
+ * A {@link GeoServerDataProvider} provider for XMarks
  */
 @SuppressWarnings("serial")
 public class StyleProvider extends GeoServerDataProvider<StyleInfo> {

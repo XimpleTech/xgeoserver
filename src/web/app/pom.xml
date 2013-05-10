@@ -250,6 +250,7 @@
           <stopPort>8395</stopPort>
           <stopKey>GEOSERVER_JETTY_STOPKEY</stopKey>
           <contextPath>geoserver</contextPath>
+          <webApp>${project.build.directory}/geoserver</webApp>
           <daemon>false</daemon>
           <!-- uncomment following to set a GEOSERVER_DATA_DIR -->
           <!--

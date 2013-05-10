@@ -7,6 +7,7 @@ DROP VIEW layergroup;
 DROP VIEW layer_style;
 DROP VIEW layer;
 DROP VIEW style;
+DROP VIEW xmark;
 DROP VIEW wmslayer;
 DROP VIEW wmsstore;
 DROP VIEW coverage;

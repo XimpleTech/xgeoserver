@@ -123,7 +123,7 @@ public class GeoServerResourceLoader extends DefaultResourceLoader implements Ap
     /**
      * Adds a location to the path used for resource lookups.
      *
-     * @param A directory containing resources.
+     * @param searchLocation directory containing resources.
      */
     public void addSearchLocation(File searchLocation) {
         searchLocations.add(searchLocation);

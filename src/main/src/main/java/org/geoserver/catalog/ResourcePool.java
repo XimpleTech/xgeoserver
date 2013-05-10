@@ -1957,9 +1957,6 @@ public class ResourcePool {
                 xmarks = xmarkCache.get( info );
                 if ( xmarks == null ) {
                     
-                    //JD: it is important that we call the SLDParser(File) constructor because
-                    // if not the sourceURL will not be set which will mean it will fail to 
-                    //resolve relative references to online resources
                     File xmarkFile = dataDir().findXMarkXMLFile(info);
                     if ( xmarkFile == null ){
                         throw new IOException( "No such file: " + info.getFilename());
@@ -1969,8 +1966,6 @@ public class ResourcePool {
                     xmarks = XShapeMarkFactory.getCurrentMarks().get(xmarkFile.toString());
                     // xmarks = XMarks.xmark(XMarks.parse(xmarkFile, null, info.getXMarkVersion()));
                     
-                    //set the name of the xmark to be the name of hte xmark metadata
-                    // remove this when wms works off xmark info
                     xmarks.setName( info.getName() );
                     xmarkCache.put( info, xmarks );
                 }
@@ -2029,6 +2024,7 @@ public class ResourcePool {
             BufferedOutputStream out = new BufferedOutputStream( new FileOutputStream( xmarkFile ) );
             
             try {
+                LOGGER.info("Enter writeXMark...");
                 // TODO: Ximple Mark Encode
                 // Marks.encode(XMarks.xml(xmarks), info.getSLDVersion(), format, out);
                 clear(info);

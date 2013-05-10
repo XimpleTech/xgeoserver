@@ -296,7 +296,10 @@ public class MockData implements TestData {
     
     /** The styles map */
     private HashMap layerStyles = new HashMap();
-    
+
+    /** The xmarks map */
+    private HashMap xmarks = new HashMap();
+
     /** The coverage store map */
     private HashMap coverageStores = new HashMap();
     
@@ -689,6 +692,7 @@ public class MockData implements TestData {
         writer.coverageStores(coverageStores, coverageStoresNamespaces, disabledCoverageStores);
         writer.namespaces(namespaces);
         writer.styles(layerStyles);
+        writer.xmarks(xmarks);
         writer.write(new File(data, "catalog.xml"));
     }
 

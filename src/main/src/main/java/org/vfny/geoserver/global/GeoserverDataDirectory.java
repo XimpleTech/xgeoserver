@@ -71,9 +71,8 @@ public class GeoserverDataDirectory {
     /**
      * Locate feature type directory name using the FeatureType as a key into the catalog 
      * @see Data#getFeatureTypeInfo(String) 
-     * @param name
-     *            String The FeatureTypeInfo Name
-
+     * @param featureType
+     *          String The FeatureTypeInfo Name
      * @return the feature type dir name, or null if not found (either the feature type or the directory)
      *
      * @throws NoSuchElementException
@@ -169,7 +168,7 @@ public class GeoserverDataDirectory {
     /**
      * Given a url, tries to interpret it as a file into the data directory, or as an absolute
      * location, and returns the actual absolute location of the File
-     * @param path
+     * @param url
      * @return
      */
     public static File findDataFile(URL url) {
@@ -206,7 +205,38 @@ public class GeoserverDataDirectory {
         
         return null;
     }
-    
+
+    /**
+     * Looks up a file under the "xmarks" directory.
+     *
+     * @param fileName The name of the file.
+     *
+     * @return The xmark file, or null if it does not exist.
+     */
+    public static File findXMarkFile(String fileName) {
+        return findXMarkFile( fileName, false );
+    }
+
+    /**
+     * Looks up a file under the "xmarks" directory.
+     *
+     * @param fileName The name of the file.
+     * @param resolve If set to true a non-null file handle will be returned even
+     * when the file does not exist.
+     *
+     * @return The xmark file, or null if it does not exist and resolve == false.
+     */
+    public static File findXMarkFile(String fileName, boolean resolve) {
+        File baseDir = GeoserverDataDirectory.getGeoserverDataDirectory();
+        File xmarkFile = new File( new File( baseDir, "xmarks" ), fileName );
+
+        if (resolve || xmarkFile.exists() ) {
+            return xmarkFile;
+        }
+
+        return null;
+    }
+
     /**
      * Given a path, tries to interpret it as a file into the data directory, or as an absolute
      * location, and returns the actual absolute location of the File
@@ -262,7 +292,7 @@ public class GeoserverDataDirectory {
     /**
      * Initializes the data directory lookup service.
      * 
-     * @param servContext
+     * @param context
      */
     public static void init(WebApplicationContext context) {
         ServletContext servContext = context.getServletContext();
@@ -349,7 +379,7 @@ public class GeoserverDataDirectory {
 
     /**
      * Helper method to help client code migrade from using this class to using
-     * {@link org.geoserver.config.GeoserverDataDirectory}.
+     * {@link org.geoserver.config.GeoServerDataDirectory}.
      */
     public static org.geoserver.config.GeoServerDataDirectory accessor() {
         return new org.geoserver.config.GeoServerDataDirectory(loader);

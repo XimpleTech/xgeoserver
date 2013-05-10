@@ -145,6 +145,8 @@ public abstract class AbstractAppSchemaMockData extends SystemTestData
     
     private final Map<String, String> layerStyles = new LinkedHashMap<String,String>();
 
+    private final Map<String, String> xmarks = new LinkedHashMap<String,String>();
+
     private File styles;
 
     /** the 'featureTypes' directory, under 'data' */
@@ -323,9 +325,10 @@ public abstract class AbstractAppSchemaMockData extends SystemTestData
         writer.dataStores(datastoreParams, datastoreNamespacePrefixes, Collections
                 .<String> emptySet());
         writer.coverageStores(new HashMap<String, Map<String, String>>(),
-                new HashMap<String, String>(), Collections.<String> emptySet());
+            new HashMap<String, String>(), Collections.<String>emptySet());
         writer.namespaces(namespaces);
         writer.styles(layerStyles);
+        writer.xmarks(xmarks);
         try {
             writer.write(new File(data, "catalog.xml"));
         } catch (IOException e) {

@@ -164,9 +164,10 @@
 			        <include>**/*.xml</include>
 			        <include>**/*.xsd</include>
 		    	    <include>**/*.sql</include>
-                    <include>**/*.sld</include>
-                    <include>**/*.tiff</include>
-	            </includes>
+              <include>**/*.sld</include>
+              <include>**/*.tiff</include>
+              <include>**/*.xmk</include>
+	          </includes>
 		    </testResource>
 	    </testResources>
 	</build>

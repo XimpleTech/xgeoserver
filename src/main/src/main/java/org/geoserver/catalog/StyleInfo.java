@@ -34,6 +34,9 @@ public interface StyleInfo extends CatalogInfo {
      */
     public static String DEFAULT_RASTER = "raster";
 
+    public static String XTPC_POLYLINE = "xtpc-polyline";
+    public static String XTPC_SYMBOL = "xtpc-symbol";
+
     
     /**
      * Name of the style.

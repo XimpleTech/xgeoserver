@@ -7,6 +7,8 @@ import org.geotools.styling.Style;
 
 public interface XMarkInfo extends CatalogInfo {
 
+    String DEFAULT_XMARKS = "xtpc-marks";
+
     /**
      * Name of the style.
      * <p>

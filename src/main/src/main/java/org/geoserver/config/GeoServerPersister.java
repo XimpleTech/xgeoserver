@@ -4,9 +4,7 @@
  */
 package org.geoserver.config;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -17,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogException;
 import org.geoserver.catalog.CoverageInfo;
@@ -33,6 +30,7 @@ import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WMSLayerInfo;
 import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.event.CatalogAddEvent;
 import org.geoserver.catalog.event.CatalogListener;
 import org.geoserver.catalog.event.CatalogModifyEvent;
@@ -41,6 +39,7 @@ import org.geoserver.catalog.event.CatalogRemoveEvent;
 import org.geoserver.config.util.XStreamPersister;
 import org.geoserver.platform.GeoServerResourceLoader;
 import org.geotools.data.DataUtilities;
+import org.geotools.renderer.style.XShapeMarks;
 import org.geotools.styling.AbstractStyleVisitor;
 import org.geotools.styling.ExternalGraphic;
 import org.geotools.util.logging.Logging;
@@ -69,7 +68,7 @@ public class GeoServerPersister implements CatalogListener, ConfigurationListene
         Object source = event.getSource();
         try {
             if ( source instanceof WorkspaceInfo ) {
-                addWorkspace( (WorkspaceInfo) source );
+                addWorkspace((WorkspaceInfo) source);
             }
             else if ( source instanceof NamespaceInfo ) {
                 addNamespace( (NamespaceInfo) source );
@@ -97,6 +96,9 @@ public class GeoServerPersister implements CatalogListener, ConfigurationListene
             }
             else if ( source instanceof StyleInfo ) {
                 addStyle( (StyleInfo) source );
+            }
+            else if ( source instanceof XMarkInfo) {
+                addXMark( (XMarkInfo) source );
             }
             else if ( source instanceof LayerGroupInfo ) {
                 addLayerGroup( (LayerGroupInfo) source );
@@ -127,6 +129,9 @@ public class GeoServerPersister implements CatalogListener, ConfigurationListene
                 }
                 else if ( source instanceof StyleInfo ) {
                     renameStyle( (StyleInfo) source, newName );
+                }
+                else if ( source instanceof XMarkInfo ) {
+                    renameXMark((XMarkInfo) source, newName);
                 }
                 else if ( source instanceof LayerGroupInfo ) {
                     renameLayerGroup( (LayerGroupInfo) source, newName );
@@ -171,6 +176,26 @@ public class GeoServerPersister implements CatalogListener, ConfigurationListene
                         oldFile.renameTo(new File(newDir, oldFile.getName()));
                     }
 
+                }
+            }
+
+            //handle the case of a xmark changing workspace
+            if (source instanceof XMarkInfo) {
+                i = event.getPropertyNames().indexOf("workspace");
+                if (i > -1) {
+                    WorkspaceInfo newWorkspace = (WorkspaceInfo) event.getNewValues().get( i );
+                    File newDir = dd.xmarkDir(true, newWorkspace);
+
+                    //look for any resource files (image, etc...) and copy them over, don't move
+                    // since they could be shared among other styles
+                    for (File oldFile : resources((XMarkInfo) source)) {
+                        FileUtils.copyFile(oldFile, new File(newDir, oldFile.getName()));
+                    }
+
+                    //move over the config file and the sld
+                    for (File oldFile : files((XMarkInfo)source)) {
+                        oldFile.renameTo(new File(newDir, oldFile.getName()));
+                    }
                 }
             }
 
@@ -798,5 +823,105 @@ public class GeoServerPersister implements CatalogListener, ConfigurationListene
         if (dir != null) {
             FileUtils.deleteDirectory( dir );
         }
+    }
+    
+    void addXMark( XMarkInfo xi ) throws IOException {
+        LOGGER.fine( "Persisting xmark " + xi.getName() );
+        dir( xi, true );
+        persist( xi, file( xi ) );
+    }
+    
+    void renameXMark( XMarkInfo xi, String newName ) throws IOException {
+        LOGGER.fine( "Renameing xmark " + xi.getName() + " to " + newName );
+        rename( file( xi ), newName+".xml" );
+    }
+    
+    void modifyXMark( XMarkInfo xi) throws IOException {
+        LOGGER.fine( "Persisting xmark " + xi.getName() );
+        persist(xi, file(xi) );
+    }
+    
+    void removeXMark( XMarkInfo xi) throws IOException {
+        LOGGER.fine( "Removing xmark " + xi.getName() );
+        file(xi).delete();
+    }
+    
+    File dir( XMarkInfo xi) throws IOException {
+        return dir(xi, false );
+    }
+    
+    File dir( XMarkInfo xi, boolean create ) throws IOException {
+        return dd.xmarkDir(create, xi);
+    }
+
+    File file( XMarkInfo xi) throws IOException {
+        //special case for xmarks, if the file name (minus the suffix) matches the id of the xmark
+        // and the suffix is xml (rather than sld) we need to avoid overwritting the actual 
+        // xmark file
+        if (xi.getFilename() != null && xi.getFilename().endsWith(".xml")
+            && xi.getFilename().startsWith(xi.getName()+".")) {
+            //append a second .xml suffix
+            return new File( dir(xi), xi.getName() + ".xml.xml");
+        }
+        else {
+            return new File( dir(xi), xi.getName() + ".xml");
+        }
+    }
+
+    /*
+     * returns the XMK file as well
+     */
+    List<File> files(XMarkInfo xi) throws IOException {
+        File f = file(xi);
+        List<File> list = 
+            new ArrayList<File>(Arrays.asList(f, new File(f.getParentFile(), xi.getFilename())));
+        return list;
+    }
+
+    /*
+     * returns additional resource files 
+     */
+    List<File> resources(XMarkInfo xi) throws IOException {
+        final List<File> files = new ArrayList<File>();
+        try {
+            /*
+            xi.getXMark().accept(new AbstractXMarkVisitor() {
+                @Override
+                public void visit(ExternalGraphic exgr) {
+                    if (exgr.getOnlineResource() == null) {
+                        return;
+                    }
+    
+                    URI uri = exgr.getOnlineResource().getLinkage();
+                    if (uri == null) {
+                        return;
+                    }
+    
+                    File f = null;
+                    try {
+                        f = DataUtilities.urlToFile(uri.toURL());
+                    } catch (MalformedURLException e) {
+                        LOGGER.log(Level.WARNING, "Error attemping to processing XMK resource", e);
+                    }
+    
+                    if (f != null && f.exists()) {
+                        files.add(f);
+                    }
+                }
+            });
+            */
+            URI uri = null;
+            File f = null;
+            if (uri != null) {
+                f = DataUtilities.urlToFile(uri.toURL());
+            }
+            XShapeMarks xmarks = xi.getXMark();
+            LOGGER.log(Level.FINEST, "Load XMark:" + xi.getName());
+        }
+        catch(IOException e) {
+            LOGGER.log(Level.WARNING, "Error loading xmark", e);
+        }
+
+        return files;
     }
 }

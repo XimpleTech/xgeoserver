@@ -1141,6 +1141,7 @@
      <include>**/*.sld</include>
      <include>**/*.ico</include>
      <include>**/*.json</include>
+     <include>**/*.xmk</include>
     </includes>
     <excludes>
      <exclude>**/doc-files/**</exclude>
@@ -1182,6 +1183,7 @@
      <include>**/*.tiff</include>
      <include>**/*.zip</include>
      <include>**/*.json</include>
+     <include>**/*.xmk</include>
     </includes>
     <excludes>
      <exclude>**/doc-files/**</exclude>

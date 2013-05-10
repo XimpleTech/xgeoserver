@@ -87,4 +87,14 @@ public class DefaultGeoServerLoader extends GeoServerLoader {
         catalog.removeListener(p);
     }
 
+    @Override
+    protected void initializeXMarks(Catalog catalog, XStreamPersister xp) throws IOException {
+        //add a persister temporarily in case the styles don't exist on disk
+        GeoServerPersister p = new GeoServerPersister(resourceLoader, xp);
+        catalog.addListener(p);
+
+        super.initializeXMarks(catalog, xp);
+
+        catalog.removeListener(p);
+    }
 }

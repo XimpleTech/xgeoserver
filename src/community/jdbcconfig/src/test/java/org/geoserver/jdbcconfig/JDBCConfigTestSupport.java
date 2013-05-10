@@ -64,8 +64,8 @@ public class JDBCConfigTestSupport {
 
     String dropScriptName = "dropdb.h2.sql";
 
-     String dbUser = System.getProperty("user.name");
-     String dbPasswd = "";
+    String dbUser = System.getProperty("user.name");
+    String dbPasswd = "";
 
     private WebApplicationContext appContext;
 

@@ -160,6 +160,7 @@ public class SampleDataAccessMockData extends SystemTestData {
             }
         });
         writer.styles(Collections.<String, String> emptyMap());
+        writer.xmarks(Collections.<String, String> emptyMap());
         writer.write(new File(data, "catalog.xml"));
     }
 

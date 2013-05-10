@@ -37,6 +37,7 @@ import org.geoserver.catalog.WMSLayerInfo;
 import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.catalog.WorkspaceInfo;
 import org.geoserver.catalog.Wrapper;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.event.CatalogListener;
 import org.geoserver.catalog.impl.CatalogImpl;
 import org.geoserver.catalog.util.LegacyCatalogImporter;
@@ -115,6 +116,9 @@ public abstract class GeoServerLoader {
                 
                 //initialize styles
                 initializeStyles(catalog, xp);
+
+                // initialize XMarks
+                initializeXMarks(catalog, xp);
             } 
             catch (Exception e) {
                 throw new RuntimeException( e );
@@ -175,6 +179,12 @@ public abstract class GeoServerLoader {
         if ( catalog.getStyleByName( StyleInfo.DEFAULT_RASTER ) == null ) {
             initializeStyle( catalog, StyleInfo.DEFAULT_RASTER, "default_raster.sld" );
         }
+        if ( catalog.getStyleByName( StyleInfo.XTPC_POLYLINE ) == null ) {
+            initializeStyle( catalog, StyleInfo.XTPC_POLYLINE, "xtpc_polyline.sld" );
+        }
+        if ( catalog.getStyleByName( StyleInfo.XTPC_SYMBOL ) == null ) {
+            initializeStyle( catalog, StyleInfo.XTPC_SYMBOL, "xtpc_symbol.sld" );
+        }
     }
     
     /**
@@ -194,7 +204,28 @@ public abstract class GeoServerLoader {
         s.setFilename( sld );
         catalog.add( s );
     }
-    
+
+    protected void initializeXMarks( Catalog catalog, XStreamPersister xp) throws IOException {
+        if ( catalog.getXMarkByName(XMarkInfo.DEFAULT_XMARKS) == null ) {
+            initializeXMark(catalog, XMarkInfo.DEFAULT_XMARKS, "xtpc_defaultxmarks.xmk");
+        }
+    }
+
+    void initializeXMark( Catalog catalog, String xmarkName, String xmk ) throws IOException {
+
+        //copy the file out to the data directory if necessary
+        if ( resourceLoader.find( "xmarks", xmk ) == null ) {
+            FileUtils.copyURLToFile(GeoServerLoader.class.getResource(xmk),
+                new File( resourceLoader.findOrCreateDirectory("xmarks" ), xmk) );
+        }
+
+        //create a xmark for it
+        XMarkInfo s = catalog.getFactory().createXMark();
+        s.setName( xmarkName );
+        s.setFilename( xmk );
+        catalog.add( s );
+    }
+
     public void reload() throws Exception {
         destroy();
         
@@ -251,6 +282,8 @@ public abstract class GeoServerLoader {
        
         //global styles
         loadStyles(resourceLoader.find( "styles" ), catalog, xp);
+        //global xmarks
+        loadXMarks(resourceLoader.find("xmarks"), catalog, xp);
 
         //workspaces, stores, and resources
         File workspaces = resourceLoader.find( "workspaces" );
@@ -331,6 +364,12 @@ public abstract class GeoServerLoader {
                 File styles = resourceLoader.find(wsd, "styles");
                 if (styles != null) {
                     loadStyles(styles, catalog, xp);
+                }
+
+                //load the xmarks for the workspace
+                File xmarks = resourceLoader.find(wsd, "xmarks");
+                if (xmarks != null) {
+                    loadXMarks(xmarks, catalog, xp);
                 }
             }
             
@@ -674,6 +713,25 @@ public abstract class GeoServerLoader {
             }
             catch( Exception e ) {
                 LOGGER.log( Level.WARNING, "Failed to load style from file '" + sf.getName() + "'" , e );
+            }
+        }
+    }
+
+    void loadXMarks(File xmarks, Catalog catalog, XStreamPersister xp) {
+        for ( File xmf : list(xmarks,new SuffixFileFilter(".xml") ) ) {
+            try {
+                //handle the .xml.xml case
+                if (new File(xmarks, xmf.getName()+".xml").exists()) {
+                    continue;
+                }
+
+                XMarkInfo xmi = depersist( xp, xmf, XMarkInfo.class );
+                catalog.add( xmi );
+
+                LOGGER.info( "Loaded xmark '" + xmi.getName() + "'" );
+            }
+            catch( Exception e ) {
+                LOGGER.log( Level.WARNING, "Failed to load xmark from file '" + xmf.getName() + "'" , e );
             }
         }
     }

@@ -822,7 +822,7 @@ public interface CatalogFacade {
      *
      * @param id The unique identifier of the xmark.
      *
-     * @return The xmark, or <code>null</code> if no such style exists
+     * @return The xmark, or <code>null</code> if no such xmark exists
      */
     XMarkInfo getXMark(String id);
 
@@ -831,31 +831,31 @@ public interface CatalogFacade {
      *
      * @param name The name of the xmark.
      *
-     * @return The style, or <code>null</code> if no such style exists
+     * @return The xmark, or <code>null</code> if no such xmark exists
      */
     XMarkInfo getXMarkByName(String name);
 
     /**
      * Returns the xmark matching a particular name in the specified workspace, or <code>null</code>
-     * if no such style could be found.
+     * if no such xmark could be found.
      *
-     * @param workspace The workspace containing the style; non {@code null}, use
+     * @param workspace The workspace containing the xmark; non {@code null}, use
      *        {@value CatalogFacade##ANY_WORKSPACE} or {@link #NO_WORKSPACE} as appropriate.
      * @param name The name of the xmark to return.
      */
     XMarkInfo getXMarkByName(WorkspaceInfo workspace, String name);
 
     /**
-     * Loads all styles from persistent storage.
+     * Loads all xmarks from persistent storage.
      *
-     * @return A list of styles, possibly empty.
+     * @return A list of xmarks, possibly empty.
      */
     List<XMarkInfo> getXMarks();
 
     /**
-     * All styles in the specified workspace.
+     * All xmarks in the specified workspace.
      *
-     * @param workspace The workspace containing styles.
+     * @param workspace The workspace containing xmarks.
      */
     List<XMarkInfo> getXMarksByWorkspace(WorkspaceInfo workspace);
 }

@@ -49,6 +49,7 @@ import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WMSLayerInfo;
 import org.geoserver.catalog.WMSStoreInfo;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.XMarkInfo;
 import org.geoserver.catalog.impl.AttributeTypeInfoImpl;
 import org.geoserver.catalog.impl.AttributionInfoImpl;
 import org.geoserver.catalog.impl.AuthorityURL;
@@ -72,6 +73,7 @@ import org.geoserver.catalog.impl.StyleInfoImpl;
 import org.geoserver.catalog.impl.WMSLayerInfoImpl;
 import org.geoserver.catalog.impl.WMSStoreInfoImpl;
 import org.geoserver.catalog.impl.WorkspaceInfoImpl;
+import org.geoserver.catalog.impl.XMarkInfoImpl;
 import org.geoserver.config.ContactInfo;
 import org.geoserver.config.CoverageAccessInfo;
 import org.geoserver.config.GeoServer;
@@ -287,6 +289,7 @@ public class XStreamPersister {
         xs.alias("wmsStore", WMSStoreInfo.class);
         xs.alias("coverageStore", CoverageStoreInfo.class);
         xs.alias("style",StyleInfo.class);
+        xs.alias("xmark",XMarkInfo.class);
         xs.alias( "featureType", FeatureTypeInfo.class);
         xs.alias( "coverage", CoverageInfo.class);
         xs.alias( "wmsLayer", WMSLayerInfo.class);
@@ -356,7 +359,12 @@ public class XStreamPersister {
         xs.omitField(impl(StyleInfo.class), "catalog");
         xs.registerLocalConverter(impl(StyleInfo.class), "workspace", new ReferenceConverter(WorkspaceInfo.class));
         xs.registerLocalConverter(impl(StyleInfo.class), "metadata", new MetadataMapConverter() );
-        
+
+        // XMarkInfo
+        xs.omitField(impl(XMarkInfo.class), "catalog");
+        xs.registerLocalConverter(impl(XMarkInfo.class), "workspace", new ReferenceConverter(WorkspaceInfo.class));
+        xs.registerLocalConverter(impl(XMarkInfo.class), "metadata", new MetadataMapConverter() );
+
         // ResourceInfo
         xs.omitField( impl(ResourceInfo.class), "catalog");
         xs.omitField( impl(ResourceInfo.class), "crs" );
@@ -472,6 +480,7 @@ public class XStreamPersister {
         xs.omitField(impl(NamespaceInfo.class), "id");
         xs.omitField(impl(StoreInfo.class), "id");
         xs.omitField(impl(StyleInfo.class), "id");
+        xs.omitField(impl(XMarkInfo.class), "id");
         xs.omitField(impl(ResourceInfo.class), "id");
         xs.omitField(impl(LayerInfo.class), "id");
         xs.omitField(impl(LayerGroupInfo.class), "id" );
@@ -600,6 +609,7 @@ public class XStreamPersister {
         xs.addDefaultImplementation(WMSStoreInfoImpl.class, WMSStoreInfo.class);
         xs.addDefaultImplementation(CoverageStoreInfoImpl.class, CoverageStoreInfo.class);
         xs.addDefaultImplementation(StyleInfoImpl.class, StyleInfo.class);
+        xs.addDefaultImplementation(XMarkInfoImpl.class, XMarkInfo.class);
         xs.addDefaultImplementation(FeatureTypeInfoImpl.class, FeatureTypeInfo.class );
         xs.addDefaultImplementation(CoverageInfoImpl.class, CoverageInfo.class);
         xs.addDefaultImplementation(WMSLayerInfoImpl.class, WMSLayerInfo.class);

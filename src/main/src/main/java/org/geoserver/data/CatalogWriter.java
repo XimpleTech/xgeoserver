@@ -139,7 +139,7 @@ public class CatalogWriter {
     /**
      * Writers the "formats" element of the catalog.xml file 
      * @param coverageStores
-     * @param coverageStoresNamespaces
+     * @param namespaces
      */
     public void coverageStores(HashMap coverageStores, HashMap namespaces, Set disabled) {
         Element formatsElement = document.createElement("formats");
@@ -229,7 +229,30 @@ public class CatalogWriter {
         }
     }
     
-    
+    /**
+     * Writes "xmark" elements to the catalog.xml file.
+     *
+     * @param xmarks
+     *            map of <id,filename>
+     *
+     */
+    public void xmarks(Map xmarks) {
+        Element xmarksElement = document.createElement("xmarks");
+        catalog.appendChild(xmarksElement);
+
+        for (Iterator s = xmarks.entrySet().iterator(); s.hasNext();) {
+            Map.Entry style = (Map.Entry) s.next();
+            String id = (String) style.getKey();
+            String filename = (String) style.getValue();
+
+            Element xmarkElement = document.createElement("style");
+            xmarksElement.appendChild(xmarkElement);
+
+            xmarkElement.setAttribute("id", id);
+            xmarkElement.setAttribute("filename", filename);
+        }
+    }
+
 
     /**
      * WRites the catalog.xml file.

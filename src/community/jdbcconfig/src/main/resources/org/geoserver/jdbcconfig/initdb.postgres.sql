@@ -410,6 +410,29 @@ SELECT a.oid,
  WHERE a.type_id = b.oid
    AND b.typename = 'org.geoserver.catalog.StyleInfo';
 
+-- xmark view
+CREATE OR REPLACE VIEW xmark AS
+SELECT a.oid,
+       a.id,
+       (SELECT c.value
+          FROM object_property c, property_type d
+         WHERE c.oid = a.oid
+           AND c.property_type = d.oid
+           AND d.name = 'name') as name,
+       (SELECT c.value
+          FROM object_property c, property_type d
+         WHERE c.oid = a.oid
+           AND c.property_type = d.oid
+           AND d.name = 'filename') as filename,
+       (SELECT c.related_oid
+          FROM object_property c, property_type d
+         WHERE c.oid = a.oid
+           AND c.property_type = d.oid
+           AND d.name = 'workspace.id') workspace
+  FROM object a, type b
+ WHERE a.type_id = b.oid
+   AND b.typename = 'org.geoserver.catalog.XMarkInfo';
+
 -- layer view
 CREATE OR REPLACE VIEW layer AS
 SELECT a.oid, 

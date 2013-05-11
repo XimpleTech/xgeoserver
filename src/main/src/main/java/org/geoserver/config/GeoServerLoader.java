@@ -49,6 +49,7 @@ import org.geoserver.config.util.XStreamPersisterFactory;
 import org.geoserver.config.util.XStreamServiceLoader;
 import org.geoserver.platform.GeoServerExtensions;
 import org.geoserver.platform.GeoServerResourceLoader;
+import org.geotools.renderer.style.XShapeMarks;
 import org.geotools.util.logging.Logging;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -728,7 +729,8 @@ public abstract class GeoServerLoader {
                 XMarkInfo xmi = depersist( xp, xmf, XMarkInfo.class );
                 catalog.add( xmi );
 
-                LOGGER.info( "Loaded xmark '" + xmi.getName() + "'" );
+                XShapeMarks marks = xmi.getXMark();
+                LOGGER.info( "Loaded xmark '" + xmi.getName() + "' size=" + marks.size() );
             }
             catch( Exception e ) {
                 LOGGER.log( Level.WARNING, "Failed to load xmark from file '" + xmf.getName() + "'" , e );

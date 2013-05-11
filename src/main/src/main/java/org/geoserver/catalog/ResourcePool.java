@@ -1968,6 +1968,7 @@ public class ResourcePool {
                     
                     xmarks.setName( info.getName() );
                     xmarkCache.put( info, xmarks );
+                    LOGGER.log(Level.INFO, "LoadXMark [" + info.getName() + "] Completed");
                 }
             }
         }

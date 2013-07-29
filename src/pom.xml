@@ -1286,6 +1286,7 @@
       <descriptor>release/ext-monitor-hibernate.xml</descriptor>
       <descriptor>release/ext-xslt.xml</descriptor>
       <descriptor>release/ext-inspire.xml</descriptor>
+      <descriptor>release/ext-css.xml</descriptor>
      </descriptors>
      <finalName>geoserver-2.3.3.x-SNAPSHOT</finalName>
      <outputDirectory>${project.build.directory}/release</outputDirectory>

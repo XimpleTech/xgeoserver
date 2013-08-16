@@ -11,7 +11,7 @@
  <parent>
   <groupId>org.geoserver</groupId>
   <artifactId>community</artifactId>
-  <version>2.3.3.x-SNAPSHOT</version>
+  <version>2.3.4.x-SNAPSHOT</version>
  </parent>
  <groupId>org.geoserver.community</groupId>
  <artifactId>release</artifactId>
@@ -23,11 +23,11 @@
      <artifactId>authkey</artifactId>
      <version>${project.version}</version>
    </dependency>
-   <dependency>
+   <!--dependency>
      <groupId>org.geoserver.community</groupId>
      <artifactId>css</artifactId>
      <version>${project.version}</version>
-   </dependency>
+   </dependency-->
    <dependency>
      <groupId>org.geoserver.community</groupId>
      <artifactId>printing</artifactId>

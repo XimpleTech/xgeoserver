@@ -21,7 +21,6 @@ import org.geoserver.template.FeatureWrapper;
 import org.geoserver.template.GeoServerTemplateLoader;
 import org.geoserver.wms.GetFeatureInfoRequest;
 import org.geoserver.wms.WMS;
-import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.Name;
@@ -64,8 +63,8 @@ public class HTMLFeatureInfoOutputFormat extends GetFeatureInfoOutputFormat {
             @Override
             public TemplateModel wrap(Object object) throws TemplateModelException {
                 if (object instanceof FeatureCollection) {
-                    SimpleHash map = (SimpleHash) super.wrap(object);
-                    map.put("request", Dispatcher.REQUEST.get().getKvp());
+                    SimpleHash map = (SimpleHash) super.wrap(object);                    
+                    map.put("request", Dispatcher.REQUEST.get().getKvp());    
                     return map;
                 }
                 return super.wrap(object);

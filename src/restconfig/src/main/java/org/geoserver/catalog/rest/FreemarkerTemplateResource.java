@@ -25,6 +25,7 @@ public class FreemarkerTemplateResource extends StoreFileResource {
 
     public static final String MEDIATYPE_FTL_EXTENSION = "ftl";
     public static final MediaType MEDIATYPE_FTL = new MediaType("text/plain");
+
     static {
         MediaTypes.registerExtension(MEDIATYPE_FTL_EXTENSION, MEDIATYPE_FTL);
     }
@@ -37,42 +38,42 @@ public class FreemarkerTemplateResource extends StoreFileResource {
     public boolean allowGet() {
         return true;
     }
-    
+
     @Override
     public boolean allowPut() {
         return true;
     }
-    
+
     @Override
     public boolean allowDelete() {
         return true;
     }
-    
+
     @Override
     public boolean allowPost() {
         return false;
     }
 
-    @Override    
-    public void handleGet() {   
+    @Override
+    public void handleGet() {
         getResponse().setEntity(new FileRepresentation(getTemplateFile(), MEDIATYPE_FTL, 0));
     }
-    
-    @Override    
+
+    @Override
     public void handlePut() {
         doFileUpload();
         getResponse().setStatus(Status.SUCCESS_CREATED);
     }
-    
-    @Override    
+
+    @Override
     public void handleDelete() {
         if (getTemplateFile().delete()) {
             getResponse().setStatus(Status.SUCCESS_OK);
         } else {
             getResponse().setStatus(Status.SERVER_ERROR_INTERNAL);
         }
-    }    
-        
+    }
+
     private File doFileUpload() {
         try {
             getResponse().setStatus(Status.SUCCESS_ACCEPTED);
@@ -82,31 +83,31 @@ public class FreemarkerTemplateResource extends StoreFileResource {
                 MediaType mediaType = getRequest().getEntity().getMediaType();
                 LOGGER.info("PUT file: mimetype=" + mediaType + ", path=" + directory.getAbsolutePath());
             }
-            
+
             return RESTUtils.handleBinUpload(getAttribute("template") + "." + MEDIATYPE_FTL_EXTENSION, directory, false, getRequest());
         } catch (IOException e) {
             throw new RestletException(e.getMessage(), Status.SERVER_ERROR_INTERNAL, e);
         }
     }
-    
+
     private File getTemplateFile() {
         try {
             File directory = catalog.getResourceLoader().find(getDirectoryPath(getRequest()));
-            File templateFile = catalog.getResourceLoader().find(directory, 
-                    getAttribute("template") + "." + MEDIATYPE_FTL_EXTENSION);        
+            File templateFile = catalog.getResourceLoader().find(directory,
+                    getAttribute("template") + "." + MEDIATYPE_FTL_EXTENSION);
             if (templateFile == null) {
                 if (LOGGER.isLoggable(Level.INFO)) {
-                    LOGGER.info("File not found: " + getDirectoryPathAsString(getRequest()) + "/" + 
+                    LOGGER.info("File not found: " + getDirectoryPathAsString(getRequest()) + "/" +
                             getAttribute("template") + "." + MEDIATYPE_FTL_EXTENSION);
                 }
-                
-                throw new RestletException("File Not Found", Status.CLIENT_ERROR_NOT_FOUND);            
+
+                throw new RestletException("File Not Found", Status.CLIENT_ERROR_NOT_FOUND);
             } else {
                 return templateFile;
             }
         } catch (IOException e) {
-            throw new RestletException(e.getMessage(), Status.CLIENT_ERROR_NOT_FOUND, e);            
-        }        
+            throw new RestletException(e.getMessage(), Status.CLIENT_ERROR_NOT_FOUND, e);
+        }
     }
 
     public static String getDirectoryPathAsString(Request request) {
@@ -116,7 +117,7 @@ public class FreemarkerTemplateResource extends StoreFileResource {
         }
         return buff.toString();
     }
-    
+
     /*
      * templates
      * templates/<template>.ftl
@@ -137,22 +138,22 @@ public class FreemarkerTemplateResource extends StoreFileResource {
 
         List<String> path = new ArrayList<String>();
         path.add("workspaces");
-        
+
         if (workspace != null) {
             path.add(workspace);
             if (datastore != null) {
                 path.add(datastore);
                 if (featureType != null) {
-                    path.add(featureType);                    
+                    path.add(featureType);
                 }
             } else if (coveragestore != null) {
-                path.add(coveragestore);   
+                path.add(coveragestore);
                 if (coverage != null) {
                     path.add(coverage);
                 }
             }
         }
-        
-        return path.toArray(new String[] {});
+
+        return path.toArray(new String[]{});
     }
 }

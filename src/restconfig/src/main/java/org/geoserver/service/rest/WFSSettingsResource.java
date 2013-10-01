@@ -24,14 +24,12 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 
 /**
- * 
  * @author Juan Marin, OpenGeo
- *
  */
 public class WFSSettingsResource extends ServiceSettingsResource {
 
     public WFSSettingsResource(Context context, Request request, Response response, Class clazz,
-            GeoServer geoServer) {
+                               GeoServer geoServer) {
         super(context, request, response, clazz, geoServer);
     }
 
@@ -84,6 +82,7 @@ public class WFSSettingsResource extends ServiceSettingsResource {
                     properties.put("verbose", wfsInfo.isVerbose() ? "true" : "false");
                     properties.put("maxFeatures", String.valueOf(wfsInfo.getMaxFeatures()));
                     properties.put("isFeatureBounding", wfsInfo.isFeatureBounding() ? "true" : "false");
+                    properties.put("hitsIgnoreMaxFeatures", wfsInfo.isHitsIgnoreMaxFeatures() ? "true" : "false");
                     properties.put("serviceLevel", wfsInfo.getServiceLevel());
                     properties.put("isCanonicalSchemaLocation", wfsInfo.isCanonicalSchemaLocation() ? "true" : "false");
                     properties.put("encodeFeatureMember", wfsInfo.isEncodeFeatureMember() ? "true" : "false");

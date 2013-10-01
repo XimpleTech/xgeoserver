@@ -28,14 +28,12 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 
 /**
- * 
  * @author Juan Marin, OpenGeo
- * 
  */
 public class WMSSettingsResource extends ServiceSettingsResource {
 
     public WMSSettingsResource(Context context, Request request, Response response, Class clazz,
-            GeoServer geoServer) {
+                               GeoServer geoServer) {
         super(context, request, response, clazz, geoServer);
     }
 
@@ -99,7 +97,7 @@ public class WMSSettingsResource extends ServiceSettingsResource {
                     properties.put("maxRenderingTime", String.valueOf(wmsInfo.getMaxRenderingTime()));
                     properties.put("maxRenderindErrors", String.valueOf(wmsInfo.getMaxRenderingErrors()));
                     properties.put("watermarkEnabled", wmsInfo.getWatermark().isEnabled() ? "true" : "false");
-                    properties.put("watermarkUrl", wmsInfo.getWatermark().getURL()!= null ? wmsInfo.getWatermark().getURL() : "NO_WATERMARK_URL");
+                    properties.put("watermarkUrl", wmsInfo.getWatermark().getURL() != null ? wmsInfo.getWatermark().getURL() : "NO_WATERMARK_URL");
                     properties.put("watermarkTransparency", String.valueOf(wmsInfo.getWatermark().getTransparency()));
                     properties.put("watermarkPosition", wmsInfo.getWatermark().getPosition());
                     properties.put("pngCompression", String.valueOf(wmsInfo.getMetadata().get("pngCompression")));

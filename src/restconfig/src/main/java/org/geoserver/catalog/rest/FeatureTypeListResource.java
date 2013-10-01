@@ -17,22 +17,22 @@ import org.restlet.data.Response;
 public class FeatureTypeListResource extends AbstractCatalogListResource {
 
     public FeatureTypeListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                   Response response, Catalog catalog) {
         super(context, request, response, FeatureTypeInfo.class, catalog);
     }
 
     @Override
     protected List handleListGet() throws Exception {
-        String ws = getAttribute( "workspace" ); 
+        String ws = getAttribute("workspace");
         String ds = getAttribute("datastore");
-        
-        if ( ds != null ) {
+
+        if (ds != null) {
             DataStoreInfo dataStore = catalog.getDataStoreByName(ws, ds);
-            return catalog.getFeatureTypesByDataStore(dataStore);    
+            return catalog.getFeatureTypesByDataStore(dataStore);
         }
-        
-        NamespaceInfo ns = catalog.getNamespaceByPrefix( ws );
-        return catalog.getFeatureTypesByNamespace( ns );
+
+        NamespaceInfo ns = catalog.getNamespaceByPrefix(ws);
+        return catalog.getFeatureTypesByNamespace(ns);
     }
 
 }

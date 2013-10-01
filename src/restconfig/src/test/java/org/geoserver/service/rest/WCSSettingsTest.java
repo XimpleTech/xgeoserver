@@ -6,6 +6,7 @@ package org.geoserver.service.rest;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.junit.Assert.*;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
@@ -18,8 +19,8 @@ import org.w3c.dom.Document;
 import com.mockrunner.mock.web.MockHttpServletResponse;
 
 public class WCSSettingsTest extends CatalogRESTTestSupport {
-    
-    @After 
+
+    @After
     public void revertChanges() {
         revertService(WCSInfo.class, null);
     }

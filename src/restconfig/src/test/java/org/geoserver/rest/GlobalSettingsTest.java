@@ -7,6 +7,7 @@ package org.geoserver.rest;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
@@ -23,16 +24,16 @@ public class GlobalSettingsTest extends CatalogRESTTestSupport {
 
     @Before
     public void revertSettings() {
-        GeoServerInfo global = getGeoServer().getGlobal();       
+        GeoServerInfo global = getGeoServer().getGlobal();
         global.getJAI().setAllowInterpolation(false);
         global.getJAI().setMemoryThreshold(0.75d);
         global.getJAI().setTilePriority(5);
         global.getCoverageAccess().setQueueType(QueueType.UNBOUNDED);
         getGeoServer().save(global);
-        
+
         revertSettings(null);
     }
-    
+
     @Test
     public void testGetAsJSON() throws Exception {
         JSON json = getAsJSON("/rest/settings.json");

@@ -17,18 +17,18 @@ import org.restlet.data.Response;
 public class DataStoreListResource extends AbstractCatalogListResource {
 
     protected DataStoreListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                    Response response, Catalog catalog) {
         super(context, request, response, DataStoreInfo.class, catalog);
     }
 
     @Override
     protected DataFormat createHTMLFormat(Request request, Response response) {
-        return new DataStoreHTMLFormat( request, response, this, catalog );
+        return new DataStoreHTMLFormat(request, response, this, catalog);
     }
-    
+
     @Override
     protected List handleListGet() throws Exception {
-        String ws = getAttribute( "workspace" );
-        return catalog.getDataStoresByWorkspace( ws );
+        String ws = getAttribute("workspace");
+        return catalog.getDataStoresByWorkspace(ws);
     }
 }

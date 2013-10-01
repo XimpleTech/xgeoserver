@@ -13,9 +13,7 @@ import org.restlet.data.Response;
 import org.restlet.resource.Resource;
 
 /**
- * 
  * @author Juan Marin, OpenGeo
- *
  */
 public class WFSSettingsFinder extends AbstractGeoServerFinder {
 

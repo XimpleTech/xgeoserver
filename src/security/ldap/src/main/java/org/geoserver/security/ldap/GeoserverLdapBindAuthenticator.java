@@ -31,24 +31,26 @@ import org.springframework.util.StringUtils;
  * to a direct dn access.
  * 
  * @author "Mauro Bartolomeoli - mauro.bartolomeoli@geo-solutions.it"
+ * 
  */
 public class GeoserverLdapBindAuthenticator extends BindAuthenticator {
 
     private static final Log logger = LogFactory
             .getLog(GeoserverLdapBindAuthenticator.class);
-    
+
     private String userFilter = "";
-    
+
     private String userFormat = "";
-    
-    public GeoserverLdapBindAuthenticator(BaseLdapPathContextSource contextSource) {
+
+    public GeoserverLdapBindAuthenticator(
+            BaseLdapPathContextSource contextSource) {
         super(contextSource);
     }
-    
+
     public void setUserFilter(String userFilter) {
         this.userFilter = userFilter;
     }
-    
+
     @Override
     public DirContextOperations authenticate(Authentication authentication) {
         if (userFilter == null || userFilter.equals("")) {
@@ -58,10 +60,10 @@ public class GeoserverLdapBindAuthenticator extends BindAuthenticator {
             return authenticateUsingFilter(authentication);
         }
     }
-    
+
     /**
-     * If userFilter is defined we extract user data using the filter and dnPattern
-     * (if defined) to transform username for authentication.
+     * If userFilter is defined we extract user data using the filter and
+     * dnPattern (if defined) to transform username for authentication.
      * 
      * @param authentication
      * @return
@@ -72,7 +74,7 @@ public class GeoserverLdapBindAuthenticator extends BindAuthenticator {
         Assert.isInstanceOf(UsernamePasswordAuthenticationToken.class,
                 authentication,
                 "Can only process UsernamePasswordAuthenticationToken objects");
-    
+
         String username = authentication.getName();
         String password = (String) authentication.getCredentials();
         // format given username if required
@@ -84,27 +86,27 @@ public class GeoserverLdapBindAuthenticator extends BindAuthenticator {
             throw new BadCredentialsException(messages.getMessage(
                     "BindAuthenticator.emptyPassword", "Empty Password"));
         }
-    
+
         DirContext ctx = null;
         String userDnStr = "";
         try {
             ctx = getContextSource().getContext(username, password);
-    
+
             // Check for password policy control
             PasswordPolicyControl ppolicy = PasswordPolicyControlExtractor
                     .extractControl(ctx);
-    
+
             logger.debug("Retrieving user object using filter...");
             SearchControls searchCtls = new SearchControls();
             searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-    
+
             user = SpringSecurityLdapTemplate.searchForSingleEntryInternal(ctx,
                     searchCtls, "", userFilter, new Object[] { username });
             userDnStr = user.getDn().toString();
             if (ppolicy != null) {
                 user.setAttributeValue(ppolicy.getID(), ppolicy);
             }
-    
+
         } catch (NamingException e) {
             // This will be thrown if an invalid user name is used and the
             // method may
@@ -122,15 +124,15 @@ public class GeoserverLdapBindAuthenticator extends BindAuthenticator {
         } finally {
             LdapUtils.closeContext(ctx);
         }
-    
+
         if (user == null) {
             throw new BadCredentialsException(messages.getMessage(
                     "BindAuthenticator.badCredentials", "Bad credentials"));
         }
-    
+
         return user;
     }
-    
+
     public void setUserFormat(String userFormat) {
         this.userFormat = userFormat;
     }

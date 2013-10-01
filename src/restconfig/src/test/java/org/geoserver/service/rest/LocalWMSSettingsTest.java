@@ -7,6 +7,7 @@ package org.geoserver.service.rest;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -42,7 +43,7 @@ public class LocalWMSSettingsTest extends CatalogRESTTestSupport {
             geoServer.remove(wmsInfo);
         }
         wmsInfo = geoServer.getFactory().create(WMSInfo.class);
-        
+
         wmsInfo.setName("WMS");
         wmsInfo.setWorkspace(ws);
         geoServer.add(wmsInfo);

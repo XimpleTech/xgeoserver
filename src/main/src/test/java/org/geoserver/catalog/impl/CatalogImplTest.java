@@ -39,6 +39,7 @@ import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.catalog.Keyword;
 import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerInfo;
+import org.geoserver.catalog.MetadataLinkInfo;
 import org.geoserver.catalog.MetadataMap;
 import org.geoserver.catalog.NamespaceInfo;
 import org.geoserver.catalog.Predicates;
@@ -135,8 +136,8 @@ public class CatalogImplTest {
         s.setFilename( "styleFilename" );
         
         l = factory.createLayer();
-        l.setEnabled(true);
         l.setResource( ft );
+        l.setEnabled(true);
         l.setDefaultStyle( s );
 
         lg = factory.createLayerGroup();
@@ -970,6 +971,36 @@ public class CatalogImplTest {
         assertEquals( 1, ft3.getKeywords().size() );
     }
     
+    @Test
+    public void testModifyMetadataLinks() {
+        addFeatureType();
+        
+        FeatureTypeInfo ft2 = catalog.getFeatureTypeByName(ft.getName());
+        MetadataLinkInfo ml = catalog.getFactory().createMetadataLink();
+        ml.setContent("http://www.geoserver.org/meta");
+        ml.setType("text/plain");
+        ml.setMetadataType("iso");
+        ft2.getMetadataLinks().clear();
+        ft2.getMetadataLinks().add(ml);
+        catalog.save(ft2);
+        
+        FeatureTypeInfo ft3 = catalog.getFeatureTypeByName(ft.getName());
+        MetadataLinkInfo ml3 = ft3.getMetadataLinks().get(0);
+        ml3.setType("application/json");
+        
+        // do not save and grab another, the metadata link must not have been modified
+        FeatureTypeInfo ft4 = catalog.getFeatureTypeByName(ft.getName());
+        MetadataLinkInfo ml4 = ft4.getMetadataLinks().get(0);
+        assertEquals("text/plain", ml4.getType());
+        
+        
+        // now save and grab yet another, the modification must have happened
+        catalog.save(ft3);
+        FeatureTypeInfo ft5 = catalog.getFeatureTypeByName(ft.getName());
+        MetadataLinkInfo ml5 = ft5.getMetadataLinks().get(0);
+        assertEquals("application/json", ml5.getType());
+    }
+    
     
     @Test
     public void testFeatureTypeEvents() {
@@ -1113,8 +1144,8 @@ public class CatalogImplTest {
         
         addStyle();
         LayerInfo l = catalog.getFactory().createLayer();
-        l.setEnabled(true);
         l.setResource(ft);
+        l.setEnabled(true);
         l.setDefaultStyle( s );
         
         catalog.add(l);
@@ -1739,8 +1770,8 @@ public class CatalogImplTest {
         catalog.add(s2);
         
         LayerInfo l2 = factory.createLayer();
-        l2.setEnabled(true);
         l2.setResource(ft2);
+        l2.setEnabled(true);
         l2.setDefaultStyle(s2);
         catalog.add(l2);
         

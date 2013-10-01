@@ -7,6 +7,7 @@ package org.geoserver.rest;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
@@ -22,6 +23,7 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import com.mockrunner.mock.web.MockHttpServletResponse;
+
 public class GlobalContactTest extends CatalogRESTTestSupport {
 
     protected GeoServer geoServer;
@@ -36,11 +38,11 @@ public class GlobalContactTest extends CatalogRESTTestSupport {
         contactInfo.setAddressPostalCode("20001");
         contactInfo.setAddressCountry("United States");
         contactInfo.setAddressState("DC");
-        
+
         GeoServerInfo geoServerInfo = geoServer.getGlobal();
         SettingsInfo settingsInfo = geoServerInfo.getSettings();
         settingsInfo.setContact(contactInfo);
-        geoServer.save(geoServerInfo);        
+        geoServer.save(geoServerInfo);
     }
 
     @Test

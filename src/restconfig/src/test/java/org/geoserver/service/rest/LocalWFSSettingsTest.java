@@ -7,6 +7,7 @@ package org.geoserver.service.rest;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -24,8 +25,8 @@ import org.w3c.dom.Document;
 import com.mockrunner.mock.web.MockHttpServletResponse;
 
 public class LocalWFSSettingsTest extends CatalogRESTTestSupport {
-    
-    @After 
+
+    @After
     public void revertChanges() {
         LocalWorkspace.remove();
         revertService(WFSInfo.class, "sf");

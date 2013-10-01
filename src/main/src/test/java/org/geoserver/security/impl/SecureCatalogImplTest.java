@@ -50,6 +50,8 @@ public class SecureCatalogImplTest extends AbstractAuthorizationTest {
         super.setUp();
 
         populateCatalog();
+        
+        Dispatcher.REQUEST.remove();
     }
 
     @Test 
@@ -349,15 +351,14 @@ public class SecureCatalogImplTest extends AbstractAuthorizationTest {
 
         // and the secure catalog with the filter
         SecureCatalogImpl sc = new SecureCatalogImpl(withLayers, filter) {
-        
-                    @Override
-                    // override so we don't need GeoServerSecurityManager
-                    protected boolean isAdmin(Authentication authentication) {
-                        return false;
-                    }
-        
-            };
-        
+
+            @Override
+            // override so we don't need GeoServerSecurityManager
+            protected boolean isAdmin(Authentication authentication) {
+                return false;
+            }
+
+        };
 
         // base behavior sanity
         assertTrue(layers.size() > 1);

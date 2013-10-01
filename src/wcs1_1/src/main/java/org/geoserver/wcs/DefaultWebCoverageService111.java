@@ -54,8 +54,8 @@ import org.geoserver.wcs.responses.CoverageResponseDelegateFinder;
 import org.geotools.coverage.grid.GeneralGridGeometry;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridGeometry2D;
-import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.gml2.bindings.GML2EncodingUtils;
 import org.geotools.parameter.DefaultParameterDescriptor;
@@ -70,6 +70,7 @@ import org.opengis.filter.Filter;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterDescriptor;
 import org.opengis.parameter.GeneralParameterValue;
+import org.opengis.parameter.ParameterDescriptor;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -168,7 +169,8 @@ public class DefaultWebCoverageService111 implements WebCoverageService111 {
             checkOutput(meta, request.getOutput());
 
             // grab the format, the reader using the default params
-            final AbstractGridCoverage2DReader reader = (AbstractGridCoverage2DReader) meta.getGridCoverageReader(null, WCSUtils.getReaderHints(wcs));
+            final GridCoverage2DReader reader = (GridCoverage2DReader) meta.getGridCoverageReader(
+                    null, WCSUtils.getReaderHints(wcs));
 
 
             // handle spatial domain subset, if needed
@@ -563,7 +565,8 @@ public class DefaultWebCoverageService111 implements WebCoverageService111 {
         }
 
     }
-    private Double[] estimateOffsets(final AbstractGridCoverage2DReader reader, final GridCrsType gridCRS,
+
+    private Double[] estimateOffsets(final GridCoverage2DReader reader, final GridCrsType gridCRS,
             MathTransform gridToCRS, final GeneralEnvelope intersectionEnvelope,
             boolean reprojectionNeeded) {
         Double[] offsets;
@@ -636,8 +639,8 @@ public class DefaultWebCoverageService111 implements WebCoverageService111 {
         }
 
         CoordinateReferenceSystem bboxCRs = CRS.decode(bbox.getCrs());
-        AbstractGridCoverage2DReader reader = (AbstractGridCoverage2DReader) meta.getGridCoverageReader(null, WCSUtils.getReaderHints(wcs));
-
+        GridCoverage2DReader reader = (GridCoverage2DReader) meta.getGridCoverageReader(null,
+                WCSUtils.getReaderHints(wcs));
         Envelope gridEnvelope = reader.getOriginalEnvelope();
         GeneralEnvelope gridEnvelopeBboxCRS = null;
         if (bboxCRs instanceof GeographicCRS) {

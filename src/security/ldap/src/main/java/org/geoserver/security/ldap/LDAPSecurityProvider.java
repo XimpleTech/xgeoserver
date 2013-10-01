@@ -6,6 +6,8 @@ package org.geoserver.security.ldap;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,6 +24,7 @@ import org.geotools.util.logging.Logging;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.ldap.core.support.DefaultTlsDirContextAuthenticationStrategy;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.security.ldap.authentication.LdapAuthenticationProvider;
 import org.springframework.security.ldap.authentication.SpringSecurityAuthenticationSource;
@@ -57,17 +60,17 @@ public class LDAPSecurityProvider extends GeoServerSecurityProvider {
     @Override
     public GeoServerAuthenticationProvider createAuthenticationProvider(SecurityNamedServiceConfig config) {
         LDAPSecurityServiceConfig ldapConfig = (LDAPSecurityServiceConfig) config;
-    
+
         DefaultSpringSecurityContextSource ldapContext = new DefaultSpringSecurityContextSource(
                 ldapConfig.getServerURL());
         ldapContext.setCacheEnvironmentProperties(false);
         ldapContext
                 .setAuthenticationSource(new SpringSecurityAuthenticationSource());
-    
+
         if (ldapConfig.isUseTLS()) {
             // TLS does not play nicely with pooled connections
             ldapContext.setPooled(false);
-    
+
             DefaultTlsDirContextAuthenticationStrategy tls = new DefaultTlsDirContextAuthenticationStrategy();
             tls.setHostnameVerifier(new HostnameVerifier() {
                 @Override
@@ -78,21 +81,21 @@ public class LDAPSecurityProvider extends GeoServerSecurityProvider {
     
             ldapContext.setAuthenticationStrategy(tls);
         }
-    
+
         GeoserverLdapBindAuthenticator authenticator = new GeoserverLdapBindAuthenticator(
                 ldapContext);
-    
+
         // authenticate and extract user using a filter and an optional username
         // format
         authenticator.setUserFilter(ldapConfig.getUserFilter());
         authenticator.setUserFormat(ldapConfig.getUserFormat());
-    
+
         // authenticate and extract user using a distinguished name
         if (ldapConfig.getUserDnPattern() != null) {
             authenticator.setUserDnPatterns(new String[] { ldapConfig
                     .getUserDnPattern() });
         }
-    
+
         LdapAuthoritiesPopulator authPopulator = null;
         LdapAuthenticationProvider provider = null;
         String ugServiceName = ldapConfig.getUserGroupServiceName();
@@ -112,23 +115,24 @@ public class LDAPSecurityProvider extends GeoServerSecurityProvider {
                         ugServiceName), e);
             }
         }
-    
+
         if (authPopulator == null) {
             // fall back to looking up roles via LDAP server, choosing
             // between default and binding populator
             if (ldapConfig.isBindBeforeGroupSearch()) {
-                authPopulator = new BindingLdapAuthoritiesPopulator(ldapContext,
-                        ldapConfig.getGroupSearchBase());
+                authPopulator = new BindingLdapAuthoritiesPopulator(
+                        ldapContext, ldapConfig.getGroupSearchBase());
                 if (ldapConfig.getGroupSearchFilter() != null) {
                     ((BindingLdapAuthoritiesPopulator) authPopulator)
-                            .setGroupSearchFilter(ldapConfig.getGroupSearchFilter());
+                            .setGroupSearchFilter(ldapConfig
+                                    .getGroupSearchFilter());
                 }
                 provider = new LdapAuthenticationProvider(authenticator,
                         authPopulator) {
                     /**
                      * We need to give authoritiesPopulator both username and
-                     * password, so it can bind to the LDAP server. We encode them
-                     * in the username:password format.
+                     * password, so it can bind to the LDAP server. We encode
+                     * them in the username:password format.
                      */
                     @Override
                     protected Collection<? extends GrantedAuthority> loadUserAuthorities(
@@ -139,20 +143,23 @@ public class LDAPSecurityProvider extends GeoServerSecurityProvider {
                     }
                 };
             } else {
-                authPopulator = new DefaultLdapAuthoritiesPopulator(ldapContext,
-                        ldapConfig.getGroupSearchBase());
-    
+                authPopulator = new DefaultLdapAuthoritiesPopulator(
+                        ldapContext, ldapConfig.getGroupSearchBase());
+
                 if (ldapConfig.getGroupSearchFilter() != null) {
                     ((DefaultLdapAuthoritiesPopulator) authPopulator)
-                            .setGroupSearchFilter(ldapConfig.getGroupSearchFilter());
+                            .setGroupSearchFilter(ldapConfig
+                                    .getGroupSearchFilter());
                 }
                 provider = new LdapAuthenticationProvider(authenticator,
                         authPopulator);
             }
-    
+
         }
-    
-        return new LDAPAuthenticationProvider(provider, ldapConfig.getAdminGroup(),
-                ldapConfig.getGroupAdminGroup());
+
+        
+        
+        return new LDAPAuthenticationProvider(provider,
+                ldapConfig.getAdminGroup(), ldapConfig.getGroupAdminGroup());
     }
 }

@@ -102,7 +102,7 @@ public class CatalogIntegrationTest extends GeoServerSystemTestSupport {
     }
     
     @Test
-    public void testModificationProxySerialization() throws Exception {
+    public void modificationProxySerializeTest() throws Exception {
         Catalog catalog = getCatalog();
         
         // workspace

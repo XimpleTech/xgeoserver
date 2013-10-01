@@ -50,35 +50,35 @@ public class JDBCTest extends CatalogRESTTestSupport {
         super.onSetUp(testData);
 
         HashMap params = new HashMap();
-        params.put( JDBCDataStoreFactory.NAMESPACE.key, MockData.DEFAULT_URI);
-        params.put( JDBCDataStoreFactory.DATABASE.key, databasePath());
-        params.put( JDBCDataStoreFactory.DBTYPE.key, "h2");
-        
-        H2DataStoreFactory fac =  new H2DataStoreFactory();
-        
+        params.put(JDBCDataStoreFactory.NAMESPACE.key, MockData.DEFAULT_URI);
+        params.put(JDBCDataStoreFactory.DATABASE.key, databasePath());
+        params.put(JDBCDataStoreFactory.DBTYPE.key, "h2");
+
+        H2DataStoreFactory fac = new H2DataStoreFactory();
+
         JDBCDataStore ds = fac.createDataStore(params);
 
         SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
-        tb.setName( "widgets" );
-        tb.setSRS( "EPSG:4326");
-        tb.add( "g", Point.class );
-        tb.add( "name", String.class );
-        
-        ds.createSchema( tb.buildFeatureType() );
-        
-        FeatureWriter fw = ds.getFeatureWriterAppend( "widgets", Transaction.AUTO_COMMIT );
+        tb.setName("widgets");
+        tb.setSRS("EPSG:4326");
+        tb.add("g", Point.class);
+        tb.add("name", String.class);
+
+        ds.createSchema(tb.buildFeatureType());
+
+        FeatureWriter fw = ds.getFeatureWriterAppend("widgets", Transaction.AUTO_COMMIT);
         fw.hasNext();
         SimpleFeature sf = (SimpleFeature) fw.next();
-        sf.setAttribute("g", new GeometryFactory().createPoint( new Coordinate(1,1)));
-        sf.setAttribute( "name", "one");
+        sf.setAttribute("g", new GeometryFactory().createPoint(new Coordinate(1, 1)));
+        sf.setAttribute("name", "one");
         fw.write();
-        
+
         fw.hasNext();
         sf = (SimpleFeature) fw.next();
-        sf.setAttribute("g", new GeometryFactory().createPoint( new Coordinate(2,2)));
-        sf.setAttribute( "name", "two");
+        sf.setAttribute("g", new GeometryFactory().createPoint(new Coordinate(2, 2)));
+        sf.setAttribute("name", "two");
         fw.write();
-        
+
         fw.close();
         ds.dispose();
     }
@@ -90,137 +90,137 @@ public class JDBCTest extends CatalogRESTTestSupport {
 
     @Test
     public void testCreateDataStore() throws Exception {
-        assertNull( catalog.getDataStoreByName( "gs", "acme") );
-        
-        String xml = 
-            "<dataStore>" +
-              "<name>acme</name>" + 
-              "<connectionParameters>" +
-                "<namespace>" + MockData.DEFAULT_URI + "</namespace>" + 
-                "<database>" + databasePath() + "</database>" + 
-                "<dbtype>h2</dbtype>" + 
-              "</connectionParameters>" + 
-            "</dataStore>";
-        MockHttpServletResponse resp = 
-            postAsServletResponse("/rest/workspaces/gs/datastores", xml );
-        assertEquals(resp.getOutputStreamContent(), 201, resp.getStatusCode() );
-        
-        assertNotNull( catalog.getDataStoreByName( "gs", "acme") );
+        assertNull(catalog.getDataStoreByName("gs", "acme"));
+
+        String xml =
+                "<dataStore>" +
+                        "<name>acme</name>" +
+                        "<connectionParameters>" +
+                        "<namespace>" + MockData.DEFAULT_URI + "</namespace>" +
+                        "<database>" + databasePath() + "</database>" +
+                        "<dbtype>h2</dbtype>" +
+                        "</connectionParameters>" +
+                        "</dataStore>";
+        MockHttpServletResponse resp =
+                postAsServletResponse("/rest/workspaces/gs/datastores", xml);
+        assertEquals(resp.getOutputStreamContent(), 201, resp.getStatusCode());
+
+        assertNotNull(catalog.getDataStoreByName("gs", "acme"));
     }
 
     @Test
     public void testCreateFeatureType() throws Exception {
         testCreateDataStore();
-        DataStoreInfo ds = catalog.getDataStoreByName( "gs", "acme");
-        assertNull( catalog.getFeatureTypeByDataStore(ds, "widgets"));
-        
-        String xml = 
-            "<featureType>" +
-              "<name>widgets</name>" + 
-            "</featureType>";
-        
-        MockHttpServletResponse resp = 
-            postAsServletResponse("/rest/workspaces/gs/datastores/acme/featuretypes", xml );
-        assertEquals( 201, resp.getStatusCode() );
-        
-        assertNotNull( catalog.getFeatureTypeByDataStore(ds, "widgets"));
-        
+        DataStoreInfo ds = catalog.getDataStoreByName("gs", "acme");
+        assertNull(catalog.getFeatureTypeByDataStore(ds, "widgets"));
+
+        String xml =
+                "<featureType>" +
+                        "<name>widgets</name>" +
+                        "</featureType>";
+
+        MockHttpServletResponse resp =
+                postAsServletResponse("/rest/workspaces/gs/datastores/acme/featuretypes", xml);
+        assertEquals(201, resp.getStatusCode());
+
+        assertNotNull(catalog.getFeatureTypeByDataStore(ds, "widgets"));
+
         //do a get feature for a sanity check
-        Document dom = getAsDOM( "wfs?request=getfeature&typename=gs:widgets");
-        assertEquals( 2, dom.getElementsByTagName( "gs:widgets" ).getLength() );
+        Document dom = getAsDOM("wfs?request=getfeature&typename=gs:widgets");
+        assertEquals(2, dom.getElementsByTagName("gs:widgets").getLength());
     }
 
     @Test
     public void testCreateGeometrylessFeatureType() throws Exception {
         testCreateDataStore();
-        
-        DataStoreInfo dsinfo = catalog.getDataStoreByName( "gs", "acme");
-        assertNull( catalog.getFeatureTypeByDataStore(dsinfo, "widgetsNG"));
-        
+
+        DataStoreInfo dsinfo = catalog.getDataStoreByName("gs", "acme");
+        assertNull(catalog.getFeatureTypeByDataStore(dsinfo, "widgetsNG"));
+
         DataStore ds = (DataStore) dsinfo.getDataStore(null);
         try {
-            if ( ds.getSchema("widgetsNG") != null ) {
+            if (ds.getSchema("widgetsNG") != null) {
                 return;
             }
+        } catch (Exception e) {
         }
-        catch( Exception e ) {}
-        
+
         SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
-        tb.setName( "widgetsNG" );
-        tb.add( "name", String.class );
-        
-        ds.createSchema( tb.buildFeatureType() );
-        
-        FeatureWriter fw = ds.getFeatureWriterAppend( "widgetsNG", Transaction.AUTO_COMMIT );
+        tb.setName("widgetsNG");
+        tb.add("name", String.class);
+
+        ds.createSchema(tb.buildFeatureType());
+
+        FeatureWriter fw = ds.getFeatureWriterAppend("widgetsNG", Transaction.AUTO_COMMIT);
         fw.hasNext();
         SimpleFeature sf = (SimpleFeature) fw.next();
-        sf.setAttribute( "name", "one");
+        sf.setAttribute("name", "one");
         fw.write();
-        
+
         fw.hasNext();
         sf = (SimpleFeature) fw.next();
-        sf.setAttribute( "name", "two");
+        sf.setAttribute("name", "two");
         fw.write();
-        
+
         fw.close();
-        
-        String xml = 
-            "<featureType>" +
-              "<name>widgetsNG</name>" + 
-            "</featureType>";
-        
-        MockHttpServletResponse resp = 
-            postAsServletResponse("/rest/workspaces/gs/datastores/acme/featuretypes", xml );
-        assertEquals( 201, resp.getStatusCode() );
-        
-        assertNotNull( catalog.getFeatureTypeByDataStore(dsinfo, "widgetsNG"));
-        
+
+        String xml =
+                "<featureType>" +
+                        "<name>widgetsNG</name>" +
+                        "</featureType>";
+
+        MockHttpServletResponse resp =
+                postAsServletResponse("/rest/workspaces/gs/datastores/acme/featuretypes", xml);
+        assertEquals(201, resp.getStatusCode());
+
+        assertNotNull(catalog.getFeatureTypeByDataStore(dsinfo, "widgetsNG"));
+
         //do a get feature for a sanity check
-        Document dom = getAsDOM( "wfs?request=getfeature&typename=gs:widgetsNG");
-        assertEquals( 2, dom.getElementsByTagName( "gs:widgetsNG" ).getLength() );
+        Document dom = getAsDOM("wfs?request=getfeature&typename=gs:widgetsNG");
+        assertEquals(2, dom.getElementsByTagName("gs:widgetsNG").getLength());
     }
 
     @Test
     public void testCreateSQLView() throws Exception {
         // first create the store
         testCreateDataStore();
-        DataStoreInfo ds = catalog.getDataStoreByName( "gs", "acme");
-        assertNull( catalog.getFeatureTypeByDataStore(ds, "widgets"));
-        
+        DataStoreInfo ds = catalog.getDataStoreByName("gs", "acme");
+        assertNull(catalog.getFeatureTypeByDataStore(ds, "widgets"));
+
         // create the sql view
-        String xml = "<featureType>\n" + 
-        "  <name>sqlview</name>\n" + 
-        "  <nativeName>sqlview</nativeName>\n" + 
-        "  <namespace>\n" + 
-        "    <name>gs</name>\n" + 
-        "  </namespace>\n" + 
-        "  <srs>EPSG:4326</srs>\n" +
-        "  <metadata>\n" + 
-        "  <entry key=\"JDBC_VIRTUAL_TABLE\">\n" + 
-        "     <virtualTable>" +
-        "       <name>sqlview</name>" +
-        "       <sql>select \"g\" from \"widgets\"</sql>\n" + 
-        "       <geometry>" +
-        "         <name>g</name>" +
-        "         <type>Point</type>" +
-        "         <srid>4326</srid>" +
-        "       </geometry>\n" + 
-        "     </virtualTable>" +
-        "  </entry>" +
-        "  </metadata>" +
-        "</featureType>";        
-        
-        MockHttpServletResponse resp = 
-            postAsServletResponse("/rest/workspaces/gs/datastores/acme/featuretypes", xml );
-        assertEquals( 201, resp.getStatusCode() );
-        
-        assertNotNull( catalog.getFeatureTypeByDataStore(ds, "sqlview"));
-        assertNotNull( catalog.getFeatureTypeByName("gs:sqlview"));
-        
+        String xml = "<featureType>\n" +
+                "  <name>sqlview</name>\n" +
+                "  <nativeName>sqlview</nativeName>\n" +
+                "  <namespace>\n" +
+                "    <name>gs</name>\n" +
+                "  </namespace>\n" +
+                "  <srs>EPSG:4326</srs>\n" +
+                "  <metadata>\n" +
+                "  <entry key=\"JDBC_VIRTUAL_TABLE\">\n" +
+                "     <virtualTable>" +
+                "       <name>sqlview</name>" +
+                "       <sql>select \"g\" from \"widgets\"</sql>\n" +
+                "       <geometry>" +
+                "         <name>g</name>" +
+                "         <type>Point</type>" +
+                "         <srid>4326</srid>" +
+                "       </geometry>\n" +
+                "     </virtualTable>" +
+                "  </entry>" +
+                "  </metadata>" +
+                "</featureType>";
+
+        MockHttpServletResponse resp =
+                postAsServletResponse("/rest/workspaces/gs/datastores/acme/featuretypes", xml);
+        assertEquals(201, resp.getStatusCode());
+
+        assertNotNull(catalog.getFeatureTypeByDataStore(ds, "sqlview"));
+        assertNotNull(catalog.getFeatureTypeByName("gs:sqlview"));
+
         //do a get feature for a sanity check
-        Document dom = getAsDOM( "wfs?request=getfeature&typename=gs:sqlview");
+        Document dom = getAsDOM("wfs?request=getfeature&typename=gs:sqlview");
         // print(dom);
-        assertEquals( 2, dom.getElementsByTagName( "gs:sqlview" ).getLength() );
+        assertEquals(2, dom.getElementsByTagName("gs:sqlview").getLength());
     }
 
     @Test
@@ -232,9 +232,9 @@ public class JDBCTest extends CatalogRESTTestSupport {
                 getAsDOM("/rest/workspaces/gs/datastores/acme/featuretypes.xml"));
 
         byte[] dataToUpload = zippedPropertyFile("pds.properties");
-        MockHttpServletResponse resp = 
-            putAsServletResponse("/rest/workspaces/gs/datastores/acme/file.properties",
-                    dataToUpload, "application/zip");
+        MockHttpServletResponse resp =
+                putAsServletResponse("/rest/workspaces/gs/datastores/acme/file.properties",
+                        dataToUpload, "application/zip");
 
         // Upload data, will be imported into DB table named "pds"
         assertEquals("Upload into database datastore failed: " + resp.getOutputStreamContent(),
@@ -274,10 +274,10 @@ public class JDBCTest extends CatalogRESTTestSupport {
 
     byte[] propertyFile() throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        BufferedWriter writer = new BufferedWriter( new OutputStreamWriter( output ) );
-        writer.write( "_=name:String,pointProperty:Point\n" );
-        writer.write( "ds.0='zero'|POINT(0 0)\n");
-        writer.write( "ds.1='one'|POINT(1 1)\n");
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output));
+        writer.write("_=name:String,pointProperty:Point\n");
+        writer.write("ds.0='zero'|POINT(0 0)\n");
+        writer.write("ds.1='one'|POINT(1 1)\n");
         writer.flush();
         return output.toByteArray();
     }

@@ -17,20 +17,20 @@ import org.restlet.data.Response;
 public class CoverageStoreListResource extends AbstractCatalogListResource {
 
     public CoverageStoreListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                     Response response, Catalog catalog) {
         super(context, request, response, CoverageStoreInfo.class, catalog);
-        
+
     }
 
     @Override
     protected DataFormat createHTMLFormat(Request request, Response response) {
-        return new CoverageStoreHTMLFormat( request, response, this, catalog );
+        return new CoverageStoreHTMLFormat(request, response, this, catalog);
     }
-    
+
     @Override
     protected List handleListGet() throws Exception {
-        String ws = getAttribute( "workspace");
-        return catalog.getCoverageStoresByWorkspace( ws );
+        String ws = getAttribute("workspace");
+        return catalog.getCoverageStoresByWorkspace(ws);
     }
 
 }

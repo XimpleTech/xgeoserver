@@ -20,40 +20,40 @@ import org.restlet.data.Response;
 
 public abstract class AbstractCatalogResource extends CatalogResourceBase {
 
-    public AbstractCatalogResource(Context context,Request request, Response response, Class clazz,
-        Catalog catalog) {
-        
+    public AbstractCatalogResource(Context context, Request request, Response response, Class clazz,
+                                   Catalog catalog) {
+
         super(context, request, response, clazz, catalog);
     }
-   
+
     @Override
-    protected ReflectiveXMLFormat createXMLFormat(Request request,Response response) {
+    protected ReflectiveXMLFormat createXMLFormat(Request request, Response response) {
         return new ReflectiveXMLFormat() {
             @Override
-            protected void write(Object data, OutputStream output) throws IOException  {
+            protected void write(Object data, OutputStream output) throws IOException {
                 XStreamPersister p = xpf.createXMLPersister();
-                p.setCatalog( catalog );
+                p.setCatalog(catalog);
                 p.setReferenceByName(true);
                 p.setExcludeIds();
-                
-                configurePersister(p,this);
-                p.save( data, output );
+
+                configurePersister(p, this);
+                p.save(data, output);
             }
-            
+
             @Override
             protected Object read(InputStream in)
                     throws IOException {
                 XStreamPersister p = xpf.createXMLPersister();
-                p.setCatalog( catalog );
-                
-                configurePersister(p,this);
-                return p.load( in, clazz );
+                p.setCatalog(catalog);
+
+                configurePersister(p, this);
+                return p.load(in, clazz);
             }
         };
     }
-    
+
     @Override
-    protected ReflectiveJSONFormat createJSONFormat(Request request,Response response) {
+    protected ReflectiveJSONFormat createJSONFormat(Request request, Response response) {
         return new ReflectiveJSONFormat() {
             @Override
             protected void write(Object data, OutputStream output)
@@ -62,28 +62,28 @@ public abstract class AbstractCatalogResource extends CatalogResourceBase {
                 p.setCatalog(catalog);
                 p.setReferenceByName(true);
                 p.setExcludeIds();
-                
-                configurePersister(p,this);
-                p.save( data, output );
+
+                configurePersister(p, this);
+                p.save(data, output);
             }
-            
+
             @Override
             protected Object read(InputStream input)
                     throws IOException {
                 XStreamPersister p = xpf.createJSONPersister();
                 p.setCatalog(catalog);
-                
-                configurePersister(p,this);
-                return p.load( input, clazz );
+
+                configurePersister(p, this);
+                return p.load(input, clazz);
             }
         };
     }
-    
+
     /**
-     * Method for subclasses to perform additional configuration of the 
+     * Method for subclasses to perform additional configuration of the
      * xstream instance used for serializing/de-serializing objects.
      */
     protected void configurePersister(XStreamPersister persister, DataFormat format) {
     }
-    
+
 }

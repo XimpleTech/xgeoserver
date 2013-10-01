@@ -96,7 +96,7 @@ public class HTMLFeatureInfoOutputFormatTest extends WMSTestSupport {
         fcType.getFeature().add(featureType.getFeatureSource(null, null).getFeatures());
         
         // fake layer list
-        List<MapLayerInfo> queryLayers = new ArrayList<MapLayerInfo>();
+        List<MapLayerInfo> queryLayers = new ArrayList<MapLayerInfo>();               
         LayerInfo layerInfo = new LayerInfoImpl();
         layerInfo.setType(LayerInfo.Type.VECTOR);
         ResourceInfo resourceInfo = new FeatureTypeInfoImpl(null);
@@ -119,7 +119,7 @@ public class HTMLFeatureInfoOutputFormatTest extends WMSTestSupport {
      * @throws URISyntaxException
      */
     @Test
-    public void testRequestParametersAreEvaluatedInTemplate() throws IOException {
+    public void testRequestParametersAreEvaluatedInTemplate() throws IOException {        
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         outputFormat.write(fcType, getFeatureInfoRequest, outStream);
         String result = new String(outStream.toByteArray());

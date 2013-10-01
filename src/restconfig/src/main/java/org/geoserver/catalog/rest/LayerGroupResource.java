@@ -23,17 +23,17 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 public class LayerGroupResource extends AbstractCatalogResource {
 
     public LayerGroupResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                              Response response, Catalog catalog) {
         super(context, request, response, LayerGroupInfo.class, catalog);
     }
 
     @Override
     protected Object handleObjectGet() throws Exception {
         String ws = getAttribute("workspace");
-        String lg = getAttribute( "layergroup" );
-        
-        LOGGER.fine( "GET layer group " + lg );
-        return ws == null ? catalog.getLayerGroupByName( lg ) : catalog.getLayerGroupByName(ws,lg); 
+        String lg = getAttribute("layergroup");
+
+        LOGGER.fine("GET layer group " + lg);
+        return ws == null ? catalog.getLayerGroupByName(lg) : catalog.getLayerGroupByName(ws, lg);
     }
 
     @Override
@@ -41,23 +41,23 @@ public class LayerGroupResource extends AbstractCatalogResource {
         if (getAttribute("workspace") == null && !isAuthenticatedAsAdmin()) {
             return false;
         }
-        return getAttribute( "layergroup") == null;
+        return getAttribute("layergroup") == null;
     }
-    
+
     @Override
     protected String handleObjectPost(Object object) throws Exception {
         String ws = getAttribute("workspace");
 
         LayerGroupInfo lg = (LayerGroupInfo) object;
-        LOGGER.info( "POST layer group " + lg.getName() + ws != null ? " to workspace " + ws : "");
-        
-        if ( lg.getLayers().isEmpty() ) {
-            throw new RestletException( "layer group must not be empty", Status.CLIENT_ERROR_BAD_REQUEST );
+        LOGGER.info("POST layer group " + lg.getName() + ws != null ? " to workspace " + ws : "");
+
+        if (lg.getLayers().isEmpty()) {
+            throw new RestletException("layer group must not be empty", Status.CLIENT_ERROR_BAD_REQUEST);
         }
-       
-        if ( lg.getBounds() == null ) {
-            LOGGER.fine( "Auto calculating layer group bounds");
-            new CatalogBuilder( catalog ).calculateLayerGroupBounds(lg);
+
+        if (lg.getBounds() == null) {
+            LOGGER.fine("Auto calculating layer group bounds");
+            new CatalogBuilder(catalog).calculateLayerGroupBounds(lg);
         }
 
         if (ws != null) {
@@ -68,8 +68,8 @@ public class LayerGroupResource extends AbstractCatalogResource {
             LOGGER.fine("Setting layer group mode SINGLE");
             lg.setMode(LayerGroupInfo.Mode.SINGLE);
         }
-        
-        catalog.add( lg );
+
+        catalog.add(lg);
         return lg.getName();
     }
 
@@ -79,73 +79,73 @@ public class LayerGroupResource extends AbstractCatalogResource {
         if (getAttribute("workspace") == null && !isAuthenticatedAsAdmin()) {
             return false;
         }
-        return getAttribute( "layergroup") != null;
+        return getAttribute("layergroup") != null;
     }
-    
+
     @Override
     protected void handleObjectPut(Object object) throws Exception {
         String workspace = getAttribute("workspace");
         String layergroup = getAttribute("layergroup");
 
-        LOGGER.info( "PUT layer group " + layergroup 
+        LOGGER.info("PUT layer group " + layergroup
                 + workspace == null ? ", workspace " + workspace : "");
-        
+
         LayerGroupInfo lg = (LayerGroupInfo) object;
-        LayerGroupInfo original = catalog.getLayerGroupByName(workspace, layergroup );
-       
+        LayerGroupInfo original = catalog.getLayerGroupByName(workspace, layergroup);
+
         //ensure not a name change
-        if ( lg.getName() != null && !lg.getName().equals( original.getName() ) ) {
-            throw new RestletException( "Can't change name of a layer group", Status.CLIENT_ERROR_FORBIDDEN );
+        if (lg.getName() != null && !lg.getName().equals(original.getName())) {
+            throw new RestletException("Can't change name of a layer group", Status.CLIENT_ERROR_FORBIDDEN);
         }
 
         //ensure not a workspace change
         if (lg.getWorkspace() != null) {
             if (!lg.getWorkspace().equals(original.getWorkspace())) {
-                throw new RestletException( "Can't change the workspace of a layer group, instead " +
-                    "DELETE from existing workspace and POST to new workspace", Status.CLIENT_ERROR_FORBIDDEN );
+                throw new RestletException("Can't change the workspace of a layer group, instead " +
+                        "DELETE from existing workspace and POST to new workspace", Status.CLIENT_ERROR_FORBIDDEN);
             }
         }
 
-        new CatalogBuilder( catalog ).updateLayerGroup( original, lg );
-        catalog.save( original );
+        new CatalogBuilder(catalog).updateLayerGroup(original, lg);
+        catalog.save(original);
     }
 
     @Override
     public boolean allowDelete() {
-        return getAttribute( "layergroup" ) != null;
+        return getAttribute("layergroup") != null;
     }
-    
+
     @Override
     protected void handleObjectDelete() throws Exception {
         String workspace = getAttribute("workspace");
-        String layergroup = getAttribute( "layergroup" );
-        LOGGER.info( "DELETE layer group " + layergroup );
-        
-        LayerGroupInfo lg = workspace == null ? catalog.getLayerGroupByName( layergroup ) : 
-            catalog.getLayerGroupByName(workspace, layergroup);
-                
-        catalog.remove( lg );
+        String layergroup = getAttribute("layergroup");
+        LOGGER.info("DELETE layer group " + layergroup);
+
+        LayerGroupInfo lg = workspace == null ? catalog.getLayerGroupByName(layergroup) :
+                catalog.getLayerGroupByName(workspace, layergroup);
+
+        catalog.remove(lg);
     }
-    
+
     @Override
     protected void configurePersister(XStreamPersister persister, DataFormat format) {
-        persister.setCallback( new XStreamPersister.Callback() {
-           @Override
-           protected void postEncodeReference(Object obj, String ref, String prefix,
-                HierarchicalStreamWriter writer, MarshallingContext context) {
-            
-               if ( obj instanceof StyleInfo ) {
-                   StringBuffer link = new StringBuffer();
-                   if (prefix != null) {
-                       link.append("/workspaces/").append(encode(prefix));
-                   }
-                   link.append("/styles/").append(encode(ref));
-                   encodeLink(link.toString(), writer);
-               }
-               if ( obj instanceof LayerInfo ) {
-                   encodeLink("/layers/" + encode(ref), writer);
-               }
-           } 
+        persister.setCallback(new XStreamPersister.Callback() {
+            @Override
+            protected void postEncodeReference(Object obj, String ref, String prefix,
+                                               HierarchicalStreamWriter writer, MarshallingContext context) {
+
+                if (obj instanceof StyleInfo) {
+                    StringBuffer link = new StringBuffer();
+                    if (prefix != null) {
+                        link.append("/workspaces/").append(encode(prefix));
+                    }
+                    link.append("/styles/").append(encode(ref));
+                    encodeLink(link.toString(), writer);
+                }
+                if (obj instanceof LayerInfo) {
+                    encodeLink("/layers/" + encode(ref), writer);
+                }
+            }
         });
     }
 }

@@ -33,7 +33,6 @@ import org.springframework.util.Assert;
  * @author Carlo Cancellieri - Geo-Solutions SAS
  */
 @Category(SystemTest.class)
-@TestSetup(run = TestSetupFrequency.ONCE)
 public class ManifestLoaderTest extends GeoServerSystemTestSupport {
 
     // singleton

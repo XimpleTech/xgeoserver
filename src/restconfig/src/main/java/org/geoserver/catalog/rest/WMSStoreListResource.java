@@ -17,18 +17,18 @@ import org.restlet.data.Response;
 public class WMSStoreListResource extends AbstractCatalogListResource {
 
     protected WMSStoreListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                   Response response, Catalog catalog) {
         super(context, request, response, WMSStoreInfo.class, catalog);
     }
 
     @Override
     protected DataFormat createHTMLFormat(Request request, Response response) {
-        return new WMSStoreHTMLFormat( request, response, this, catalog );
+        return new WMSStoreHTMLFormat(request, response, this, catalog);
     }
-    
+
     @Override
     protected List handleListGet() throws Exception {
-        String ws = getAttribute( "workspace" );
-        return catalog.getStoresByWorkspace( ws , WMSStoreInfo.class);
+        String ws = getAttribute("workspace");
+        return catalog.getStoresByWorkspace(ws, WMSStoreInfo.class);
     }
 }

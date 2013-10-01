@@ -14,7 +14,7 @@ import org.restlet.data.Response;
 
 /**
  * Rest callback that sets the {@link AdminRequest} thread local.
- * 
+ *
  * @author Justin Deoliveira, OpenGeo
  */
 public class AdminRequestCallback implements DispatcherCallback {
@@ -45,7 +45,7 @@ public class AdminRequestCallback implements DispatcherCallback {
      */
     Restlet unwrap(Restlet next) {
         if (next instanceof Route) {
-            next = ((Route)next).getNext();
+            next = ((Route) next).getNext();
         }
         if (next instanceof BeanDelegatingRestlet) {
             next = ((BeanDelegatingRestlet) next).getBean();

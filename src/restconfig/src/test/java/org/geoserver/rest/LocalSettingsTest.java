@@ -34,7 +34,7 @@ public class LocalSettingsTest extends CatalogRESTTestSupport {
 
     @After
     public void clearLocalWorkspace() throws Exception {
-        LocalWorkspace.remove();   
+        LocalWorkspace.remove();
     }
 
     @Test
@@ -125,13 +125,13 @@ public class LocalSettingsTest extends CatalogRESTTestSupport {
         assertXpathEvaluatesTo("sf", "/settings/workspace/name", dom);
         assertXpathEvaluatesTo("false", "/settings/verbose", dom);
         assertXpathEvaluatesTo("false", "/settings/verboseExceptions", dom);
-        assertXpathEvaluatesTo("http://geoserver.org","/settings/onlineResource",dom);
-        assertXpathEvaluatesTo("http://proxy.url","/settings/proxyBaseUrl",dom);
-        assertXpathEvaluatesTo("Claudius Ptolomaeus","/settings/contact/contactPerson",dom);
-        assertXpathEvaluatesTo("claudius.ptolomaeus@gmail.com","/settings/contact/contactEmail",dom);
-        assertXpathEvaluatesTo("Chief geographer","/settings/contact/contactPosition",dom);
-        assertXpathEvaluatesTo("The ancient geographes INC","/settings/contact/contactOrganization",dom);
-        assertXpathEvaluatesTo("Egypt","/settings/contact/addressCountry",dom);
+        assertXpathEvaluatesTo("http://geoserver.org", "/settings/onlineResource", dom);
+        assertXpathEvaluatesTo("http://proxy.url", "/settings/proxyBaseUrl", dom);
+        assertXpathEvaluatesTo("Claudius Ptolomaeus", "/settings/contact/contactPerson", dom);
+        assertXpathEvaluatesTo("claudius.ptolomaeus@gmail.com", "/settings/contact/contactEmail", dom);
+        assertXpathEvaluatesTo("Chief geographer", "/settings/contact/contactPosition", dom);
+        assertXpathEvaluatesTo("The ancient geographes INC", "/settings/contact/contactOrganization", dom);
+        assertXpathEvaluatesTo("Egypt", "/settings/contact/addressCountry", dom);
     }
 
     @Test
@@ -167,7 +167,7 @@ public class LocalSettingsTest extends CatalogRESTTestSupport {
 
     @Test
     public void testPutAsXML() throws Exception {
-        String xml =  "<settings>" + "<workspace><name>sf</name></workspace>" + "<contact>"
+        String xml = "<settings>" + "<workspace><name>sf</name></workspace>" + "<contact>"
                 + "<addressCity>Cairo</addressCity>"
                 + "<addressCountry>Egypt</addressCountry>" + "<addressType>Work</addressType>"
                 + "<contactEmail>claudius.ptolomaeus@gmail.com</contactEmail>"
@@ -187,13 +187,13 @@ public class LocalSettingsTest extends CatalogRESTTestSupport {
         assertXpathEvaluatesTo("sf", "/settings/workspace/name", dom);
         assertXpathEvaluatesTo("true", "/settings/verbose", dom);
         assertXpathEvaluatesTo("true", "/settings/verboseExceptions", dom);
-        assertXpathEvaluatesTo("http://geoserver2.org","/settings/onlineResource",dom);
-        assertXpathEvaluatesTo("http://proxy2.url","/settings/proxyBaseUrl",dom);
-        assertXpathEvaluatesTo("Claudius Ptolomaeus","/settings/contact/contactPerson",dom);
-        assertXpathEvaluatesTo("claudius.ptolomaeus@gmail.com","/settings/contact/contactEmail",dom);
-        assertXpathEvaluatesTo("Chief geographer","/settings/contact/contactPosition",dom);
-        assertXpathEvaluatesTo("The ancient geographes INC","/settings/contact/contactOrganization",dom);
-        assertXpathEvaluatesTo("Cairo","/settings/contact/addressCity",dom);
+        assertXpathEvaluatesTo("http://geoserver2.org", "/settings/onlineResource", dom);
+        assertXpathEvaluatesTo("http://proxy2.url", "/settings/proxyBaseUrl", dom);
+        assertXpathEvaluatesTo("Claudius Ptolomaeus", "/settings/contact/contactPerson", dom);
+        assertXpathEvaluatesTo("claudius.ptolomaeus@gmail.com", "/settings/contact/contactEmail", dom);
+        assertXpathEvaluatesTo("Chief geographer", "/settings/contact/contactPosition", dom);
+        assertXpathEvaluatesTo("The ancient geographes INC", "/settings/contact/contactOrganization", dom);
+        assertXpathEvaluatesTo("Cairo", "/settings/contact/addressCity", dom);
     }
 
     @Test

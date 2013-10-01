@@ -32,58 +32,57 @@ public class AvailableWMSLayerResource extends AbstractCatalogResource {
 
     @Override
     protected Object handleObjectGet() {
-        String workspace = (String) getRequest().getAttributes().get( "workspace" );
-        String wmsstore = (String) getRequest().getAttributes().get( "wmsstore" );
-        
-        WMSStoreInfo info = catalog.getStoreByName( workspace, wmsstore, WMSStoreInfo.class );
-        if ( info == null ) {
-            throw new RestletException( "No such WMS store: " + wmsstore, Status.CLIENT_ERROR_NOT_FOUND );
+        String workspace = (String) getRequest().getAttributes().get("workspace");
+        String wmsstore = (String) getRequest().getAttributes().get("wmsstore");
+
+        WMSStoreInfo info = catalog.getStoreByName(workspace, wmsstore, WMSStoreInfo.class);
+        if (info == null) {
+            throw new RestletException("No such WMS store: " + wmsstore, Status.CLIENT_ERROR_NOT_FOUND);
         }
-        
+
         //list of available feature types
         List<String> available = new ArrayList<String>();
         try {
             WebMapServer ds = (WebMapServer) info.getWebMapServer(null);
-            
-            for ( Layer layer : ds.getCapabilities().getLayerList() ) {
-                if(layer.getName() == null || "".equals(layer.getName())) {
+
+            for (Layer layer : ds.getCapabilities().getLayerList()) {
+                if (layer.getName() == null || "".equals(layer.getName())) {
                     continue;
                 }
-                    
+
                 WMSLayerInfo wIinfo = catalog.getResourceByStore(info, layer.getName(), WMSLayerInfo.class);
-                if (wIinfo == null ) {
+                if (wIinfo == null) {
                     //not in catalog, add it
-                    available.add( layer.getName() );
+                    available.add(layer.getName());
                 }
             }
-        } 
-        catch (IOException e) {
-            throw new RestletException( "Could not load wms store: " + wmsstore, Status.SERVER_ERROR_INTERNAL, e );
+        } catch (IOException e) {
+            throw new RestletException("Could not load wms store: " + wmsstore, Status.SERVER_ERROR_INTERNAL, e);
         }
-        
+
         return available;
     }
-    
-    
+
+
     @Override
     protected ReflectiveXMLFormat createXMLFormat(Request request, Response response) {
         return new ReflectiveXMLFormat() {
-          
+
             @Override
             protected void write(Object data, OutputStream output)
                     throws IOException {
                 XStream xstream = new XStream();
-                xstream.alias( "wmsLayerName", String.class);
-                xstream.toXML( data, output );
+                xstream.alias("wmsLayerName", String.class);
+                xstream.toXML(data, output);
             }
         };
     }
-    
+
     @Override
     public boolean allowPost() {
         return false;
     }
-    
+
     @Override
     protected String handleObjectPost(Object object) {
         return null;

@@ -134,12 +134,12 @@ public class WFSExtendedCapabilitiesTest extends GeoServerSystemTestSupport {
         assertEquals(DLS_NAMESPACE, dom.getDocumentElement().getAttribute("xmlns:inspire_dls"));
         assertMetadataUrlAndMediaType(dom, "http://foo.com?bar=baz", "application/vnd.ogc.csw.GetRecordByIdResponse_xml");
 
-        wfs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/vnd.ogc.csw.GetRecordByIdResponse_xml");
+        wfs.getMetadata().put(InspireMetadata.SERVICE_METADATA_TYPE.key, "application/xml");
         getGeoServer().save(wfs);
 
         dom = getAsDOM("wfs?request=getcapabilities&service=wfs&version=1.1.0");
         assertEquals(DLS_NAMESPACE, dom.getDocumentElement().getAttribute("xmlns:inspire_dls"));
-        assertMetadataUrlAndMediaType(dom, "http://foo.com?bar=baz", "application/vnd.ogc.csw.GetRecordByIdResponse_xml");
+        assertMetadataUrlAndMediaType(dom, "http://foo.com?bar=baz", "application/xml");
     }
 
     void assertMetadataUrlAndMediaType(Document dom, String metadataUrl, String metadataMediaType) {

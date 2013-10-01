@@ -55,17 +55,17 @@ public class LDAPAuthenticationProvider extends
      
         UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) super
                 .doAuthenticate(authentication, request);
-    
+
         if (auth == null)
             return null; // next provider
-    
+
         boolean hasNoAuthenticatedRole = auth.getAuthorities().contains(
                 GeoServerRole.AUTHENTICATED_ROLE) == false;
         boolean hasAdminRole = adminRole != null && !adminRole.equals("")
                 && !auth.getAuthorities().contains(GeoServerRole.ADMIN_ROLE);
         boolean hasGroupAdminRole = groupAdminRole != null && !groupAdminRole.equals("")
                 && !auth.getAuthorities().contains(GeoServerRole.GROUP_ADMIN_ROLE);
-    
+
         if (hasNoAuthenticatedRole || hasAdminRole || hasGroupAdminRole) {
             List<GrantedAuthority> roles = new ArrayList<GrantedAuthority>();
             roles.addAll(auth.getAuthorities());
@@ -73,8 +73,8 @@ public class LDAPAuthenticationProvider extends
                 roles.add(GeoServerRole.AUTHENTICATED_ROLE);
             }
             if (hasAdminRole || hasGroupAdminRole) {
+                // check for admin and group_admin roles
                 for (GrantedAuthority authority : auth.getAuthorities()) {
-                    // check for admin and group_admin roles
                     if (authority.getAuthority().equalsIgnoreCase(
                             "ROLE_" + adminRole)) {
                         roles.add(GeoServerRole.ADMIN_ROLE);

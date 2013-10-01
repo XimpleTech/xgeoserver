@@ -22,55 +22,55 @@ public class FreemarkerTemplateListResource extends AbstractCatalogListResource 
 
     private Catalog catalog;
 
-    
+
     protected FreemarkerTemplateListResource(Context context, Request request, Response response, Catalog catalog) {
         super(context, request, response, FreemarkerTemplateInfo.class, catalog);
         this.catalog = catalog;
     }
-    
-    
+
+
     @Override
     public boolean allowGet() {
         return true;
     }
-    
+
     @Override
     public boolean allowPut() {
         return false;
     }
-    
+
     @Override
     public boolean allowDelete() {
         return false;
     }
-    
+
     @Override
     public boolean allowPost() {
         return false;
     }
-    
-    @Override    
+
+    @Override
     protected String getItemName(XStreamPersister xp) {
         return "template";
     }
-        
+
     @Override
     protected Collection<FreemarkerTemplateInfo> handleListGet() throws Exception {
-        File directory = catalog.getResourceLoader().find(FreemarkerTemplateResource.getDirectoryPath(getRequest()));        
+        File directory = catalog.getResourceLoader().find(FreemarkerTemplateResource.getDirectoryPath(getRequest()));
         File[] files = directory.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.endsWith(".ftl");
-            }            
+            }
         });
-        
+
         List<FreemarkerTemplateInfo> list = new ArrayList<FreemarkerTemplateInfo>();
         for (File file : files) {
             list.add(new FreemarkerTemplateInfo(file));
         }
         return list;
     }
-    
+
     @Override
     String href(String link, DataFormat format) {
         return getPageInfo().getBaseURL() + getPageInfo().getRootPath() +

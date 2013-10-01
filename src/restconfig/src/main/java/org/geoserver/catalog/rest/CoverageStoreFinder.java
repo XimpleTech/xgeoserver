@@ -17,23 +17,23 @@ public class CoverageStoreFinder extends AbstractCatalogFinder {
     public CoverageStoreFinder(Catalog catalog) {
         super(catalog);
     }
-    
+
     @Override
     public Resource findTarget(Request request, Response response) {
         String ws = getAttribute(request, "workspace");
         String cs = getAttribute(request, "coveragestore");
-        
+
         //ensure referenced resources exist
-        if ( ws != null && catalog.getWorkspaceByName( ws ) == null ) {
-            throw new RestletException( "No such workspace: " + ws, Status.CLIENT_ERROR_NOT_FOUND );
+        if (ws != null && catalog.getWorkspaceByName(ws) == null) {
+            throw new RestletException("No such workspace: " + ws, Status.CLIENT_ERROR_NOT_FOUND);
         }
-        if ( cs != null && catalog.getCoverageStoreByName(ws, cs) == null ) {
-            throw new RestletException( "No such coverage store: " + ws + "," + cs, Status.CLIENT_ERROR_NOT_FOUND );
+        if (cs != null && catalog.getCoverageStoreByName(ws, cs) == null) {
+            throw new RestletException("No such coverage store: " + ws + "," + cs, Status.CLIENT_ERROR_NOT_FOUND);
         }
-        
-        if ( cs == null && request.getMethod() == Method.GET ) {
-            return new CoverageStoreListResource(getContext(),request,response,catalog);
+
+        if (cs == null && request.getMethod() == Method.GET) {
+            return new CoverageStoreListResource(getContext(), request, response, catalog);
         }
-        return new CoverageStoreResource( null, request, response, catalog );
+        return new CoverageStoreResource(null, request, response, catalog);
     }
 }

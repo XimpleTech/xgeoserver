@@ -54,7 +54,7 @@ Let's now install the CRS definitions.
 
 We now have to install the native libraries.
 
-* Assuming you are on a 64 bits Linux Operating System, click on the "gdal1.7.3-linux64-base-gcc43.tar.gz" to download the native libraries archive.
+* Assuming you are on a 64 bits Ubuntu 11 Linux Operating System (as an instance), click on the linux folder and then on "gdal192-Ubuntu11-gcc4.5.2-x86_64.tar.gz" to download the native libraries archive (Before doing this, make sure to read and agree with the ECWEULA if you intend to use ECW).
 * Extract the archive on disk and place it in a proper directory on your system.
 
    .. warning:: If you are on Windows, make sure that the GDAL DLL files are on your PATH. If you are on Linux, be sure to set the LD_LIBRARY_PATH environment variable to refer to the folder where the SOs are extracted.
@@ -103,7 +103,7 @@ To allow the GDAL native DLLs getting loaded, you have 2 possible ways:
 #. Add a wrapper.java.library.path.2=path/where/you/deployed/nativelibs entry just after the wrapper.java.library.path1=bin/wrapper/lib line.
 
 Adding support for ECW and MrSID on Windows
-++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++
 If you are on Windows and you want to add support for ECW and MrSID there is an extra step to perform.
 
 In the Windows packaging ECW and MrSID are built as plugins hence they are not loaded by default but we need to place their DLLs in a location that is pointed by the *GDAL_DRIVER_PATH* environmental variable.

@@ -17,7 +17,7 @@ import org.restlet.data.Response;
 public class CoverageListResource extends AbstractCatalogListResource {
 
     protected CoverageListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                   Response response, Catalog catalog) {
         super(context, request, response, CoverageInfo.class, catalog);
     }
 
@@ -25,14 +25,14 @@ public class CoverageListResource extends AbstractCatalogListResource {
     protected List handleListGet() throws Exception {
         String ws = getAttribute("workspace");
         String cs = getAttribute("coveragestore");
-        
-        if ( cs != null ) {
-            CoverageStoreInfo coverageStore = catalog.getCoverageStoreByName( cs );
-            return catalog.getCoveragesByCoverageStore(coverageStore);    
+
+        if (cs != null) {
+            CoverageStoreInfo coverageStore = catalog.getCoverageStoreByName(cs);
+            return catalog.getCoveragesByCoverageStore(coverageStore);
         }
-        
-        NamespaceInfo ns = catalog.getNamespaceByPrefix( ws );
-        return catalog.getCoveragesByNamespace( ns );
+
+        NamespaceInfo ns = catalog.getNamespaceByPrefix(ws);
+        return catalog.getCoveragesByNamespace(ns);
     }
 
 }

@@ -128,6 +128,7 @@ The ``typeMappings`` section is the heart of the app-schema module. It defines t
             <sourceDataStore>datastore</sourceDataStore>
             <sourceType>mappedfeature</sourceType>
             <targetElement>gsml:MappedFeature</targetElement>
+            <isDenormalised>true</isDenormalised>
             <attributeMappings>
                 <AttributeMapping>
                     ...
@@ -141,6 +142,7 @@ The ``typeMappings`` section is the heart of the app-schema module. It defines t
 
 * ``targetElement`` is the the element name in the target application schema. This is the same as the WFS feature type name.
 
+* ``isDenormalised`` is an optional tag (default true) to indicate whether this type contains denormalised data or not. If data is not denormalised, then the global feature limit can be safely applied when querying the database.  When combined with a low global feature limit (via `Services --> WFS`), setting this option to false can prevent unnecessary processing and database lookups from taking place.
 
 attributeMappings and AttributeMapping
 ``````````````````````````````````````
@@ -203,7 +205,7 @@ You can use CQL expressions to calculate the content of the element. This exampl
         <OCQL>strConCat(FIRST , strConCat(' followed by ', SECOND))</OCQL>
     </sourceExpression>
 
-You can also use CQL expressions for vocabulary translations. Read more about it in :ref:`app-schema.vocab-functions`.
+You can also use :ref:`app-schema.cql-functions` for vocabulary translations.
 
 .. warning:: Avoid use of CQL expressions for properties that users will want to query, because the current implementation cannot reverse these expressions to generate efficient SQL, and will instead read all features to calculate the property to find the features that match the filter query. Falling back to brute force search makes queries on CQL-calculated expressions very slow. If you must concatenate strings to generate content, you may find that doing this in your database is much faster.
 
@@ -387,10 +389,14 @@ See the discussion in :ref:`app-schema.feature-chaining` for the special case in
 CQL
 ---
 
-* String literals are enclosed in single quotes, for example ``'urn:ogc:def:nil:OGC:missing'``.
-* The uDig manual contains information on CQL:
+CQL functions enable data conversion and conditional behaviour to be specified in mapping files.
 
-    * http://udig.refractions.net/confluence/display/EN/Common+Query+Language
+* See :ref:`app-schema.cql-functions` for information on additional functions provided by the app-schema plugin.
+* The uDig manual includes a list of CQL functions:
+
+    * http://udig.refractions.net/confluence/display/EN/Constraint+Query+Language
+
+* CQL string literals are enclosed in single quotes, for example ``'urn:ogc:def:nil:OGC:missing'``.
 
 
 Database identifiers

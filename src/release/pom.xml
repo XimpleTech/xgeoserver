@@ -11,7 +11,7 @@
  <parent>
   <groupId>org.geoserver</groupId>
   <artifactId>geoserver</artifactId>
-  <version>2.3.5.x-SNAPSHOT</version>
+  <version>2.4.0.x-SNAPSHOT</version>
  </parent>
  <groupId>org.geoserver</groupId>
  <artifactId>release</artifactId>
@@ -41,14 +41,6 @@
   <dependency>
    <groupId>tomcat</groupId>
    <artifactId>jasper-compiler-jdt</artifactId>
-  </dependency>
-  <dependency>
-   <groupId>xerces</groupId>
-   <artifactId>xercesImpl</artifactId>
-  </dependency>
-  <dependency>
-   <groupId>xerces</groupId>
-   <artifactId>xmlParserAPIs</artifactId>
   </dependency>
   <dependency>
    <groupId>commons-el</groupId>
@@ -240,6 +232,16 @@
      <artifactId>inspire</artifactId>
      <version>${project.version}</version>
    </dependency>
+   <dependency>
+     <groupId>org.geoserver.csw</groupId>
+     <artifactId>csw-api</artifactId>
+     <version>${project.version}</version>
+   </dependency> 
+   <dependency>
+     <groupId>org.geoserver.csw</groupId>
+     <artifactId>csw-core</artifactId>
+     <version>${project.version}</version>
+   </dependency> 
  </dependencies>
  <build>
   <plugins>

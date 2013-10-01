@@ -21,15 +21,11 @@ public class LDAPSecurityServiceConfig extends BaseSecurityNamedServiceConfig
     // bind to the server before extracting groups
     // some LDAP server require this (e.g. ActiveDirectory)
     Boolean bindBeforeGroupSearch;
-    
     // extract user data using the given filter (alternative to userDnPattern)
     String userFilter;
-    
-    // format username before doing authentication using the given format (used if
-    // userFilter
+    // format username before doing authentication using the given format (used if userFilter
     // is specified)
     String userFormat;
-    
     String adminGroup;
     String groupAdminGroup;
 
@@ -83,8 +79,8 @@ public class LDAPSecurityServiceConfig extends BaseSecurityNamedServiceConfig
     }
     public Boolean isUseTLS() {
         return useTLS;
-    }
-
+    }   
+    
     public Boolean isBindBeforeGroupSearch() {
         return bindBeforeGroupSearch == null ? false : bindBeforeGroupSearch;
     }
@@ -102,36 +98,39 @@ public class LDAPSecurityServiceConfig extends BaseSecurityNamedServiceConfig
     public void setUserGroupServiceName(String userGroupServiceName) {
         this.userGroupServiceName = userGroupServiceName;
     }
-    
+
     public String getAdminGroup() {
         return adminGroup;
     }
-    
+
     public void setAdminGroup(String adminGroup) {
         this.adminGroup = adminGroup;
     }
-    
+        
     public String getGroupAdminGroup() {
         return groupAdminGroup;
     }
-    
+
     public void setGroupAdminGroup(String groupAdminGroup) {
         this.groupAdminGroup = groupAdminGroup;
     }
-    
+
     public String getUserFilter() {
         return userFilter;
     }
-    
+
     public void setUserFilter(String userFilter) {
         this.userFilter = userFilter;
     }
-    
+
     public String getUserFormat() {
         return userFormat;
     }
-    
+
     public void setUserFormat(String userFormat) {
         this.userFormat = userFormat;
     }
+    
+    
+    
 }

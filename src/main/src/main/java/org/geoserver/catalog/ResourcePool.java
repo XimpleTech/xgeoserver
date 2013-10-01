@@ -51,6 +51,7 @@ import org.geoserver.feature.retype.RetypingFeatureSource;
 import org.geoserver.platform.GeoServerExtensions;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.data.DataAccess;
 import org.geotools.data.DataAccessFactory;
 import org.geotools.data.DataAccessFactory.Param;
@@ -114,6 +115,8 @@ import org.vfny.geoserver.util.DataStoreUtils;
  *
  */
 public class ResourcePool {
+
+    private static final String PROJECTION_POLICY_SEPARATOR = "_pp_";
 
     /**
      * Hint to specify if reprojection should occur while loading a 
@@ -274,7 +277,9 @@ public class ResourcePool {
     }
 
     protected Map<String,FeatureType> createFeatureTypeCache(int size) {
-        return new FeatureTypeCache(size);
+        // for each feature type we cache two versions, one with the projection policy applied, one
+        // without it
+        return new FeatureTypeCache(size * 2);
     }
 
     /**
@@ -291,7 +296,9 @@ public class ResourcePool {
     }
 
     protected Map<String, List<AttributeTypeInfo>> createFeatureTypeAttributeCache(int size) {
-        return new FeatureTypeAttributeCache(size);
+        // for each feature type we cache two versions, one with the projection policy applied, one
+        // without it
+        return new FeatureTypeAttributeCache(size * 2);
     }
 
     /**
@@ -590,7 +597,7 @@ public class ResourcePool {
      *
      * <p>
      * This is used to smooth any relative path kind of issues for any file
-     * URLS. This code should be expanded to deal with any other context
+     * URLS or directory. This code should be expanded to deal with any other context
      * sensitve isses dataStores tend to have.
      * </p>
      *
@@ -619,6 +626,14 @@ public class ResourcePool {
             } else if (value instanceof URL && ((URL) value).getProtocol().equals("file")) {
                 File fixedPath = GeoserverDataDirectory.findDataFile(((URL) value).toString());
                 entry.setValue(DataUtilities.fileToURL(fixedPath));
+            } else if ((key != null) && key.equals("directory") && value instanceof String) {
+                String path = (String) value;
+                //if a url is used for a directory (for example property store), convert it to path
+                
+                if (path.startsWith("file:")) {
+                    File fixedPath = GeoserverDataDirectory.findDataFile((String) value);
+                    entry.setValue(fixedPath.toString());            
+                }
             }
         }
 
@@ -804,11 +819,12 @@ public class ResourcePool {
     }
     
     FeatureType getFeatureType( FeatureTypeInfo info, boolean handleProjectionPolicy ) throws IOException {
-        boolean cacheable = isCacheable(info) && handleProjectionPolicy;
-        FeatureType ft = (FeatureType) featureTypeCache.get( info.getId() );
+        boolean cacheable = isCacheable(info);
+        String key = getFeatureTypeInfoKey(info, handleProjectionPolicy);
+        FeatureType ft = (FeatureType) featureTypeCache.get(key);
         if ( ft == null || !cacheable ) {
             synchronized ( featureTypeCache ) {
-                ft = (FeatureType) featureTypeCache.get( info.getId() );
+                ft = (FeatureType) featureTypeCache.get(key);
                 if ( ft == null || !cacheable) {
                     
                     //grab the underlying feature type
@@ -890,7 +906,7 @@ public class ResourcePool {
                     } // end special case for SimpleFeatureType
                     
                     if(cacheable) {
-                        featureTypeCache.put( info.getId(), ft );
+                        featureTypeCache.put(key, ft );
                     } else if(vtName != null) {
                         JDBCDataStore jstore = (JDBCDataStore) dataAccess;
                         jstore.removeVirtualTable(vtName);
@@ -900,6 +916,10 @@ public class ResourcePool {
         }
         
         return ft;
+    }
+
+    private String getFeatureTypeInfoKey(FeatureTypeInfo info, boolean handleProjectionPolicy) {
+        return info.getId() + PROJECTION_POLICY_SEPARATOR + handleProjectionPolicy;
     }
     
     /**
@@ -1010,7 +1030,8 @@ public class ResourcePool {
      * @param info The feature type metadata.
      */
     public void clear( FeatureTypeInfo info ) {
-        featureTypeCache.remove( info.getId() );
+        featureTypeCache.remove(getFeatureTypeInfoKey(info, true));
+        featureTypeCache.remove(getFeatureTypeInfoKey(info, false));
         featureTypeAttributeCache.remove( info.getId() );
     }
     
@@ -1161,12 +1182,27 @@ public class ResourcePool {
     @SuppressWarnings("deprecation")
     public GridCoverageReader getGridCoverageReader( CoverageStoreInfo info, Hints hints ) 
         throws IOException {
+        return getGridCoverageReader(info, (String) null, hints);
+    }
+    
+    /**
+     * Returns a coverage reader, caching the result.
+     *  
+     * @param info The coverage metadata.
+     * @param hints Hints to use when loading the coverage, may be <code>null</code>.
+     * 
+     * @throws IOException Any errors that occur loading the reader.
+     */
+    @SuppressWarnings("deprecation")
+    public GridCoverageReader getGridCoverageReader(CoverageStoreInfo info, String coverageName, Hints hints) 
+        throws IOException {
         
         final AbstractGridFormat gridFormat = info.getFormat();
         if(gridFormat == null) {
             throw new IOException("Could not find the raster plugin for format " + info.getType());
         }
         
+        // look into the cache
         GridCoverageReader reader = null;
         Object key;
         if ( hints != null && info.getId() != null) {
@@ -1185,7 +1221,7 @@ public class ResourcePool {
             }
             
             key = new CoverageHintReaderKey(info.getId(), hints);
-            reader = (GridCoverageReader) hintCoverageReaderCache.get( key );
+            reader = (GridCoverage2DReader) hintCoverageReaderCache.get( key );
         } else {
             key = info.getId();
             if(key != null) {
@@ -1193,40 +1229,53 @@ public class ResourcePool {
             }
         }
         
-        if (reader != null) {
-            return reader;
-        }
-        
-        synchronized ( hints != null ? hintCoverageReaderCache : coverageReaderCache ) {
-            if (key != null) {
-                if (hints != null) {
-                    reader = (GridCoverageReader) hintCoverageReaderCache.get(key);
-                } else {
-                    reader = (GridCoverageReader) coverageReaderCache.get(key);
-                }
-            }
-            if (reader == null) {
-                /////////////////////////////////////////////////////////
-                //
-                // Getting coverage reader using the format and the real path.
-                //
-                // /////////////////////////////////////////////////////////
-                final File obj = GeoserverDataDirectory.findDataFile(info.getURL());
-    
-                // readers might change the provided hints, pass down a defensive copy
-                reader = gridFormat.getReader(obj, new Hints(hints));
-                if(key != null) {
-                    if(hints != null) {
-                        hintCoverageReaderCache.put((CoverageHintReaderKey) key, reader);
+        // if not found in cache, create it
+        if(reader == null) {
+            synchronized ( hints != null ? hintCoverageReaderCache : coverageReaderCache ) {
+                if (key != null) {
+                    if (hints != null) {
+                        reader = (GridCoverageReader) hintCoverageReaderCache.get(key);
                     } else {
-                        coverageReaderCache.put((String) key, reader);
+                        reader = (GridCoverageReader) coverageReaderCache.get(key);
+                    }
+                }
+                if (reader == null) {
+                    /////////////////////////////////////////////////////////
+                    //
+                    // Getting coverage reader using the format and the real path.
+                    //
+                    // /////////////////////////////////////////////////////////
+                    final String url = info.getURL();
+                    final File obj = GeoserverDataDirectory.findDataFile(url);
+                    // In case no File is returned, provide the original String url
+                    final Object input = obj != null ? obj : url;  
+
+                    // readers might change the provided hints, pass down a defensive copy
+                    reader = gridFormat.getReader(input, new Hints(hints));
+                    if(reader == null) {
+                        throw new IOException("Failed to create reader from " + url + " and hints " + hints);
+                    }
+                    if(key != null) {
+                        if(hints != null) {
+                            hintCoverageReaderCache.put((CoverageHintReaderKey) key, reader);
+                        } else {
+                            coverageReaderCache.put((String) key, reader);
+                        }
                     }
                 }
             }
         }
         
-        return reader;
-            
+        // wrap it if we are dealing with a multi-coverage reader
+        if(coverageName != null) {
+            // force the result to work against a single coverage, so that the OGC service portion of
+            // GeoServer does not need to be updated to the multicoverage stuff
+            // (we might want to introduce a hint later for code that really wants to get the
+            // multi-coverage reader)
+            return SingleGridCoverage2DReader.wrap((GridCoverage2DReader) reader, coverageName);
+        } else {
+            return (GridCoverage2DReader) reader;
+        }
     }
     
     /**
@@ -1696,7 +1745,8 @@ public class ResourcePool {
             super(maxSize);
         }
         
-        protected void dispose(String id, FeatureType featureType) {
+        protected void dispose(String key, FeatureType featureType) {
+            String id = key.substring(0, key.indexOf(PROJECTION_POLICY_SEPARATOR));
         	FeatureTypeInfo info = catalog.getFeatureType(id);
             LOGGER.info( "Disposing feature type '" + info.getName() + "'");
             fireDisposed(info, featureType);

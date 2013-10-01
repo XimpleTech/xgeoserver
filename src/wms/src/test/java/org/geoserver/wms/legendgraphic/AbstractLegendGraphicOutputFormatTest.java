@@ -7,6 +7,7 @@ package org.geoserver.wms.legendgraphic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.awt.Color;
@@ -16,14 +17,17 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.media.jai.PlanarImage;
 import javax.xml.namespace.QName;
 
@@ -407,59 +411,7 @@ public class AbstractLegendGraphicOutputFormatTest extends WMSTestSupport {
      * Tests that the legend graphic is produced for multiple layers
      * with vector and coverage layers.
      */
-    @org.junit.Test
-    public void testMixedGeometry() throws Exception {
-        GetLegendGraphicRequest req = new GetLegendGraphicRequest();
-    
-        SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
-        builder.setName("MIXEDGEOMETRY");
-        builder.setNamespaceURI("test");
-        builder.setDefaultGeometry("GEOMETRY");
-        CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
-        builder.setCRS(crs);
-    
-        GeometryFactory geometryFactory = new GeometryFactory();
-    
-        AttributeType at = new AttributeTypeImpl(new NameImpl("ID"), String.class,
-                false, false, Collections.EMPTY_LIST, null, null);
-        builder.add(new AttributeDescriptorImpl(at, new NameImpl("ID"), 0, 1,
-                false, null));
-    
-        GeometryType gt = new GeometryTypeImpl(new NameImpl("GEOMETRY"),
-                Geometry.class, crs, false, false, Collections.EMPTY_LIST, null,
-                null);
-    
-        builder.add(new GeometryDescriptorImpl(gt, new NameImpl("GEOMETRY"), 0, 1,
-                false, null));
-    
-        FeatureType fType = builder.buildFeatureType();
-        List<FeatureType> layers = new ArrayList<FeatureType>();
-        layers.add(fType);
-    
-        req.setLayers(layers);
-    
-        List<Style> styles = new ArrayList<Style>();
-        req.setStyles(styles);
-    
-        styles.add(readSLD("MixedGeometry.sld"));
-    
-        this.legendProducer.buildLegendGraphic(req);
-    
-        BufferedImage image = this.legendProducer.buildLegendGraphic(req);
-    
-        assertNotBlank("testMixedGeometry", image, LegendUtils.DEFAULT_BG_COLOR);
-        
-        // LineSymbolizer
-        assertPixel(image, 10, 10, new Color(0,0,0));
-        
-        // PolygonSymbolizer
-        assertPixel(image, 10, 30, new Color(0,0,255));
-        
-        // PointSymbolizer
-        assertPixel(image, 10, 50, new Color(255,0,0));
-    
-    }
-		   
+    @org.junit.Test    
 	public void testMultipleLayersWithVectorAndCoverage() throws Exception {        
         GetLegendGraphicRequest req = new GetLegendGraphicRequest();
         
@@ -520,7 +472,8 @@ public class AbstractLegendGraphicOutputFormatTest extends WMSTestSupport {
      * Tests that the legend graphic is produced for multiple layers
      * with vector and coverage layers, when coverage is not visible
      * at current scale.
-     */        
+     */    
+    @org.junit.Test
     public void testMultipleLayersWithVectorAndInvisibleCoverage() throws Exception {        
         GetLegendGraphicRequest req = new GetLegendGraphicRequest();
         req.setScale(1000);
@@ -575,7 +528,59 @@ public class AbstractLegendGraphicOutputFormatTest extends WMSTestSupport {
 	        }
 	    }
     }
+
+	public void testMixedGeometry() throws Exception {
+        GetLegendGraphicRequest req = new GetLegendGraphicRequest();
     
+        SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
+        builder.setName("MIXEDGEOMETRY");
+        builder.setNamespaceURI("test");
+        builder.setDefaultGeometry("GEOMETRY");
+        CoordinateReferenceSystem crs = CRS.decode("EPSG:4326");
+        builder.setCRS(crs);
+    
+        GeometryFactory geometryFactory = new GeometryFactory();
+    
+        AttributeType at = new AttributeTypeImpl(new NameImpl("ID"), String.class,
+                false, false, Collections.EMPTY_LIST, null, null);
+        builder.add(new AttributeDescriptorImpl(at, new NameImpl("ID"), 0, 1,
+                false, null));
+    
+        GeometryType gt = new GeometryTypeImpl(new NameImpl("GEOMETRY"),
+                Geometry.class, crs, false, false, Collections.EMPTY_LIST, null,
+                null);
+    
+        builder.add(new GeometryDescriptorImpl(gt, new NameImpl("GEOMETRY"), 0, 1,
+                false, null));
+    
+        FeatureType fType = builder.buildFeatureType();
+        List<FeatureType> layers = new ArrayList<FeatureType>();
+        layers.add(fType);
+    
+        req.setLayers(layers);
+    
+        List<Style> styles = new ArrayList<Style>();
+        req.setStyles(styles);
+    
+        styles.add(readSLD("MixedGeometry.sld"));
+    
+        this.legendProducer.buildLegendGraphic(req);
+    
+        BufferedImage image = this.legendProducer.buildLegendGraphic(req);
+    
+        assertNotBlank("testMixedGeometry", image, LegendUtils.DEFAULT_BG_COLOR);
+        
+        // LineSymbolizer
+        assertPixel(image, 10, 10, new Color(0,0,0));
+        
+        // PolygonSymbolizer
+        assertPixel(image, 10, 30, new Color(0,0,255));
+        
+        // PointSymbolizer
+        assertPixel(image, 10, 50, new Color(255,0,0));
+    
+    }
+		   
     /**
      * Tests that symbols are not bigger than the requested icon size.
      */
@@ -812,6 +817,50 @@ public class AbstractLegendGraphicOutputFormatTest extends WMSTestSupport {
         assertPixel(image, 1, 61, new Color(255, 255, 255));
         assertPixel(image, 7, 67, new Color(255, 0, 0));
         assertPixel(image, 10, 70, new Color(255, 0, 0));
+    }
+    
+    /**
+     * Tests that minSymbolSize legend option is respected.
+     */
+    @org.junit.Test
+    public void testInternationalizedLabels() throws Exception {
+        GetLegendGraphicRequest req = new GetLegendGraphicRequest();
+        
+        Map<String,String> options = new HashMap<String,String>();
+        options.put("forceLabels", "on");
+        req.setLegendOptions(options);
+        
+        FeatureTypeInfo ftInfo = getCatalog()
+                .getFeatureTypeByName(MockData.MPOINTS.getNamespaceURI(),
+                        MockData.MPOINTS.getLocalPart());
+    
+        
+        List<FeatureType> layers = new ArrayList<FeatureType>();
+        layers.add(ftInfo.getFeatureType());
+        req.setLayers(layers);
+    
+        List<Style> styles = new ArrayList<Style>();
+        req.setStyles(styles);
+    
+        styles.add(readSLD("Internationalized.sld"));
+    
+        BufferedImage image = this.legendProducer.buildLegendGraphic(req);
+        int noLocalizedWidth = image.getWidth();        
+        
+        
+        req.setLocale(Locale.ITALIAN);
+        image = this.legendProducer.buildLegendGraphic(req);
+        // test that using localized labels we get a different label than when not using it
+        int itWidth = image.getWidth();
+        assertTrue(itWidth != noLocalizedWidth);
+        
+        req.setLocale(Locale.ENGLISH);
+        image = this.legendProducer.buildLegendGraphic(req);
+        // test that using localized labels we get a different label than when not using it
+        int enWidth = image.getWidth();
+        assertTrue(enWidth != noLocalizedWidth);
+        assertTrue(enWidth != itWidth);
+        
     }
     
     /**

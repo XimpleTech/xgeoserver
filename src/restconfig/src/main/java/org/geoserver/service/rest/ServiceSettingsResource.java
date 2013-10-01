@@ -26,9 +26,7 @@ import org.restlet.data.Response;
 import org.restlet.data.Status;
 
 /**
- * 
  * @author Juan Marin, OpenGeo
- * 
  */
 public class ServiceSettingsResource extends AbstractCatalogResource {
 
@@ -43,7 +41,7 @@ public class ServiceSettingsResource extends AbstractCatalogResource {
     private GeoServerResourceLoader resourceLoader;
 
     public ServiceSettingsResource(Context context, Request request, Response response,
-            Class clazz, GeoServer geoServer) {
+                                   Class clazz, GeoServer geoServer) {
         super(context, request, response, clazz, geoServer.getCatalog());
         this.clazz = clazz;
         this.geoServer = geoServer;
@@ -151,14 +149,14 @@ public class ServiceSettingsResource extends AbstractCatalogResource {
     }
 
     private void addDefaultsIfMissing(ServiceInfo serviceInfo) {
-        if(serviceInfo == null) {
+        if (serviceInfo == null) {
             return;
         }
-        
+
         List<XStreamServiceLoader> loaders = GeoServerExtensions.extensions(XStreamServiceLoader.class);
-        
+
         for (XStreamServiceLoader loader : loaders) {
-            if(loader.getClass().isAssignableFrom(serviceInfo.getClass())) {
+            if (loader.getClass().isAssignableFrom(serviceInfo.getClass())) {
                 loader.initializeService(serviceInfo);
             }
         }

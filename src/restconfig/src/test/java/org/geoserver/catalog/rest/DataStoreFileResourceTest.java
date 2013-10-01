@@ -34,7 +34,7 @@ public class DataStoreFileResourceTest extends CatalogRESTTestSupport {
 
         FileDataStoreFactorySpi dataAccessFactory = EasyMock
                 .createMock(FileDataStoreFactorySpi.class);
-        expect(dataAccessFactory.getFileExtensions()).andReturn(new String[] { ".CUSTOM" }).anyTimes();
+        expect(dataAccessFactory.getFileExtensions()).andReturn(new String[]{".CUSTOM"}).anyTimes();
         replay(dataAccessFactory);
 
         factoryProvider.setDataStoreFactories(Collections.singletonList(dataAccessFactory));

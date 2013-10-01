@@ -24,14 +24,12 @@ import freemarker.template.Configuration;
 import freemarker.template.SimpleHash;
 
 /**
- * 
  * @author Juan Marin, OpenGeo
- *
  */
 public class WCSSettingsResource extends ServiceSettingsResource {
 
     public WCSSettingsResource(Context context, Request request, Response response, Class clazz,
-            GeoServer geoServer) {
+                               GeoServer geoServer) {
         super(context, request, response, clazz, geoServer);
     }
 

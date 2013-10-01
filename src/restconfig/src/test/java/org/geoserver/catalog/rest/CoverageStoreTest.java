@@ -5,7 +5,12 @@
 package org.geoserver.catalog.rest;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,109 +45,108 @@ public class CoverageStoreTest extends CatalogRESTTestSupport {
     public void addBlueMarbleCoverage() throws Exception {
         getTestData().addDefaultRasterLayer(SystemTestData.TASMANIA_BM, getCatalog());
     }
-    
+
     @Test
     public void testGetAllAsXML() throws Exception {
-        Document dom = getAsDOM( "/rest/workspaces/wcs/coveragestores.xml");
-        assertEquals( catalog.getStoresByWorkspace( "wcs", CoverageStoreInfo.class ).size(), 
-            dom.getElementsByTagName( "coverageStore").getLength() );
+        Document dom = getAsDOM("/rest/workspaces/wcs/coveragestores.xml");
+        assertEquals(catalog.getStoresByWorkspace("wcs", CoverageStoreInfo.class).size(),
+                dom.getElementsByTagName("coverageStore").getLength());
     }
 
     @Test
     public void testGetAllAsJSON() throws Exception {
-        JSON json = getAsJSON( "/rest/workspaces/wcs/coveragestores.json");
-        assertTrue( json instanceof JSONObject );
-        
-        Object coveragestores = ((JSONObject)json).getJSONObject("coverageStores").get("coverageStore");
-        assertNotNull( coveragestores );
-        
-        if( coveragestores instanceof JSONArray ) {
-            assertEquals( catalog.getCoverageStoresByWorkspace("wcs").size() , ((JSONArray)coveragestores).size() );    
-        }
-        else {
-            assertEquals( 1, catalog.getCoverageStoresByWorkspace("wcs").size() );
+        JSON json = getAsJSON("/rest/workspaces/wcs/coveragestores.json");
+        assertTrue(json instanceof JSONObject);
+
+        Object coveragestores = ((JSONObject) json).getJSONObject("coverageStores").get("coverageStore");
+        assertNotNull(coveragestores);
+
+        if (coveragestores instanceof JSONArray) {
+            assertEquals(catalog.getCoverageStoresByWorkspace("wcs").size(), ((JSONArray) coveragestores).size());
+        } else {
+            assertEquals(1, catalog.getCoverageStoresByWorkspace("wcs").size());
         }
     }
 
     @Test
     public void testGetAllAsHTML() throws Exception {
-        Document dom = getAsDOM( "/rest/workspaces/wcs/coveragestores.html");
-        List<CoverageStoreInfo> coveragestores = catalog.getCoverageStoresByWorkspace("wcs"); 
-        
-        NodeList links = xp.getMatchingNodes("//html:a", dom );
-        assertEquals( coveragestores.size(), links.getLength() );
-        
-        for ( int i = 0; i < coveragestores.size(); i++ ){
-            CoverageStoreInfo cs = coveragestores.get( i );
-            Element link = (Element) links.item( i );
-            
-            assertTrue( link.getAttribute("href").endsWith( cs.getName() + ".html") );
+        Document dom = getAsDOM("/rest/workspaces/wcs/coveragestores.html");
+        List<CoverageStoreInfo> coveragestores = catalog.getCoverageStoresByWorkspace("wcs");
+
+        NodeList links = xp.getMatchingNodes("//html:a", dom);
+        assertEquals(coveragestores.size(), links.getLength());
+
+        for (int i = 0; i < coveragestores.size(); i++) {
+            CoverageStoreInfo cs = coveragestores.get(i);
+            Element link = (Element) links.item(i);
+
+            assertTrue(link.getAttribute("href").endsWith(cs.getName() + ".html"));
         }
     }
 
     @Test
     public void testPutAllUnauthorized() throws Exception {
-        assertEquals( 405, putAsServletResponse("/rest/workspaces/wcs/coveragestores").getStatusCode() );
+        assertEquals(405, putAsServletResponse("/rest/workspaces/wcs/coveragestores").getStatusCode());
     }
 
     @Test
     public void testDeleteAllUnauthorized() throws Exception {
-        assertEquals( 405, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores").getStatusCode() );
+        assertEquals(405, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores").getStatusCode());
     }
 
     @Test
     public void testGetAsXML() throws Exception {
-        Document dom = getAsDOM( "/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
-        assertEquals( "coverageStore", dom.getDocumentElement().getNodeName() );
-        assertEquals( "BlueMarble", xp.evaluate( "/coverageStore/name", dom) );
-        assertEquals( "wcs", xp.evaluate( "/coverageStore/workspace/name", dom) );
+        Document dom = getAsDOM("/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
+        assertEquals("coverageStore", dom.getDocumentElement().getNodeName());
+        assertEquals("BlueMarble", xp.evaluate("/coverageStore/name", dom));
+        assertEquals("wcs", xp.evaluate("/coverageStore/workspace/name", dom));
     }
 
     @Test
     public void testGetAsHTML() throws Exception {
-        Document dom = getAsDOM( "/rest/workspaces/wcs/coveragestores/BlueMarble.html");
-        
-        CoverageStoreInfo cs = catalog.getCoverageStoreByName( "wcs", "BlueMarble" );
-        List<CoverageInfo> coverages = catalog.getCoveragesByCoverageStore( cs );
-        
-        NodeList links = xp.getMatchingNodes("//html:a", dom );
-        assertEquals( coverages.size(), links.getLength() );
-        
-        for ( int i = 0; i < coverages.size(); i++ ){
-            CoverageInfo ft = coverages.get( i );
-            Element link = (Element) links.item( i );
-            
-            assertTrue( link.getAttribute("href").endsWith( ft.getName() + ".html") );
+        Document dom = getAsDOM("/rest/workspaces/wcs/coveragestores/BlueMarble.html");
+
+        CoverageStoreInfo cs = catalog.getCoverageStoreByName("wcs", "BlueMarble");
+        List<CoverageInfo> coverages = catalog.getCoveragesByCoverageStore(cs);
+
+        NodeList links = xp.getMatchingNodes("//html:a", dom);
+        assertEquals(coverages.size(), links.getLength());
+
+        for (int i = 0; i < coverages.size(); i++) {
+            CoverageInfo ft = coverages.get(i);
+            Element link = (Element) links.item(i);
+
+            assertTrue(link.getAttribute("href").endsWith(ft.getName() + ".html"));
         }
     }
 
     File setupNewCoverageStore() throws Exception {
-        File dir = new File( "./target/usa" );
+        File dir = new File("./target/usa");
         dir.mkdir();
         dir.deleteOnExit();
-        
-        File f = new File( dir, "usa.prj");
+
+        File f = new File(dir, "usa.prj");
         f.deleteOnExit();
-        FileOutputStream fout = new FileOutputStream( f );
-        IOUtils.copy( getClass().getResourceAsStream("test-data/usa.prj"), fout );
+        FileOutputStream fout = new FileOutputStream(f);
+        IOUtils.copy(getClass().getResourceAsStream("test-data/usa.prj"), fout);
         fout.flush();
         fout.close();
-       
-        f = new File( dir, "usa.meta");
+
+        f = new File(dir, "usa.meta");
         f.deleteOnExit();
-        fout = new FileOutputStream( f ); 
-        IOUtils.copy( getClass().getResourceAsStream("test-data/usa.meta"), fout );
+        fout = new FileOutputStream(f);
+        IOUtils.copy(getClass().getResourceAsStream("test-data/usa.meta"), fout);
         fout.flush();
         fout.close();
-        
-        f = new File( dir, "usa.png");
+
+        f = new File(dir, "usa.png");
         f.deleteOnExit();
-        
-        fout = new FileOutputStream( f ); 
-        IOUtils.copy( getClass().getResourceAsStream("test-data/usa.png"), fout );
+
+        fout = new FileOutputStream(f);
+        IOUtils.copy(getClass().getResourceAsStream("test-data/usa.png"), fout);
         fout.flush();
         fout.close();
-        
+
         return f;
     }
 
@@ -152,161 +156,161 @@ public class CoverageStoreTest extends CatalogRESTTestSupport {
 
         File f = setupNewCoverageStore();
         String xml =
-            "<coverageStore>" +
-              "<name>newCoverageStore</name>" +
-              "<type>WorldImage</type>" +
-              "<url>file://" + f.getAbsolutePath() + "</url>" + 
-              "<workspace>wcs</workspace>" + 
-            "</coverageStore>";
-        
-        MockHttpServletResponse response = 
-            postAsServletResponse( "/rest/workspaces/wcs/coveragestores", xml, "text/xml" );
-        assertEquals( 201, response.getStatusCode() );
-        assertNotNull( response.getHeader( "Location") );
-        assertTrue( response.getHeader("Location").endsWith( "/workspaces/wcs/coveragestores/newCoverageStore" ) );
+                "<coverageStore>" +
+                        "<name>newCoverageStore</name>" +
+                        "<type>WorldImage</type>" +
+                        "<url>file://" + f.getAbsolutePath() + "</url>" +
+                        "<workspace>wcs</workspace>" +
+                        "</coverageStore>";
 
-        CoverageStoreInfo newCoverageStore = catalog.getCoverageStoreByName( "newCoverageStore" );
-        assertNotNull( newCoverageStore );
-        
+        MockHttpServletResponse response =
+                postAsServletResponse("/rest/workspaces/wcs/coveragestores", xml, "text/xml");
+        assertEquals(201, response.getStatusCode());
+        assertNotNull(response.getHeader("Location"));
+        assertTrue(response.getHeader("Location").endsWith("/workspaces/wcs/coveragestores/newCoverageStore"));
+
+        CoverageStoreInfo newCoverageStore = catalog.getCoverageStoreByName("newCoverageStore");
+        assertNotNull(newCoverageStore);
+
         assertNotNull(newCoverageStore.getFormat());
     }
 
     @Test
     public void testGetAsJSON() throws Exception {
-        JSON json = getAsJSON( "/rest/workspaces/wcs/coveragestores/BlueMarble.json" );
-        
-        JSONObject coverageStore = ((JSONObject)json).getJSONObject("coverageStore");
+        JSON json = getAsJSON("/rest/workspaces/wcs/coveragestores/BlueMarble.json");
+
+        JSONObject coverageStore = ((JSONObject) json).getJSONObject("coverageStore");
         assertNotNull(coverageStore);
-        
-        assertEquals( "BlueMarble", coverageStore.get( "name") );
-        assertEquals( "wcs", coverageStore.getJSONObject( "workspace").get( "name" ));
-        assertNotNull( coverageStore.get( "type") );
-        assertNotNull( coverageStore.get( "url") );
+
+        assertEquals("BlueMarble", coverageStore.get("name"));
+        assertEquals("wcs", coverageStore.getJSONObject("workspace").get("name"));
+        assertNotNull(coverageStore.get("type"));
+        assertNotNull(coverageStore.get("url"));
     }
 
     @Test
     public void testPostAsJSON() throws Exception {
         removeStore("wcs", "newCoverageStore");
         File f = setupNewCoverageStore();
-        String json = 
-            "{'coverageStore':{" +
-                "'name':'newCoverageStore'," +
-                "'type': 'WorldImage'," + 
-                "'url':'" + f.getAbsolutePath().replace('\\','/')  + "'," +
-                "'workspace':'wcs'," +
-              "}" +
-            "}";
-        MockHttpServletResponse response = 
-            postAsServletResponse( "/rest/workspaces/wcs/coveragestores", json, "text/json" );
-        
-        assertEquals( 201, response.getStatusCode() );
-        assertNotNull( response.getHeader( "Location") );
-        assertTrue( response.getHeader("Location").endsWith( "/workspaces/wcs/coveragestores/newCoverageStore" ) );
-        
-        CoverageStoreInfo newCoverageStore = catalog.getCoverageStoreByName( "newCoverageStore" );
-        assertNotNull( newCoverageStore );
-        assertNotNull( newCoverageStore.getFormat() );
+        String json =
+                "{'coverageStore':{" +
+                        "'name':'newCoverageStore'," +
+                        "'type': 'WorldImage'," +
+                        "'url':'" + f.getAbsolutePath().replace('\\', '/') + "'," +
+                        "'workspace':'wcs'," +
+                        "}" +
+                        "}";
+        MockHttpServletResponse response =
+                postAsServletResponse("/rest/workspaces/wcs/coveragestores", json, "text/json");
+
+        assertEquals(201, response.getStatusCode());
+        assertNotNull(response.getHeader("Location"));
+        assertTrue(response.getHeader("Location").endsWith("/workspaces/wcs/coveragestores/newCoverageStore"));
+
+        CoverageStoreInfo newCoverageStore = catalog.getCoverageStoreByName("newCoverageStore");
+        assertNotNull(newCoverageStore);
+        assertNotNull(newCoverageStore.getFormat());
     }
 
     @Test
     public void testPostToResource() throws Exception {
-        String xml = 
-        "<coverageStore>" + 
-         "<name>BlueMarble</name>" + 
-         "<enabled>false</enabled>" + 
-        "</coverageStore>";
-        
-        MockHttpServletResponse response = 
-            postAsServletResponse( "/rest/workspaces/wcs/coveragestores/BlueMarble", xml, "text/xml");
-        assertEquals( 405, response.getStatusCode() );
+        String xml =
+                "<coverageStore>" +
+                        "<name>BlueMarble</name>" +
+                        "<enabled>false</enabled>" +
+                        "</coverageStore>";
+
+        MockHttpServletResponse response =
+                postAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble", xml, "text/xml");
+        assertEquals(405, response.getStatusCode());
     }
-    
+
     @Test
     public void testPut() throws Exception {
-        Document dom = getAsDOM( "/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
-        assertXpathEvaluatesTo("true", "/coverageStore/enabled", dom );
-        
-        String xml = 
-        "<coverageStore>" + 
-         "<name>BlueMarble</name>" + 
-         "<enabled>false</enabled>" + 
-        "</coverageStore>";
-        
-        MockHttpServletResponse response = 
-            putAsServletResponse( "/rest/workspaces/wcs/coveragestores/BlueMarble", xml, "text/xml");
-        assertEquals( 200, response.getStatusCode() );
+        Document dom = getAsDOM("/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
+        assertXpathEvaluatesTo("true", "/coverageStore/enabled", dom);
 
-        dom = getAsDOM( "/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
-        assertXpathEvaluatesTo("false", "/coverageStore/enabled", dom );
-        
-        assertFalse( catalog.getCoverageStoreByName( "wcs", "BlueMarble").isEnabled() );
+        String xml =
+                "<coverageStore>" +
+                        "<name>BlueMarble</name>" +
+                        "<enabled>false</enabled>" +
+                        "</coverageStore>";
+
+        MockHttpServletResponse response =
+                putAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble", xml, "text/xml");
+        assertEquals(200, response.getStatusCode());
+
+        dom = getAsDOM("/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
+        assertXpathEvaluatesTo("false", "/coverageStore/enabled", dom);
+
+        assertFalse(catalog.getCoverageStoreByName("wcs", "BlueMarble").isEnabled());
     }
 
     @Test
     public void testPut2() throws Exception {
-        Document dom = getAsDOM( "/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
-        assertXpathEvaluatesTo("GeoTIFF", "/coverageStore/type", dom );
-        
-        String xml = 
-        "<coverageStore>" + 
-         "<name>BlueMarble</name>" + 
-         "<type>WorldImage</type>" + 
-         "</coverageStore>";
-        
-        MockHttpServletResponse response = 
-            putAsServletResponse( "/rest/workspaces/wcs/coveragestores/BlueMarble", xml, "text/xml");
-        assertEquals( 200, response.getStatusCode() );
-        
-        CoverageStoreInfo cs = catalog.getCoverageStoreByName( "wcs", "BlueMarble" );
-        assertEquals( "WorldImage", cs.getType() );
+        Document dom = getAsDOM("/rest/workspaces/wcs/coveragestores/BlueMarble.xml");
+        assertXpathEvaluatesTo("GeoTIFF", "/coverageStore/type", dom);
+
+        String xml =
+                "<coverageStore>" +
+                        "<name>BlueMarble</name>" +
+                        "<type>WorldImage</type>" +
+                        "</coverageStore>";
+
+        MockHttpServletResponse response =
+                putAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble", xml, "text/xml");
+        assertEquals(200, response.getStatusCode());
+
+        CoverageStoreInfo cs = catalog.getCoverageStoreByName("wcs", "BlueMarble");
+        assertEquals("WorldImage", cs.getType());
     }
 
     @Test
     public void testPutNonExistant() throws Exception {
-        String xml = 
-            "<coverageStore>" + 
-            "<name>changed</name>" + 
-            "</coverageStore>";
+        String xml =
+                "<coverageStore>" +
+                        "<name>changed</name>" +
+                        "</coverageStore>";
 
-        MockHttpServletResponse response = 
-            putAsServletResponse("/rest/workspaces/wcs/coveragestores/nonExistant", xml, "text/xml" );
-        assertEquals( 404, response.getStatusCode() );
+        MockHttpServletResponse response =
+                putAsServletResponse("/rest/workspaces/wcs/coveragestores/nonExistant", xml, "text/xml");
+        assertEquals(404, response.getStatusCode());
     }
 
     @Test
     public void testDeleteNonExistant() throws Exception {
-        assertEquals( 404, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/nonExistant").getStatusCode() );
+        assertEquals(404, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/nonExistant").getStatusCode());
     }
 
     @Test
     public void testDelete() throws Exception {
-        CoverageStoreInfo cs = catalog.getCoverageStoreByName("wcs","BlueMarble");
+        CoverageStoreInfo cs = catalog.getCoverageStoreByName("wcs", "BlueMarble");
         List<CoverageInfo> coverages = catalog.getCoveragesByCoverageStore(cs);
-        for ( CoverageInfo c : coverages ) {
-            for ( LayerInfo l : catalog.getLayers(c) ) {
+        for (CoverageInfo c : coverages) {
+            for (LayerInfo l : catalog.getLayers(c)) {
                 catalog.remove(l);
             }
-            catalog.remove( c );
+            catalog.remove(c);
         }
-        
-        assertEquals( 200, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble").getStatusCode());
-        assertNull( catalog.getCoverageStoreByName("wcs", "BlueMarble"));
+
+        assertEquals(200, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble").getStatusCode());
+        assertNull(catalog.getCoverageStoreByName("wcs", "BlueMarble"));
     }
 
     @Test
     public void testDeleteNonEmpty() throws Exception {
-        assertEquals( 401, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble").getStatusCode());
+        assertEquals(401, deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble").getStatusCode());
     }
 
     @Test
     public void testDeleteRecursive() throws Exception {
         assertNotNull(catalog.getCoverageStoreByName("wcs", "BlueMarble"));
         MockHttpServletResponse response =
-            deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble?recurse=true");
+                deleteAsServletResponse("/rest/workspaces/wcs/coveragestores/BlueMarble?recurse=true");
         assertEquals(200, response.getStatusCode());
 
         assertNull(catalog.getCoverageStoreByName("wcs", "BlueMarble"));
-        
+
         for (CoverageInfo c : catalog.getCoverages()) {
             if (c.getStore().getName().equals("BlueMarble")) {
                 fail();

@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.springframework.web.servlet.DispatcherServlet;
 
 import com.mockrunner.mock.web.MockHttpServletResponse;
+
 import static org.junit.Assert.*;
 
 public class RestConcurrencyTest extends CatalogRESTTestSupport {
@@ -68,9 +69,9 @@ public class RestConcurrencyTest extends CatalogRESTTestSupport {
 
     @Override
     protected DispatcherServlet getDispatcher() throws Exception {
-        if(dispatcher == null) {
+        if (dispatcher == null) {
             synchronized (this) {
-                if(dispatcher == null) {
+                if (dispatcher == null) {
                     dispatcher = super.getDispatcher();
                 }
             }

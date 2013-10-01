@@ -1120,9 +1120,27 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
             final Filter filter, @Nullable Integer offset, @Nullable Integer count,
             @Nullable SortBy sortOrder) {
 
-        if (null != sortOrder && !canSort(of, sortOrder.getPropertyName().getPropertyName())) {
-            throw new IllegalArgumentException("Can't sort objects of type " + of.getName()
-                    + " by " + sortOrder.getPropertyName());
+        SortBy[] sortOrderList = null;
+
+        if (sortOrder != null) {
+            sortOrderList = new SortBy[] { sortOrder };
+        }
+        
+        return list(of, filter, offset, count, sortOrderList);
+    }
+    
+    @Override
+    public <T extends CatalogInfo> CloseableIterator<T> list(final Class<T> of,
+            final Filter filter, @Nullable Integer offset, @Nullable Integer count,
+            @Nullable SortBy... sortOrder) {
+
+        if (sortOrder != null) {
+            for (SortBy so : sortOrder) {
+                if (sortOrder != null && !canSort(of, so.getPropertyName().getPropertyName())) {
+                    throw new IllegalArgumentException(
+                        "Can't sort objects of type "+of.getName()+" by "+so.getPropertyName());
+                }
+            }
         }
 
         Iterable<T> iterable = iterable(of, filter, sortOrder);
@@ -1254,7 +1272,7 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
     }
 
     public <T extends CatalogInfo> Iterable<T> iterable(final Class<? super T> of,
-            final Filter filter, final SortBy sortBy) {
+            final Filter filter, final SortBy[] sortByList) {
         List<T> all;
 
         T t = null;
@@ -1280,12 +1298,15 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
             throw new IllegalArgumentException("Unknown type: " + of);
         }
 
-        if (null != sortBy) {
-            Ordering<Object> ordering = Ordering.from(comparator(sortBy));
-            if (SortOrder.DESCENDING.equals(sortBy.getSortOrder())) {
-                ordering = ordering.reverse();
+        if (null != sortByList) {
+            for (int i = sortByList.length - 1; i >=0 ; i--) {
+            	SortBy sortBy = sortByList[i];
+	            Ordering<Object> ordering = Ordering.from(comparator(sortBy));
+	            if (SortOrder.DESCENDING.equals(sortBy.getSortOrder())) {
+	                ordering = ordering.reverse();
+	            }
+	            all = ordering.sortedCopy(all);
             }
-            all = ordering.sortedCopy(all);
         }
 
         if (Filter.INCLUDE.equals(filter)) {

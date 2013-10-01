@@ -55,6 +55,7 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
     public final static String testFilterName5 = "basicAuthTestFilterWithRememberMe";
     public final static String testFilterName8 = "x509TestFilter";
     
+    
     @Override
     protected void onSetUp(SystemTestData testData) throws Exception {
         super.onSetUp(testData);
@@ -66,7 +67,8 @@ public class AuthenticationCacheFilterTest extends AbstractAuthenticationProvide
         
         getSecurityManager().saveFilter(config);
 
-    }
+    }    
+    
     
     Authentication getAuth(String filterName, String user, Integer idleTime, Integer liveTime) {
         

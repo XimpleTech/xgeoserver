@@ -147,7 +147,8 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class XStreamPersister {
 
-    
+    private boolean unwrapNulls = true;
+   
     /**
      * Callback interface or xstream persister.
      */
@@ -272,6 +273,16 @@ public class XStreamPersister {
         init(xs);
     }
     
+    /**
+     * Sets null handling in proxy objects.
+     * Defaults to unwrap. If set to false, proxy object are not transformed to nulls.
+     * 
+     * @param unwrapNulls
+     */
+    public void setUnwrapNulls(boolean unwrapNulls) {
+        this.unwrapNulls = unwrapNulls;
+    }
+
     protected void init(XStream xs) {
         // Default implementations
         initImplementationDefaults(xs);
@@ -975,7 +986,8 @@ public class XStreamPersister {
             if ( reader.hasMoreChildren() ) {
                 while(reader.hasMoreChildren()) {
                     reader.moveDown();
-                    if ("workspace".equals(reader.getNodeName())) {
+                    String nodeName = reader.getNodeName();
+                    if ("workspace".equals(nodeName)) {
                         if (reader.hasMoreChildren()) {
                             //specified as <workspace><name>[name]</name></workspace>
                             reader.moveDown();
@@ -987,10 +999,10 @@ public class XStreamPersister {
                             pre = reader.getValue();
                         }
                     }
-                    else {
+                    else if("name".equals(nodeName) || "id".equals(nodeName) || "prefix".equals(nodeName)) {
                         ref = reader.getValue();
                     }
-
+                    
                     reader.moveUp();
                 }
             }
@@ -1003,8 +1015,12 @@ public class XStreamPersister {
             if ( catalog != null ) {
                 resolved = ResolvingProxy.resolve( catalog, proxy );
             }
-            
-            return CatalogImpl.unwrap( resolved );
+            if(unwrapNulls) {
+                return CatalogImpl.unwrap( resolved );
+            } else {
+                return resolved != null ? CatalogImpl.unwrap( resolved ) : proxy;
+            }
+            //            
         }
     }
     class ReferenceCollectionConverter extends LaxCollectionConverter {
@@ -1882,6 +1898,9 @@ public class XStreamPersister {
             writer.startNode("sql");
             writer.setValue(vt.getSql());
             writer.endNode();
+            writer.startNode("escapeSql");
+            writer.setValue(Boolean.toString(vt.isEscapeSql()));
+            writer.endNode();
             if(vt.getPrimaryKeyColumns() != null) {
                 for(String pk : vt.getPrimaryKeyColumns()) {
                     writer.startNode("keyColumn");
@@ -1934,7 +1953,19 @@ public class XStreamPersister {
         public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
             String name = readValue("name", String.class, reader);
             String sql = readValue("sql", String.class, reader);
-            VirtualTable vt = new VirtualTable(name, sql);
+            
+            // escapeSql value may be missing from existing definitions.  In this 
+            // case set it to false to prevent changing behaviour
+            boolean escapeSql;
+            try {
+                escapeSql = Boolean.valueOf(readValue("escapeSql", String.class, reader));
+            } catch (IllegalArgumentException e) {
+                escapeSql = false;
+                // the reader is now in the wrong position, it must be moved back a line
+                reader.moveUp();
+            }
+                
+            VirtualTable vt = new VirtualTable(name, sql, escapeSql);
             List<String> primaryKeys = new ArrayList<String>();
             while(reader.hasMoreChildren()) {
                 reader.moveDown();

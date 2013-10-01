@@ -17,17 +17,18 @@ import org.restlet.data.Response;
 public class NamespaceListResource extends AbstractCatalogListResource {
 
     protected NamespaceListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                    Response response, Catalog catalog) {
         super(context, request, response, NamespaceInfo.class, catalog);
     }
 
     @Override
     protected DataFormat createHTMLFormat(Request request, Response response) {
-        return new NamespaceHTMLFormat( request, response, this, catalog );
+        return new NamespaceHTMLFormat(request, response, this, catalog);
     }
+
     @Override
     protected List handleListGet() throws Exception {
-        LOGGER.fine( "GET all namespaces");
+        LOGGER.fine("GET all namespaces");
         return catalog.getNamespaces();
     }
 

@@ -46,7 +46,7 @@ import org.geoserver.wms.WMSInfo.WMSInterpolation;
 import org.geoserver.wms.WatermarkInfo.Position;
 import org.geoserver.wms.featureinfo.GetFeatureInfoOutputFormat;
 import org.geoserver.wms.map.RenderedImageMapResponse;
-import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.Query;
 import org.geotools.data.ows.Layer;
@@ -64,6 +64,8 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.CRS.AxisOrder;
 import org.geotools.styling.Style;
 import org.geotools.util.Converters;
+import org.geotools.util.DateRange;
+import org.geotools.util.NumberRange;
 import org.geotools.util.Range;
 import org.geotools.util.Version;
 import org.geotools.util.logging.Logging;
@@ -799,7 +801,7 @@ public class WMS implements ApplicationContextAware {
      */
     public GeneralParameterValue[] getWMSReadParameters(final GetMapRequest request,
             final MapLayerInfo mapLayerInfo, final Filter layerFilter, final List<Object> times,
-            final List<Object> elevations, final AbstractGridCoverage2DReader reader,
+            final List<Object> elevations, final GridCoverage2DReader reader,
             boolean readGeom) throws IOException {
         // setup the scene
         final ParameterValueGroup readParametersDescriptor = reader.getFormat().getReadParameters();

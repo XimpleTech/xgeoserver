@@ -7,6 +7,7 @@ package org.geoserver.service.rest;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
@@ -19,8 +20,8 @@ import org.w3c.dom.Document;
 import com.mockrunner.mock.web.MockHttpServletResponse;
 
 public class WFSSettingsTest extends CatalogRESTTestSupport {
-    
-    @Before 
+
+    @Before
     public void revertChanges() {
         revertService(WFSInfo.class, null);
     }

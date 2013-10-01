@@ -1,6 +1,6 @@
 package org.geoserver.threadlocals;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +58,7 @@ public abstract class AbstractThreadLocalTransferTest {
         @Override
         public Void call() throws Exception {
             // this is the the main thread, we are actually running inside the thread pool
-            assertFalse(originalThread.equals(Thread.currentThread()));
+            assertNotEquals(originalThread, Thread.currentThread());
 
             // apply the thread local, check it has been applied correctly
             transfer.apply(storage);

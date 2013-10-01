@@ -12,6 +12,7 @@ import org.w3c.dom.Node;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONArray;
+
 import static org.junit.Assert.*;
 
 /**
@@ -29,7 +30,7 @@ public class FontListTest extends GeoServerSystemTestSupport {
         //make assertions
         Node fonts = getFirstElementByTagName(dom, "fonts");
         assertNotNull(fonts);
-        assertTrue( ((Element) fonts).getElementsByTagName("entry").getLength()  > 0);
+        assertTrue(((Element) fonts).getElementsByTagName("entry").getLength() > 0);
     }
 
     @Test

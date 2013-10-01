@@ -23,20 +23,19 @@ public class ResourceHTMLFormat extends CatalogFreemarkerHTMLFormat {
     @Override
     protected Configuration createConfiguration(Object data, Class clazz) {
         Configuration cfg = super.createConfiguration(data, clazz);
-        cfg.setObjectWrapper( 
-            new ObjectToMapWrapper<ResourceInfo>(ResourceInfo.class) {
-                @Override
-                protected void wrapInternal(Map properties, SimpleHash model, ResourceInfo object) {
-                    try {
-                        properties.put( "boundingBox", object.boundingBox() );
-                    } 
-                    catch (Exception e) {
-                        throw new RuntimeException( e );
+        cfg.setObjectWrapper(
+                new ObjectToMapWrapper<ResourceInfo>(ResourceInfo.class) {
+                    @Override
+                    protected void wrapInternal(Map properties, SimpleHash model, ResourceInfo object) {
+                        try {
+                            properties.put("boundingBox", object.boundingBox());
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 }
-            }      
         );
         return cfg;
-        
+
     }
 }

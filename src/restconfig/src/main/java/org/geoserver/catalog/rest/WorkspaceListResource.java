@@ -17,18 +17,18 @@ import org.restlet.data.Response;
 public class WorkspaceListResource extends AbstractCatalogListResource {
 
     public WorkspaceListResource(Context context, Request request,
-            Response response, Catalog catalog) {
+                                 Response response, Catalog catalog) {
         super(context, request, response, WorkspaceInfo.class, catalog);
     }
 
     @Override
     protected List handleListGet() throws Exception {
-        LOGGER.fine( "GET all workspaces" );
+        LOGGER.fine("GET all workspaces");
         return catalog.getWorkspaces();
     }
-    
+
     @Override
     protected DataFormat createHTMLFormat(Request request, Response response) {
-        return new WorkspaceHTMLFormat(request,response,this,catalog);
+        return new WorkspaceHTMLFormat(request, response, this, catalog);
     }
 }

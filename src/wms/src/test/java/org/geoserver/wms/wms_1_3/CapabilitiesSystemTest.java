@@ -20,7 +20,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
-import org.apache.xerces.dom.DOMInputImpl;
 import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -37,6 +36,7 @@ import org.geoserver.wms.WMSTestSupport;
 import org.geotools.xml.XML;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSInput;
 import org.w3c.dom.ls.LSResourceResolver;
 import org.xml.sax.SAXException;
@@ -110,21 +110,24 @@ public class CapabilitiesSystemTest extends WMSTestSupport {
      */
     @Test
     public void testValidateCapabilitiesXML() throws Exception {
-        Document dom = getAsDOM("ows?service=WMS&version=1.3.0&request=GetCapabilities");
-        print(dom);
+        final Document dom = getAsDOM("ows?service=WMS&version=1.3.0&request=GetCapabilities");
+        
         SchemaFactory factory = SchemaFactory.newInstance("http://www.w3.org/2001/XMLSchema");
         URL schemaLocation = getClass().getResource(
                 "/schemas/wms/1.3.0/capabilities_1_3_0.xsd");
+        
         factory.setResourceResolver(new LSResourceResolver() {
             
             public LSInput resolveResource(String type, String namespaceURI, String publicId,
                     String systemId, String baseURI) {
-
+                
                 if(namespaceURI.equals("http://www.w3.org/1999/xlink")) {
                     try {
+                        LSInput input = ((DOMImplementationLS)dom.getImplementation()).createLSInput();
                         URL xlink = getClass().getResource("/schemas/xlink/1999/xlink.xsd");
                         systemId = xlink.toURI().toASCIIString();
-                        DOMInputImpl input = new DOMInputImpl(publicId, systemId, null);
+                        input.setPublicId(publicId);
+                        input.setSystemId(systemId);
                         return input;
                     } catch(Exception e) {
                         return null;
@@ -132,9 +135,11 @@ public class CapabilitiesSystemTest extends WMSTestSupport {
                     }
                 } else if(XML.NAMESPACE.equals(namespaceURI)) {
                     try {
+                        LSInput input = ((DOMImplementationLS)dom.getImplementation()).createLSInput();
                         URL xml = XML.class.getResource("xml.xsd");
                         systemId = xml.toURI().toASCIIString();
-                        DOMInputImpl input = new DOMInputImpl(publicId, systemId, null);
+                        input.setPublicId(publicId);
+                        input.setSystemId(systemId);
                         return input;
                     } catch(Exception e) {
                         return null;
@@ -146,7 +151,7 @@ public class CapabilitiesSystemTest extends WMSTestSupport {
             }
         });
         Schema schema = factory.newSchema(schemaLocation);
-
+        
         Validator validator = schema.newValidator();
         Source source = new DOMSource(dom);
         try {

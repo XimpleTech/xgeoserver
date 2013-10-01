@@ -31,17 +31,17 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 public abstract class AbstractCatalogListResource extends CatalogResourceBase {
 
     protected AbstractCatalogListResource(Context context, Request request,
-            Response response, Class clazz, Catalog catalog) {
+                                          Response response, Class clazz, Catalog catalog) {
         super(context, request, response, clazz, catalog);
     }
 
     @Override
     protected final Object handleObjectGet() throws Exception {
-        return XStreamPersister.unwrapProxies( handleListGet() );
+        return XStreamPersister.unwrapProxies(handleListGet());
     }
-    
+
     protected abstract Collection handleListGet() throws Exception;
-    
+
     //JD: we create custom formats here because we need to set up the collection aliases
     // correctly, basically whatever collection we get back we ant to alias to layers, featureTypes,
     // coverages, styles, etc...
@@ -53,7 +53,7 @@ public abstract class AbstractCatalogListResource extends CatalogResourceBase {
             public XStream getXStream() {
                 return f.getXStream();
             }
-            
+
             @Override
             protected void write(Object data, OutputStream output) throws IOException {
                 aliasCollection(data, f.getXStream());
@@ -61,7 +61,7 @@ public abstract class AbstractCatalogListResource extends CatalogResourceBase {
             }
         };
     }
-    
+
     @Override
     protected ReflectiveXMLFormat createXMLFormat(Request request, Response response) {
         final ReflectiveXMLFormat f = super.createXMLFormat(request, response);
@@ -70,7 +70,7 @@ public abstract class AbstractCatalogListResource extends CatalogResourceBase {
             public XStream getXStream() {
                 return f.getXStream();
             }
-            
+
             @Override
             protected void write(Object data, OutputStream output) throws IOException {
                 aliasCollection(data, f.getXStream());
@@ -78,69 +78,70 @@ public abstract class AbstractCatalogListResource extends CatalogResourceBase {
             }
         };
     }
-    
+
     @Override
     protected void configureXStream(XStream xstream) {
         XStreamPersister xp = xpf.createXMLPersister();
         final String name = getItemName(xp);
-        xstream.alias( name, clazz );
-        
-        xstream.registerConverter( 
-            new CollectionConverter(xstream.getMapper()) {
-                public boolean canConvert(Class type) {
-                    return Collection.class.isAssignableFrom(type);
-                };
-                @Override
-                protected void writeItem(Object item,
-                        MarshallingContext context,
-                        HierarchicalStreamWriter writer) {
-                    
-                    writer.startNode( name );
-                    context.convertAnother( item );
-                    writer.endNode();
+        xstream.alias(name, clazz);
+
+        xstream.registerConverter(
+                new CollectionConverter(xstream.getMapper()) {
+                    public boolean canConvert(Class type) {
+                        return Collection.class.isAssignableFrom(type);
+                    }
+
+                    ;
+
+                    @Override
+                    protected void writeItem(Object item,
+                                             MarshallingContext context,
+                                             HierarchicalStreamWriter writer) {
+
+                        writer.startNode(name);
+                        context.convertAnother(item);
+                        writer.endNode();
+                    }
                 }
-            }
         );
-        xstream.registerConverter( 
-            new Converter() {
+        xstream.registerConverter(
+                new Converter() {
 
-                public boolean canConvert(Class type) {
-                    return clazz.isAssignableFrom( type );
-                }
-                
-                public void marshal(Object source,
-                        HierarchicalStreamWriter writer,
-                        MarshallingContext context) {
-                    
-                    String ref = null;
-                    if ( OwsUtils.getter( clazz, "name", String.class ) != null ) {
-                        ref = (String) OwsUtils.get( source, "name");
+                    public boolean canConvert(Class type) {
+                        return clazz.isAssignableFrom(type);
                     }
-                    else if ( OwsUtils.getter( clazz, "id", String.class ) != null ) {
-                        ref = (String) OwsUtils.get( source, "id");
-                    }
-                    else {
-                        throw new RuntimeException( "Could not determine identifier for: " + clazz.getName());
-                    }
-                    writer.startNode( "name" );
-                    writer.setValue(ref);
-                    writer.endNode();
-                    
-                    encodeLink(encode(ref), writer);
-                }
 
-                public Object unmarshal(HierarchicalStreamReader reader,
-                        UnmarshallingContext context) {
-                    return null;
+                    public void marshal(Object source,
+                                        HierarchicalStreamWriter writer,
+                                        MarshallingContext context) {
+
+                        String ref = null;
+                        if (OwsUtils.getter(clazz, "name", String.class) != null) {
+                            ref = (String) OwsUtils.get(source, "name");
+                        } else if (OwsUtils.getter(clazz, "id", String.class) != null) {
+                            ref = (String) OwsUtils.get(source, "id");
+                        } else {
+                            throw new RuntimeException("Could not determine identifier for: " + clazz.getName());
+                        }
+                        writer.startNode("name");
+                        writer.setValue(ref);
+                        writer.endNode();
+
+                        encodeLink(encode(ref), writer);
+                    }
+
+                    public Object unmarshal(HierarchicalStreamReader reader,
+                                            UnmarshallingContext context) {
+                        return null;
+                    }
                 }
-            }
         );
     }
 
     protected String getItemName(XStreamPersister xp) {
-        return xp.getClassAliasingMapper().serializedClass( clazz );
+        return xp.getClassAliasingMapper().serializedClass(clazz);
     }
-    
+
     /**
      * Template method to alias the type of the collection.
      * <p>
@@ -148,7 +149,7 @@ public abstract class AbstractCatalogListResource extends CatalogResourceBase {
      * to work with a Set.
      * </p>
      */
-    protected void aliasCollection( Object data, XStream xstream ) {
+    protected void aliasCollection(Object data, XStream xstream) {
         XStreamPersister xp = xpf.createXMLPersister();
         final String alias = getItemName(xp);
         xstream.alias(alias + "s", Collection.class, data.getClass());

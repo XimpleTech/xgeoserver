@@ -218,7 +218,8 @@
     <groupId>org.bouncycastle</groupId>
     <artifactId>bcprov-jdk14</artifactId>    
   </dependency>
- </dependencies> 
+
+ </dependencies>
 
  <build>
   <plugins>

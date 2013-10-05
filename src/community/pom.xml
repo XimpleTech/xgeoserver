@@ -27,56 +27,59 @@
   </dependencies>
 
   <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>2.1</version>
-        <configuration>
-          <descriptors>
-            <descriptor>release/ext-authkey.xml</descriptor>
-            <descriptor>release/ext-ftp.xml</descriptor>
-            <descriptor>release/ext-printing.xml</descriptor>
-            <descriptor>release/ext-python.xml</descriptor>
-            <descriptor>release/ext-groovy.xml</descriptor>
-            <descriptor>release/ext-javascript.xml</descriptor>
-            <descriptor>release/ext-spatialite.xml</descriptor>
-            <descriptor>release/ext-jdbcconfig.xml</descriptor>
-            <descriptor>release/ext-sfs.xml</descriptor>
-            <descriptor>release/ext-dds.xml</descriptor>
-            <descriptor>release/ext-aggregate.xml</descriptor>
-            <descriptor>release/ext-wcs2_0.xml</descriptor>
-            <descriptor>release/ext-libjpeg-turbo.xml</descriptor>
-          </descriptors>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <archive>
-            <manifest>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-            </manifest>
-            <manifestEntries>
-              <GeoServerModule>community</GeoServerModule>
-              <Application-Name>${project.build.finalname}</Application-Name>
-              <Project-Version>${project.version}</Project-Version>
-              <Iteration-Name>${iteration}</Iteration-Name>
-              <Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
-              <Git-Revision>${build.commit.id}</Git-Revision>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
+   <plugins>
+     <plugin>
+      <artifactId>maven-assembly-plugin</artifactId>
+      <version>2.1</version>
+      <configuration>
+        <descriptors>
+          <descriptor>release/ext-authkey.xml</descriptor>
+          <descriptor>release/ext-ftp.xml</descriptor>
+          <descriptor>release/ext-printing.xml</descriptor>
+          <descriptor>release/ext-python.xml</descriptor>
+          <descriptor>release/ext-groovy.xml</descriptor>
+          <descriptor>release/ext-javascript.xml</descriptor>
+          <descriptor>release/ext-spatialite.xml</descriptor>
+          <descriptor>release/ext-jdbcconfig.xml</descriptor>
+          <descriptor>release/ext-sfs.xml</descriptor>
+       	  <descriptor>release/ext-dds.xml</descriptor>
+          <descriptor>release/ext-aggregate.xml</descriptor>
+          <descriptor>release/ext-wcs2_0.xml</descriptor>
+          <descriptor>release/ext-wms-eo.xml</descriptor>
+          <descriptor>release/ext-libjpeg-turbo.xml</descriptor>
+          <descriptor>release/ext-netcdf.xml</descriptor>
+          <descriptor>release/ext-netcdf-out.xml</descriptor>
+        </descriptors>
+      </configuration>
+     </plugin>
+	<plugin>
+		<artifactId>maven-jar-plugin</artifactId>
+		<executions>
+			<execution>
+				<phase>package</phase>
+				<goals>
+					<goal>test-jar</goal>
+				</goals>
+			</execution>
+		</executions>
+		<configuration>
+			<archive>
+				<manifest>
+					<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+					<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+				</manifest>
+				<manifestEntries>
+					<GeoServerModule>community</GeoServerModule>
+					<Application-Name>${project.build.finalname}</Application-Name>
+					<Project-Version>${project.version}</Project-Version>
+					<Iteration-Name>${iteration}</Iteration-Name>
+					<Build-Timestamp>${maven.build.timestamp}</Build-Timestamp>
+					<Git-Revision>${build.commit.id}</Git-Revision>
+				</manifestEntries>
+			</archive>
+		</configuration>
+	</plugin>
+   </plugins>
   </build>
 
   <!-- profiles for individual modules -->
@@ -155,7 +158,12 @@
         <module>feature-aggregate</module>
         <module>script</module>
         <module>wcs2_0</module>
+        <module>wcs2_0-eo</module>
+        <module>web-wcs2_0-eo</module>
+        <module>wms-eo</module>
         <module>libjpeg-turbo</module>
+        <module>netcdf</module>
+        <module>netcdf-out</module>
       </modules>
     </profile>
     <profile>
@@ -201,12 +209,6 @@
       </modules>
     </profile>
     <profile>
-      <id>csw</id>
-      <modules>
-        <module>csw</module>
-      </modules>
-    </profile>
-    <profile>
       <id>jdbcconfig</id>
       <modules>
         <module>jdbcconfig</module>
@@ -215,9 +217,7 @@
     <profile>
       <id>script</id>
       <activation>
-        <property>
-          <name>script</name>
-        </property>
+        <property><name>script</name></property>
       </activation>
       <modules>
         <module>script</module>
@@ -226,12 +226,28 @@
     <profile>
       <id>wcs20</id>
       <activation>
-        <property>
-          <name>wcs20</name>
-        </property>
+        <property><name>wcs20</name></property>
       </activation>
       <modules>
         <module>wcs2_0</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>netcdf-out</id>
+      <activation>
+        <property><name>netcdf-out</name></property>
+      </activation> 
+      <modules>
+        <module>netcdf-out</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>netcdf</id>
+      <activation>
+        <property><name>netcdf</name></property>
+      </activation> 
+      <modules>
+        <module>netcdf</module>
       </modules>
     </profile>
     <profile>
@@ -241,6 +257,24 @@
       </modules>
     </profile>
     <profile>
+      <id>wms-eo</id>
+      <activation>
+        <property><name>wms-eo</name></property>
+      </activation> 	  
+      <modules>
+        <module>wms-eo</module>
+      </modules>
+    </profile>	
+    <profile>
+      <id>kml-old</id>
+      <activation>
+        <property><name>kml-old</name></property>
+      </activation> 	  
+      <modules>
+        <module>kml-old</module>
+      </modules>
+    </profile>
+		<profile>
       <id>libjpeg-turbo</id>
       <activation>
         <property>
@@ -249,6 +283,18 @@
       </activation>
       <modules>
         <module>libjpeg-turbo</module>
+			</modules>
+		</profile>    
+    <profile>
+      <id>importer</id>
+      <modules>
+        <module>importer</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>geopkg</id>
+      <modules>
+        <module>geopkg</module>
       </modules>
     </profile>
   </profiles>

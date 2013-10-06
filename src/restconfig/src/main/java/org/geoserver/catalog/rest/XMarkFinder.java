@@ -28,7 +28,7 @@ public class XMarkFinder extends AbstractCatalogFinder {
                 throw new RestletException(String.format("No such xmark %s in workspace %s",
                     xmark, workspace), Status.CLIENT_ERROR_NOT_FOUND );
             }
-            if (workspace == null && catalog.getStyleByName( xmark ) == null) {
+            if (workspace == null && catalog.getXMarkByName( xmark ) == null) {
                 throw new RestletException( "No such xmark: " + xmark, Status.CLIENT_ERROR_NOT_FOUND );
             }
         }

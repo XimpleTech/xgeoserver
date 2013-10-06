@@ -117,9 +117,6 @@ public class LDAPAuthProviderPanel extends AuthenticationProviderPanel<LDAPSecur
             add(new TextField("groupAdminGroup"));
             add(new TextField("groupSearchBase"));
             add(new TextField("groupSearchFilter"));
-            add(new CheckBox("bindBeforeGroupSearch"));
-            add(new TextField("adminGroup"));
-            add(new TextField("groupAdminGroup"));
         }
 
         @Override

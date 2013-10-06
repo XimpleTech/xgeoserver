@@ -264,7 +264,7 @@ public class ConfigDatabase {
         } else {
             Iterator<T> iterator = lazyTransformed.iterator();
             if (offset != null) {
-                Iterators.skip(iterator, offset.intValue());
+                Iterators.advance(iterator, offset.intValue());
             }
             if (limit != null) {
                 iterator = Iterators.limit(iterator, limit.intValue());

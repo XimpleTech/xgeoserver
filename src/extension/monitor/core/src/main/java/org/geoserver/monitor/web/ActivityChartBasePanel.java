@@ -106,7 +106,7 @@ public abstract class ActivityChartBasePanel extends Panel {
         monitor.query(q, gatherer);
         
         HashMap<RegularTimePeriod,Integer> data = gatherer.getData();
-        
+
         Class timeUnitClass = getTimePeriod(range[0]).getClass();
         TimeSeries series = new TimeSeries("foo", timeUnitClass);
         for (Map.Entry<RegularTimePeriod, Integer> d : data.entrySet()) {

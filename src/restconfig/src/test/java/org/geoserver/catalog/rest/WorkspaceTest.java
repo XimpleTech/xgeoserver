@@ -44,8 +44,8 @@ public class WorkspaceTest extends CatalogRESTTestSupport {
     public void testGetAllAsJSON() throws Exception {
         JSON json = getAsJSON("/rest/workspaces.json");
         assertTrue(json instanceof JSONObject);
-
-        JSONArray workspaces = ((JSONObject) json).getJSONObject("workspaces").getJSONArray("workspace");
+        // JSONArray workspaces = ((JSONObject) json).getJSONObject("workspaces").getJSONArray("workspace");
+        JSONArray workspaces = ((JSONObject) json).getJSONArray("workspaces").getJSONObject(0).getJSONArray("workspace");
         assertNotNull(workspaces);
 
         assertEquals(catalog.getNamespaces().size(), workspaces.size());

@@ -42,6 +42,10 @@
    <artifactId>geoip</artifactId>
    <version>1.2.3</version>
   </dependency>
+   <dependency>
+    <groupId>jfree</groupId>
+    <artifactId>jcommon</artifactId>
+   </dependency>
   <dependency>
    <groupId>jfree</groupId>
    <artifactId>jfreechart</artifactId>

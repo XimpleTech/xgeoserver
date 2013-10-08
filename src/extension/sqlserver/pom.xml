@@ -39,8 +39,4 @@
     </profile>
   </profiles>
 
-  <properties>
-    <sqlServerDriverVersion>4.0.2206.100</sqlServerDriverVersion>
-  </properties>
-
 </project>

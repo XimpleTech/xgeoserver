@@ -1599,6 +1599,7 @@
   <image.tests>true</image.tests>
   <interactive.tests>false</interactive.tests>
   <surefire.forkNumber>1</surefire.forkNumber>
+  <sqlServerDriverVersion>4.0.2206.100</sqlServerDriverVersion>
  </properties>
 
  <profiles>

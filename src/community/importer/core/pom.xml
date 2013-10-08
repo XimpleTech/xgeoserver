@@ -54,8 +54,23 @@
       <dependencies>
         <dependency>
           <groupId>com.oracle</groupId>
-          <artifactId>ojdbc14</artifactId>
-          <version>10.2.0.3.0</version>
+          <artifactId>ojdbc5</artifactId>
+          <version>11.2.0.1.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.oracle</groupId>
+          <artifactId>sdoapi</artifactId>
+          <version>11.1.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.oracle</groupId>
+          <artifactId>sdotype</artifactId>
+          <version>11.1.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.oracle</groupId>
+          <artifactId>sdoutl</artifactId>
+          <version>11.1.0</version>
         </dependency>
       </dependencies>
     </profile>
@@ -64,8 +79,8 @@
       <dependencies>
         <dependency>
           <groupId>com.microsoft</groupId>
-          <artifactId>sqljdbc</artifactId>
-          <version>4.0</version>
+          <artifactId>sqljdbc4</artifactId>
+          <version>${sqlServerDriverVersion}</version>
         </dependency>
       </dependencies>
     </profile>

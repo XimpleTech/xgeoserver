@@ -13,7 +13,7 @@ import org.apache.wicket.model.IModel;
 import org.geoserver.web.wicket.GeoServerDataProvider.Property;
 import org.geoserver.web.wicket.GeoServerTablePanel;
 import org.geoserver.web.wicket.SimpleBookmarkableLink;
-import org.ocpsoft.pretty.time.PrettyTime;
+import org.ocpsoft.prettytime.PrettyTime;
 import org.geoserver.importer.ImportContext;
 
 public class ImportContextTable extends GeoServerTablePanel<ImportContext> {

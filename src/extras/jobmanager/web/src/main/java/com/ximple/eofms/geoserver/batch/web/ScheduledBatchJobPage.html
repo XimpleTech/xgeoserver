@@ -1,9 +1,35 @@
-<!DOCTYPE html>
-<html>
+<html xmlns:wicket="http://wicket.apache.org/">
 <head>
-    <title></title>
+<wicket:head>
+  <wicket:link>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+  </wicket:link>
+ </wicket:head>
 </head>
 <body>
+<wicket:extend>
+    <h1><wicket:message key="scheduledBatchJob"></wicket:message></h1>
+    <!--
+    <h1><wicket:message key="scheduledBatchJob"></wicket:message> <span wicket:id="id"></span></h1>
+    -->
 
+    <div wicket:id="table"></div>
+
+    <wicket:fragment wicket:id="header">
+        <ul>
+            <!--
+            <li><a class="add-link" href="#" wicket:id="addNew">
+                <wicket:message key="addNew"/>
+            </a></li>
+            -->
+            <li><a class="add-link" href="#" wicket:id="executeSelected">
+                <wicket:message key="executeSelected"/>
+            </a></li>
+        </ul>
+    </wicket:fragment>
+
+    <!-- the cascade delete confirmation dialog -->
+    <div wicket:id="dialog"></div>
+</wicket:extend>
 </body>
 </html>

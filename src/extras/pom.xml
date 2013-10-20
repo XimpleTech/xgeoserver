@@ -14,10 +14,10 @@
     <version>2.4.0.x-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.ximple.geoserver</groupId>
-  <artifactId>plugin</artifactId>
+  <groupId>com.ximple.eofms</groupId>
+  <artifactId>extras</artifactId>
   <packaging>pom</packaging>
-  <name>Ximple GeoServer Plugins</name>
+  <name>Ximple GeoServer Extras Modules</name>
 
   <dependencies>
     <dependency>

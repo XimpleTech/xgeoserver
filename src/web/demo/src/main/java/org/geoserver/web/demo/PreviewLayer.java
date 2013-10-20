@@ -121,7 +121,6 @@ public class PreviewLayer {
     /**
      * Builds a fake GetMap request
      * 
-     * @param prefixedName
      * @return
      */
     GetMapRequest getRequest() {
@@ -155,7 +154,6 @@ public class PreviewLayer {
     /**
      * Expands the specified name into a list of layer info names
      * 
-     * @param name
      * @param catalog
      * @return
      */
@@ -185,8 +183,6 @@ public class PreviewLayer {
     /**
      * Given a request and a target format, builds the WMS request
      * 
-     * @param request
-     * @param string
      * @return
      */
     public String getWmsLink() {

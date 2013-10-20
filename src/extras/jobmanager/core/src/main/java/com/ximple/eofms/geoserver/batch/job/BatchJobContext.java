@@ -1,45 +1,47 @@
 package com.ximple.eofms.geoserver.batch.job;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class BatchJobContext {
-    /** serialVersionUID */
-    private static final long serialVersionUID = -1L;
+import org.quartz.JobKey;
+import org.quartz.TriggerKey;
 
-    private String jobName;
-    private String groupName;
-    private String triggerName;
+public class BatchJobContext implements Serializable {
+    /** serialVersionUID */
+    private static final long serialVersionUID = 1002869733533108325L;
+
+    private JobKey jobKey;
+    private TriggerKey triggerKey;
     private Date nextRun;
     private Date lastRun;
 
     public BatchJobContext() {
     }
 
-    public BatchJobContext(String groupName, String jobName) {
-        this.groupName = groupName;
-        this.jobName = jobName;
+    public BatchJobContext(JobKey jobKey, TriggerKey triggerKey) {
+        this.jobKey = jobKey;
+        this.triggerKey = triggerKey;
     }
 
-    public BatchJobContext(String groupName, String jobName, String triggerName) {
-        this.groupName = groupName;
-        this.jobName = jobName;
-        this.triggerName = triggerName;
+    public BatchJobContext(String groupName, String jobName, String triggerGroupName, String triggerName) {
+        this.jobKey = new JobKey(jobName, groupName);
+        this.triggerKey = new TriggerKey(triggerName, triggerGroupName);
     }
 
     public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+        return jobKey.getGroup();
     }
 
     public String getJobName() {
-        return jobName;
+        return jobKey.getName();
     }
 
-    public void setJobName(String jobName) {
-        this.jobName = jobName;
+    public JobKey getJobKey() {
+        return jobKey;
+    }
+
+    public void setJobKey(JobKey jobKey) {
+        this.jobKey = jobKey;
     }
 
     public Date getLastRun() {
@@ -59,32 +61,18 @@ public class BatchJobContext {
     }
 
     public String getTriggerName() {
-        return triggerName;
+        return triggerKey.getName();
     }
 
-    public void setTriggerName(String triggerName) {
-        this.triggerName = triggerName;
+    public String getTriggerGroupName() {
+        return triggerKey.getGroup();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        BatchJobContext that = (BatchJobContext) o;
-
-        if (!groupName.equals(that.groupName)) return false;
-        if (!jobName.equals(that.jobName)) return false;
-        if (!triggerName.equals(that.triggerName)) return false;
-
-        return true;
+    public void setTriggerKey(TriggerKey triggerKey) {
+        this.triggerKey = triggerKey;
     }
 
-    @Override
-    public int hashCode() {
-        int result = jobName.hashCode();
-        result = 31 * result + groupName.hashCode();
-        result = 31 * result + triggerName.hashCode();
-        return result;
+    public TriggerKey getTriggerKey() {
+        return triggerKey;
     }
 }

@@ -12,7 +12,7 @@ import org.geoserver.web.GeoServerApplication;
  * @author Andrea Aime - OpenGeo
  */
 @SuppressWarnings("serial")
-class PreviewLayerModel extends LoadableDetachableModel {
+class PreviewLayerModel extends LoadableDetachableModel<PreviewLayer> {
     String id;
     boolean group;
     
@@ -23,7 +23,7 @@ class PreviewLayerModel extends LoadableDetachableModel {
     }
 
     @Override
-    protected Object load() {
+    protected PreviewLayer load() {
         if(group) {
             return new PreviewLayer(GeoServerApplication.get().getCatalog().getLayerGroup(id));
         } else {

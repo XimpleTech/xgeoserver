@@ -855,7 +855,8 @@
    <dependency>
      <groupId>org.slf4j</groupId>
      <artifactId>slf4j-log4j12</artifactId>
-     <version>1.4.2</version>
+     <!--version>1.4.2</version-->
+     <version>1.7.5</version>
    </dependency>
    <dependency>
     <groupId>log4j</groupId>
@@ -870,27 +871,27 @@
    <dependency>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty</artifactId>
-    <version>6.1.8</version>
+    <version>6.1.26</version>
    </dependency>
    <dependency>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-naming</artifactId>
-    <version>6.1.8</version>
+    <version>6.1.26</version>
    </dependency>
    <dependency>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-plus</artifactId>
-    <version>6.1.8</version>
+    <version>6.1.26</version>
    </dependency>
    <dependency>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jetty-util</artifactId>
-    <version>6.1.8</version>
+    <version>6.1.26</version>
    </dependency>
    <dependency>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>jsp-2.0</artifactId>
-    <version>6.1.8</version>
+    <version>6.1.26</version>
     <type>pom</type>
    </dependency>
    <dependency>
@@ -918,15 +919,15 @@
     <artifactId>ant</artifactId>
     <version>${ant.version}</version>
    </dependency>
-   <dependency>
+   <!--dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>jcl104-over-slf4j</artifactId>
     <version>1.0.1</version>
-   </dependency>
+   </dependency-->
    <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-simple</artifactId>
-    <version>1.0.1</version>
+    <version>1.7.5</version>
    </dependency>
    <dependency>
     <groupId>javax.media</groupId>
@@ -1011,11 +1012,6 @@
       <version>${restlet.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.restlet</groupId>
-      <artifactId>org.restlet.ext.json</artifactId>
-      <version>1.0.8</version>
-    </dependency>
-    <dependency>
       <groupId>com.noelios.restlet</groupId>
       <artifactId>com.noelios.restlet.ext.servlet</artifactId>
       <version>${restlet.version}</version>
@@ -1065,6 +1061,21 @@
       <groupId>jfree</groupId>
       <artifactId>jfreechart</artifactId>
       <version>1.0.13</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast</artifactId>
+      <version>${hazelcast.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast-spring</artifactId>
+      <version>${hazelcast.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast-wm</artifactId>
+      <version>${hazelcast.version}</version>
     </dependency>
   </dependencies>
  </dependencyManagement>
@@ -1569,6 +1580,7 @@
   <module>web</module>
   <module>community</module>
   <module>extension</module>
+  <module>extras</module>
  </modules>
 
  <properties>
@@ -1600,6 +1612,7 @@
   <interactive.tests>false</interactive.tests>
   <surefire.forkNumber>1</surefire.forkNumber>
   <sqlServerDriverVersion>4.0.2206.100</sqlServerDriverVersion>
+  <hazelcast.version>3.1</hazelcast.version>
  </properties>
 
  <profiles>

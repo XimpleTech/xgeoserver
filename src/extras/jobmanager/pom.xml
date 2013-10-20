@@ -8,40 +8,60 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.ximple.geoserver</groupId>
-    <artifactId>plugin</artifactId>
+    <groupId>com.ximple.eofms</groupId>
+    <artifactId>extras</artifactId>
     <version>2.4.0.x-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.ximple.geoserver.plugin</groupId>
+  <groupId>com.ximple.geosextras</groupId>
   <artifactId>jobmanager</artifactId>
   <packaging>pom</packaging>
   <name>Ximple Quartz JobManager</name>
+
   <dependencies>
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>main</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.geoserver</groupId>
+      <artifactId>wms</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geoserver</groupId>
+      <artifactId>wfs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geoserver</groupId>
+      <artifactId>wcs</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <!-- quartz-scheduler-->
+    <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz</artifactId>
+      <version>${quartz.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.quartz-scheduler</groupId>
+      <artifactId>quartz-jobs</artifactId>
+      <version>${quartz.version}</version>
+    </dependency>
 
     <!-- Test depedencies -->
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>main</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-      <classifier>tests</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver</groupId>
-      <artifactId>wfs</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.geoserver</groupId>
-      <artifactId>wfs</artifactId>
-      <version>${project.version}</version>
       <scope>test</scope>
       <classifier>tests</classifier>
     </dependency>
@@ -57,5 +77,26 @@
     </dependency>
 
   </dependencies>
+
+  <properties>
+    <quartz.version>2.2.1</quartz.version>
+  </properties>
+
+  <build>
+    <testResources>
+      <testResource>
+        <directory>${basedir}/src/test/resources</directory>
+        <includes>
+          <include>**/*</include>
+        </includes>
+      </testResource>
+    </testResources>
+  </build>
+
+  <modules>
+    <module>core</module>
+    <module>rest</module>
+    <module>web</module>
+  </modules>
 
 </project>

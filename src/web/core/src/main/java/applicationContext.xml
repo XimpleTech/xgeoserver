@@ -12,6 +12,21 @@
   <bean id="webApplication" class="org.geoserver.web.GeoServerApplication">
   </bean>
 
+  <!--bean id="filter" class="com.hazelcast.web.WebFilter">
+    <constructor-arg>
+      <props>
+        <prop key="instance-name">geoHazelcastInstance</prop>
+        <prop key="config-location">hazelcast.xml</prop>
+        <prop key="client-config-location">hazelcast-client.xml</prop>
+        <prop key="use-client">false</prop>
+        <prop key="map-name">geoDefault</prop>
+        <prop key="sticky-session">true</prop>
+        <prop key="debug">true</prop>
+        <prop key="shutdown-on-destroy">true</prop>
+      </props>
+    </constructor-arg>
+  </bean-->
+
   <bean id="wicket"
     class="org.springframework.web.servlet.mvc.ServletWrappingController"
     lazy-init="true">

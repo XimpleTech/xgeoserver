@@ -1095,7 +1095,8 @@ public class WMS implements ApplicationContextAware {
     /**
      * Returns the default elevation (the minimum one)
      * 
-     * @param typeInfo
+     * @param coverage
+     * @param  dimensions
      * @return
      */
     Double getDefaultElevation(CoverageInfo coverage, ReaderDimensionsAccessor dimensions)
@@ -1184,10 +1185,9 @@ public class WMS implements ApplicationContextAware {
      * Builds a filter for the current time and elevation, should the layer support them. Only one
      * among time and elevation can be multi-valued
      * 
-     * @param layerFilter
-     * @param currentTime
-     * @param currentElevation
-     * @param mapLayerInfo
+     * @param times
+     * @param elevations
+     * @param typeInfo
      * @return
      */
     public Filter getTimeElevationToFilter(List<Object> times, List<Object> elevations,

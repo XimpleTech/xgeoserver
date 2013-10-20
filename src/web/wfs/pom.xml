@@ -46,23 +46,51 @@
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
-	    <dependency>
-	       <groupId>com.mockrunner</groupId>
-	       <artifactId>mockrunner-jdk1.5-j2ee1.3</artifactId>
-	       <scope>test</scope>
-	    </dependency>
+    <dependency>
+       <groupId>com.mockrunner</groupId>
+       <artifactId>mockrunner-jdk1.5-j2ee1.3</artifactId>
+       <scope>test</scope>
+    </dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-coverage</artifactId>
+      <scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-validation</artifactId>
+      <scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-data</artifactId>
+      <scope>test</scope>
 		</dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-wfs</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-arcgrid</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-geotiff</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-gtopo30</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-image</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>

@@ -1,0 +1,35 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+<body>
+<wicket:panel>
+    <div wicket:id="rootObjects">
+      <h3>
+      <wicket:message key="ConfirmExecutePanel.aboutExecute">About to execute</wicket:message>: <span wicket:id="rootObjectNames"></span>
+      </h3>
+    </div>
+    
+    <div wicket:id="notExecutedObjects">
+       <wicket:message key="ConfirmExecutePanel.notExecutedObject">The following objects could not be executed:</wicket:message>
+       <ul class="plain-ul">
+         <li wicket:id="notExecutedList" ><span wicket:id="name"></span>: <span wicket:id="reason"></span></li>
+       </ul>
+    </div>
+    
+    <div wicket:id="executedObjects">
+        <wicket:message
+            key="ConfirmExecutePanel.executedObjects">The following objects will be executed</wicket:message>:
+        <ul class="plain-ul">
+            <!--
+            <li wicket:id="workspacesExecuted"><wicket:message
+                key="ConfirmExecutePanel.workspaces" />: <span wicket:id="workspaces"></span></li>
+            <li wicket:id="storesExecuted" class="plain-li"><wicket:message key="ConfirmExecutePanel.stores"/>:
+                <span wicket:id="stores"></span></li>
+            <li wicket:id="layersExecuted"><wicket:message key="ConfirmExecutePanel.layers" />:
+                <span wicket:id="layers"></span></li>
+            <li wicket:id="groupsExecuted"><wicket:message key="ConfirmExecutePanel.groups" />:
+                <span wicket:id="groups"></span></li>
+            -->
+        </ul>
+    </div>
+</wicket:panel>
+</body>
+</html>

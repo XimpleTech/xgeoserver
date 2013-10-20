@@ -5,12 +5,12 @@
  application directory.
  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.geoserver</groupId>    
+    <groupId>org.geoserver</groupId>
     <artifactId>web</artifactId>
     <version>2.4.0.x-SNAPSHOT</version>
   </parent>
@@ -20,7 +20,7 @@
   <packaging>jar</packaging>
   <version>2.4.0.x-SNAPSHOT</version>
   <name>Core UI Module</name>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.apache.wicket</groupId>
@@ -47,7 +47,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.4.2</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
@@ -70,28 +69,28 @@
       <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
-	    <dependency>
-	       <groupId>com.mockrunner</groupId>
-	       <artifactId>mockrunner-jdk1.5-j2ee1.3</artifactId>
-	       <scope>test</scope>
-	    </dependency>
+    <dependency>
+      <groupId>com.mockrunner</groupId>
+      <artifactId>mockrunner-jdk1.5-j2ee1.3</artifactId>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.mortbay.jetty</groupId>
       <artifactId>jetty</artifactId>
       <scope>test</scope>
     </dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-coverage</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-validation</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-data</artifactId>
-		</dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-coverage</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-data</artifactId>
+    </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-shapefile</artifactId>
@@ -104,38 +103,47 @@
       <groupId>org.geotools</groupId>
       <artifactId>gt-wfs</artifactId>
     </dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-jdbc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-metadata</artifactId>
-		</dependency>
-  <dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-arcgrid</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-geotiff</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-gtopo30</artifactId>
-  </dependency>
-  <dependency>
-    <groupId>org.geotools</groupId>
-    <artifactId>gt-image</artifactId>
-  </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-web</artifactId>
-   </dependency>
-   <dependency>
-    <groupId>org.bouncycastle</groupId>
-    <artifactId>bcprov-jdk14</artifactId>    
-  </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-metadata</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-arcgrid</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-geotiff</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-gtopo30</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-image</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk14</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast-spring</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -149,7 +157,7 @@
             <configuration>
               <tasks>
                 <replace dir="${project.build.outputDirectory}" encoding="ISO-8859-1">
-                  <include name="*.properties"/> 
+                  <include name="*.properties"/>
                   <replacefilter token="@project.version@" value="${project.version}"/>
                   <replacefilter token="@build.revision@" value="${build.commit.id}"/>
                   <replacefilter token="@build.timestamp@" value="${build.timestamp}"/>

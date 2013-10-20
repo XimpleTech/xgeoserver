@@ -1,11 +1,18 @@
 package com.ximple.eofms.geoserver.batch.web;
 
+import com.ximple.eofms.geoserver.batch.job.JobManager;
+import org.apache.wicket.Application;
+import org.geoserver.web.GeoServerApplication;
+
 /**
- * Created with IntelliJ IDEA.
- * User: ulysseskao
- * Date: 13/10/16
- * Time: 下午5:08
- * To change this template use File | Settings | File Templates.
+ *
  */
 public class JobManagerWebUtils {
+    static JobManager jobManager() {
+        return GeoServerApplication.get().getBeanOfType(JobManager.class);
+    }
+
+    static boolean isDevMode() {
+        return Application.DEVELOPMENT.equalsIgnoreCase(GeoServerApplication.get().getConfigurationType());
+    }
 }

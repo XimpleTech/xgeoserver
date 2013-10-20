@@ -23,6 +23,10 @@ RequestExecutionLevel admin
 !include "StrFunc.nsh" ; String functions
 !include "LogicLib.nsh" ; ${If} ${Case} etc.
 !include "nsDialogs.nsh" ; For Custom page layouts (Radio buttons etc)
+!include "Library.nsh"
+!include "nsDialogs.nsh"
+!include "TradChinese.nsh"
+
 
 ; Might be the same as !define
 Var STARTMENU_FOLDER
@@ -60,6 +64,7 @@ Var PortHWND
 ;VIAddVersionKey Comments "http://geoserver.org"
 
 ; Install options page headers
+
 LangString TEXT_JRE_TITLE ${LANG_ENGLISH} "Java Runtime Environment"
 LangString TEXT_JRE_SUBTITLE ${LANG_ENGLISH} "Java Runtime Environment path selection"
 LangString TEXT_DATADIR_TITLE ${LANG_ENGLISH} "GeoServer Data Directory"
@@ -90,11 +95,11 @@ LangString TEXT_PORT_SUBTITLE ${LANG_ENGLISH} "Set the port that GeoServer will 
 !define MUI_ABORTWARNING
 
 ; Optional welcome text here
-  !define MUI_WELCOMEPAGE_TEXT "This wizard will guide you through the installation of ${APPNAMEANDVERSION}. \r\n\r\n\
-	It is recommended that you close all other applications before starting Setup.\
-	This will make it possible to update relevant system files without having to reboot your computer.\r\n\r\n\
-	Please report any problems or suggestions to the GeoServer Users mailing list: geoserver-users@lists.sourceforge.net. \r\n\r\n\
-	Click Next to continue."
+  !define MUI_WELCOMEPAGE_TEXT "這段程式將會幫助你完成 ${APPNAMEANDVERSION}. \r\n\r\n\
+	在安裝此程式之前,建議你關閉其他的應用程式.\
+	這將會更新相關的系統文件,而不需要重新啟動電腦.\r\n\r\n\
+	如果有任何問題或建議關於GeoServer可以將信件寄件於: geoserver-users@lists.sourceforge.net. \r\n\r\n\
+	請案'下一步'繼續."
 
 ; Install Page order
 ; This is the main list of installer things to do 
@@ -119,7 +124,7 @@ Page custom Ready                                             ; Summary page
 !insertmacro MUI_UNPAGE_INSTFILES ; Do the uninstall
 
 ; Set languages (first is default language)
-!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_LANGUAGE "TradChinese"
 !insertmacro MUI_RESERVEFILE_LANGDLL
 
 ; Startup tasks
@@ -135,8 +140,11 @@ Function .onInit
   Delete $TEMP\spltmp.bmp
 	
   StrCpy $IsManual 1  ; Set to run manually by default
-		
+
+  ;!insertmacro MUI_LANGDLL_DISPLAY
+
 FunctionEnd
+
 
 ; Check the user type, and quit if it's not an administrator.
 ; Taken from Examples/UserInfo that ships with NSIS.
@@ -213,10 +221,10 @@ Function JRE
   nsDialogs::Create 1018
   ; ${NSD_Create*} x y width height text
 
-  ${NSD_CreateLabel} 0 0 100% 36u "Please select the path to your Java Runtime Environment (JRE).\
-                                   $\r$\n$\r$\nIf you don't have a JRE installed, you can use the \
-                                   link below to go to Oracle's website to download and install the \
-                                   correct JRE for your system."
+  ${NSD_CreateLabel} 0 0 100% 36u "請選擇JAVA運行時的路徑(JRE).\
+                                   $\r$\n$\r$\n如果不安裝JRE的話, 你可以從下面的 \
+                                   連結至Oracle的網站上下載並安裝 \
+                                   正確的JRE自目前的系統."
 
   ${NSD_CreateLink} 12u 40u 100% 12u "http://www.oracle.com/technetwork/java/javase/downloads/index.html"
   Pop $LinkHWND
@@ -227,7 +235,7 @@ Function JRE
   ${NSD_OnChange} $JavaHomeHWND JREPathValid
   Pop $9
 
-  ${NSD_CreateBrowseButton} 242u 70u 50u 13u "Browse..."
+  ${NSD_CreateBrowseButton} 242u 70u 50u 13u "瀏覽..."
   Pop $BrowseJavaHWND
   ${NSD_OnClick} $BrowseJavaHWND BrowseJava
 
@@ -235,12 +243,12 @@ Function JRE
   Pop $JavaPathCheck
 
   ${If} $8 == "validJRE"
-    ${NSD_SetText} $JavaPathCheck "This path contains a valid JRE"
+    ${NSD_SetText} $JavaPathCheck "此段路徑裡包含了JRE程式"
     GetDlgItem $0 $HWNDPARENT 1 ; Next
     EnableWindow $0 1 ; Turns on
   ${EndIf}
   ${If} $8 == "novalidJRE"
-    ${NSD_SetText} $JavaPathCheck "This path does not contain a valid JRE"
+    ${NSD_SetText} $JavaPathCheck "此段路徑尚未含有JRE相關程式"
     GetDlgItem $0 $HWNDPARENT 1 ; Next
     EnableWindow $0 0 ; Turns off
   ${EndIf}
@@ -362,26 +370,26 @@ Function DataDir
   nsDialogs::Create 1018
   ; ${NSD_Create*} x y width height text
 
-  ${NSD_CreateLabel} 0 0 100% 24u "If you have an existing data directory, please select its path.  \
-                                   Otherwise, the default data directory will be used."
+  ${NSD_CreateLabel} 0 0 100% 24u "如果你已經安裝過此軟體,請選擇其他安裝路徑.  \
+                                   否則, 原始的數據將會被覆蓋."
 
   ${NSD_CreateRadioButton} 10u 36u 10u 10u
   Pop $DefaultDataDir
 
-  ${NSD_CreateLabel} 25u 37u 250u 24u "Default data directory. Will be located at: \
+  ${NSD_CreateLabel} 25u 37u 250u 24u "預設的路徑. 將會安裝於: \
                                        $\r$\n$INSTDIR\data_dir"
 
   ${NSD_CreateRadioButton} 10u 80u 10u 10u
   Pop $ExistingDataDir
 
-  ${NSD_CreateLabel} 25u 81u 250u 12u "Existing data directory:"
+  ${NSD_CreateLabel} 25u 81u 250u 12u "其他路徑:"
 
   ${NSD_CreateDirRequest} 25u 94u 215u 13u $DataDirTemp
   Pop $DataDirHWND
   ${NSD_OnChange} $DataDirHWND DataDirPathValid
   Pop $9
 
-  ${NSD_CreateBrowseButton} 242u 94u 50u 13u "Browse..."
+  ${NSD_CreateBrowseButton} 242u 94u 50u 13u "瀏覽..."
   Pop $BrowseDataDirHWND
   ${NSD_OnClick} $BrowseDataDirHWND BrowseDataDir
 
@@ -533,14 +541,14 @@ Function Creds
     StrCpy $GSPass "geoserver"
 
   ;Syntax: ${NSD_*} x y width height text
-  ${NSD_CreateLabel} 0 0 100% 36u "Set the username and password for administration of GeoServer."
+  ${NSD_CreateLabel} 0 0 100% 36u "請設定使用者名稱及密碼."
 
-  ${NSD_CreateLabel} 20u 40u 40u 14u "Username"  
+  ${NSD_CreateLabel} 20u 40u 40u 14u "使用者名稱"
   ${NSD_CreateText} 70u 38u 50u 14u $GSUser
   Pop $GSUserHWND
   ${NSD_OnChange} $GSUserHWND UsernameCheck
 
-  ${NSD_CreateLabel} 20u 60u 40u 14u "Password" 
+  ${NSD_CreateLabel} 20u 60u 40u 14u "密碼"
   ${NSD_CreateText} 70u 58u 50u 14u $GSPass
   Pop $GSPassHWND
   ${NSD_OnChange} $GSPassHWND PasswordCheck
@@ -601,14 +609,14 @@ Function Port
     StrCpy $Port "8080"
 
   ;Syntax: ${NSD_*} x y width height text
-  ${NSD_CreateLabel} 0 0 100% 36u "Set the web server port that GeoServer will respond on."
+  ${NSD_CreateLabel} 0 0 100% 36u "設置一組服務端,使GeoServer回應使用者."
 
-  ${NSD_CreateLabel} 20u 40u 20u 14u "Port"  
+  ${NSD_CreateLabel} 20u 40u 20u 25u "端口:(Port)"
   ${NSD_CreateNumber} 50u 38u 50u 14u $Port
   Pop $PortHWND
   ${NSD_OnChange} $PortHWND PortCheck
 
-  ${NSD_CreateLabel} 110u 40u 120u 14u "Valid range is 1024-65535." 
+  ${NSD_CreateLabel} 110u 40u 120u 14u "數字介於1024-65535."
 
   nsDialogs::Show
 
@@ -641,12 +649,12 @@ Function InstallType
   !insertmacro MUI_HEADER_TEXT "$(TEXT_TYPE_TITLE)" "$(TEXT_TYPE_SUBTITLE)"
 
   ;Syntax: ${NSD_*} x y width height text
-  ${NSD_CreateLabel} 0 0 100% 24u 'Select the type of installation for GeoServer.  If you are unsure of which option to choose, select the "Run manually" option.'
-  ${NSD_CreateRadioButton} 10u 28u 50% 12u "Run manually"
+  ${NSD_CreateLabel} 0 0 100% 24u '選擇安裝的GeoServer類型. 如果不確定要選擇哪個選項 , 請選擇"個人使用"的選項.'
+  ${NSD_CreateRadioButton} 10u 28u 50% 12u "個人使用"
   Pop $Manual
 
-  ${NSD_CreateLabel} 10u 44u 90% 24u "Installed for the current user.  Must be manually started and stopped."
-  ${NSD_CreateRadioButton} 10u 72u 50% 12u "Install as a service"
+  ${NSD_CreateLabel} 10u 44u 90% 24u "安裝為當前用戶.  必須手動啟動及停止GeoServer."
+  ${NSD_CreateRadioButton} 10u 72u 50% 12u "共同使用"
   Pop $Service
 
   ${If} $IsManual == 1
@@ -655,7 +663,7 @@ Function InstallType
     ${NSD_Check} $Service
   ${EndIf}
 
-  ${NSD_CreateLabel} 10u 88u 90% 24u "Installed for all users.  Will run as as a Windows Service for greater security.  Requires a 32 bit JRE."
+  ${NSD_CreateLabel} 10u 88u 90% 24u "安裝給所有的使用者使用.  將提高安全性並執行於Windows Server底下.  需要一組32位元的JRE程式."
 
   nsDialogs::Show
 
@@ -677,40 +685,40 @@ Function Ready
   !insertmacro MUI_HEADER_TEXT "$(TEXT_READY_TITLE)" "$(TEXT_READY_SUBTITLE)"
 
   ;Syntax: ${NSD_*} x y width height text
-  ${NSD_CreateLabel} 0 0 100% 24u "Please review the settings below and click the Back button if \
-                                   changes need to be made.  Click the Install button to continue."
+  ${NSD_CreateLabel} 0 0 100% 24u "請仔細閱讀下方的設置,點擊'上一步'可修改目前設置 \
+                                   .  點擊'安裝'按鈕將會確實安裝."
 
   ; Directory
-  ${NSD_CreateLabel} 10u 25u 35% 24u "Installation directory:"
+  ${NSD_CreateLabel} 10u 25u 35% 24u "安裝路徑:"
   ${NSD_CreateLabel} 40% 25u 60% 24u "$INSTDIR"
 
   ; Install type
-  ${NSD_CreateLabel} 10u 45u 35% 24u "Installation type:"
+  ${NSD_CreateLabel} 10u 45u 35% 24u "安裝類型:"
   ${If} $IsManual == 1
-    ${NSD_CreateLabel} 40% 45u 60% 24u "Run manually"
+    ${NSD_CreateLabel} 40% 45u 60% 24u "個人使用"
   ${Else}
-    ${NSD_CreateLabel} 40% 45u 60% 24u "Installed as a service"
+    ${NSD_CreateLabel} 40% 45u 60% 24u "共同使用"
   ${EndIf}
  
   ; JRE
-  ${NSD_CreateLabel} 10u 65u 35% 24u "Java Runtime Environment:"
+  ${NSD_CreateLabel} 10u 65u 35% 24u "Java所安裝的路徑:"
   ${NSD_CreateLabel} 40% 65u 60% 24u "$JavaHome"
 
 
   ; Data dir
-  ${NSD_CreateLabel} 10u 85u 35% 24u "Data Directory:"
+  ${NSD_CreateLabel} 10u 85u 35% 24u "資料儲存位置:"
   ${If} $IsExisting == 1
-    ${NSD_CreateLabel} 40% 85u 60% 24u "Using existing data directory:$\r$\n$DataDir"
+    ${NSD_CreateLabel} 40% 85u 60% 24u "使用現有的目錄:$\r$\n$DataDir"
   ${Else}
-    ${NSD_CreateLabel} 40% 85u 60% 24u "Using default data directory:$\r$\n$DataDir"
+    ${NSD_CreateLabel} 40% 85u 60% 24u "使用現有的目錄:$\r$\n$DataDir"
   ${EndIf}
 
   ; Creds
   ${If} $IsExisting == 1
-    ${NSD_CreateLabel} 10u 112u 35% 24u "Port:"
+    ${NSD_CreateLabel} 10u 112u 35% 24u "端口:"
     ${NSD_CreateLabel} 40% 112u 60% 24u "$Port"
   ${Else}
-    ${NSD_CreateLabel} 10u 112u 35% 24u "Username / Password / Port:"
+    ${NSD_CreateLabel} 10u 112u 35% 24u "使用者名稱/ 密碼 / 端口(Port):"
     ${NSD_CreateLabel} 40% 112u 60% 24u "$GSUser / $GSPass / $Port"
   ${EndIf}
 
@@ -754,6 +762,7 @@ Section "Main" SectionMain
   ; Section Files and Shortcuts
   CreateDirectory "$INSTDIR"
   SetOutPath "$INSTDIR"
+  File /r gs.ico
   File /a start.jar
   File /a GPL.txt
   File /a LICENSE.txt
@@ -765,7 +774,7 @@ Section "Main" SectionMain
   File /r logs
   File /r resources
   File /r webapps
-  File /r gs.ico
+
 
   ; Write environment variables
   Push "JAVA_HOME"
@@ -807,6 +816,7 @@ Section "Main" SectionMain
     AccessControl::GrantOnFile "$INSTDIR\logs" "NT AUTHORITY\Network Service" "FullAccess"
     AccessControl::GrantOnFile "$DataDir" "NT AUTHORITY\Network Service" "FullAccess"
   ${EndIf}
+
 
 SectionEnd
 

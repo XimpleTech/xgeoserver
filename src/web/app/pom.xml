@@ -50,7 +50,12 @@
     </dependency>
     <dependency>
       <groupId>org.geoserver.web</groupId>
-      <artifactId>web-security</artifactId>
+      <artifactId>web-sec-jdbc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geoserver.web</groupId>
+      <artifactId>web-sec-ldap</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -731,6 +736,11 @@
           <artifactId>sec-cas</artifactId>
           <version>${project.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.geoserver.web</groupId>
+          <artifactId>web-sec-cas</artifactId>
+          <version>${project.version}</version>
+        </dependency>
       </dependencies>
     </profile>
     <profile>
@@ -1003,6 +1013,21 @@
         <dependency>
           <groupId>org.geoserver.community</groupId>
           <artifactId>geopkg</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>wfs-notification</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.geoserver.community</groupId>
+          <artifactId>wfs-notification-api</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.geoserver.community</groupId>
+          <artifactId>wfs-notification-plugin</artifactId>
           <version>${project.version}</version>
         </dependency>
       </dependencies>

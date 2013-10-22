@@ -101,8 +101,9 @@ public class GetCoverage {
     private final static Set<String> mdFormats;
 
     static {
+        //TODO: This one should be pluggable
         mdFormats = new HashSet<String>();
-        mdFormats.add("NetCDF");
+        mdFormats.add("application/x-netcdf");
     }
 
     /** Logger.*/

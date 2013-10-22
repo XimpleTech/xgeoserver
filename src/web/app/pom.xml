@@ -10,12 +10,12 @@
   <parent>
     <groupId>org.geoserver</groupId>
     <artifactId>web</artifactId>
-    <version>2.4.0.x-SNAPSHOT</version>
+    <version>2.4.1.x-SNAPSHOT</version>
   </parent>
   <groupId>org.geoserver.web</groupId>
   <artifactId>web-app</artifactId>
   <packaging>jar</packaging>
-  <version>2.4.0.x-SNAPSHOT</version>
+  <version>2.4.1.x-SNAPSHOT</version>
   <name>GeoServer Web Application</name>
   <dependencies>
     <dependency>
@@ -50,7 +50,12 @@
     </dependency>
     <dependency>
       <groupId>org.geoserver.web</groupId>
-      <artifactId>web-security</artifactId>
+      <artifactId>web-sec-jdbc</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geoserver.web</groupId>
+      <artifactId>web-sec-ldap</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -364,7 +369,7 @@
         <dependency>
           <groupId>org.geoserver.extension</groupId>
           <artifactId>arcsde</artifactId>
-          <version>2.4.0.x-SNAPSHOT</version>
+          <version>2.4.1.x-SNAPSHOT</version>
         </dependency>
       </dependencies>
     </profile>
@@ -393,7 +398,7 @@
         <dependency>
           <groupId>org.geoserver.extension</groupId>
           <artifactId>sqlserver</artifactId>
-          <version>2.4.0.x-SNAPSHOT</version>
+          <version>2.4.1.x-SNAPSHOT</version>
         </dependency>
       </dependencies>
     </profile>
@@ -403,7 +408,7 @@
         <dependency>
           <groupId>org.geoserver.extension</groupId>
           <artifactId>oracle</artifactId>
-          <version>2.4.0.x-SNAPSHOT</version>
+          <version>2.4.1.x-SNAPSHOT</version>
         </dependency>
       </dependencies>
     </profile>
@@ -413,7 +418,7 @@
         <dependency>
           <groupId>org.geoserver.extension</groupId>
           <artifactId>mysql</artifactId>
-          <version>2.4.0.x-SNAPSHOT</version>
+          <version>2.4.1.x-SNAPSHOT</version>
         </dependency>
       </dependencies>
     </profile>
@@ -775,6 +780,11 @@
           <artifactId>sec-cas</artifactId>
           <version>${project.version}</version>
         </dependency>
+        <dependency>
+          <groupId>org.geoserver.web</groupId>
+          <artifactId>web-sec-cas</artifactId>
+          <version>${project.version}</version>
+        </dependency>
       </dependencies>
     </profile>
     <profile>
@@ -1064,6 +1074,21 @@
         <dependency>
           <groupId>org.geoserver.community</groupId>
           <artifactId>geopkg</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>wfs-notification</id>
+      <dependencies>
+        <!--dependency>
+          <groupId>org.geoserver.community</groupId>
+          <artifactId>wfs-notification-api</artifactId>
+          <version>${project.version}</version>
+        </dependency-->
+        <dependency>
+          <groupId>org.geoserver.community</groupId>
+          <artifactId>wfs-notification-plugin</artifactId>
           <version>${project.version}</version>
         </dependency>
       </dependencies>

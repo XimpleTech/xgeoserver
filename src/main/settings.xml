@@ -1,0 +1,15 @@
+<settings>
+  <id>SettingsInfoImpl--4ab1cb4a:141defac27f:-7599</id>
+  <workspace>
+    <id>WorkspaceInfoImpl--4ab1cb4a:141defac27f:-759b</id>
+    <name>nonDefault</name>
+  </workspace>
+  <contact>
+    <id>contact</id>
+  </contact>
+  <charset>UTF-8</charset>
+  <numDecimals>4</numDecimals>
+  <verbose>true</verbose>
+  <verboseExceptions>false</verboseExceptions>
+  <localWorkspaceIncludesPrefix>false</localWorkspaceIncludesPrefix>
+</settings>

@@ -26,8 +26,9 @@ public abstract class GeoserverQuartzJobBean extends QuartzJobBean {
     private static final String WCS_CONFIG = "wcsConfig";
     private static final String WFS_CONFIG = "wfsConfig";
     private static final String WMS_INSTANCE = "wms";
+    private static final String GEOSERVER_INSTANCE = "geoServer";
 
-    protected GeoServer geoServer;
+    private GeoServer geoServer;
 
     protected abstract void executeInternal(JobExecutionContext executionContext) throws JobExecutionException;
 
@@ -47,8 +48,9 @@ public abstract class GeoserverQuartzJobBean extends QuartzJobBean {
         return appCtx;
     }
 
-    public void setGeoServer(GeoServer geoServer) {
-        this.geoServer = geoServer;
+
+    protected GeoServer getGeosServer(JobExecutionContext context) throws JobExecutionException {
+        return (GeoServer) getApplicationContext(context).getBean(GEOSERVER_INSTANCE);
     }
 
     /*

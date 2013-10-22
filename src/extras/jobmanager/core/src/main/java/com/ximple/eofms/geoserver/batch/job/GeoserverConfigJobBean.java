@@ -216,8 +216,10 @@ public abstract class GeoserverConfigJobBean extends GeoserverQuartzJobBean {
         return GeoserverDataDirectory.findConfigDir(rootDir, name);
     }
 
+    /*
     protected Catalog getCatalog() {
-        if (geoServer == null) return null;
+        if (getGeoServer() == null) return null;
         return geoServer.getCatalog();
     }
+    */
 }

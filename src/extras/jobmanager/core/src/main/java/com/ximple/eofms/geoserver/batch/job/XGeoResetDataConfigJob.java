@@ -22,18 +22,27 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.collections.MultiMap;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.xmlrules.DigesterLoader;
+import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.CatalogFactory;
 import org.geoserver.catalog.DataStoreInfo;
+import org.geoserver.catalog.FeatureTypeInfo;
+import org.geoserver.catalog.StyleInfo;
+import org.geoserver.config.GeoServer;
 import org.geoserver.feature.FeatureSourceUtils;
+import org.geotools.data.DataAccess;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.referencing.CRS;
+import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
+import org.opengis.feature.type.GeometryDescriptor;
+import org.opengis.feature.type.GeometryType;
 import org.opengis.metadata.Identifier;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -42,6 +51,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.SimpleTrigger;
+import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.web.context.ContextLoader;
 import org.vfny.geoserver.global.ConfigurationException;
 import org.vfny.geoserver.global.GeoserverDataDirectory;
@@ -108,7 +118,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             try {
                 xfmsConfigDir = GeoserverDataDirectory.findConfigDir(rootDir, "xgsjobs");
             } catch (ConfigurationException cfe) {
-                LOGGER.warning("no xmark dir found, creating new one");
+                LOGGER.warning("no xgsjobs dir found, creating new one");
                 //if for some bizarre reason we don't fine the dir, make a new one.
                 xfmsConfigDir = new File(rootDir, "xgsjobs");
             }
@@ -176,12 +186,6 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
     protected void doExecuteInternal(JobExecutionContext executionContext)
         throws JobExecutionException {
-
-    }
-
-    /*
-    protected void doExecuteInternal(JobExecutionContext executionContext)
-        throws JobExecutionException {
         if (executionContext == null)
             return;
 
@@ -189,39 +193,44 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             LOGGER.info("XGeoResetDataConfigJob internal execute begin.");
 
         boolean masterMode = isMasterMode(executionContext);
-        DataConfig dataConfig = getDataConfig(executionContext);
-        DataStoreConfig targetDataStoreConf = null;
-        DataStoreInfo targetDataStoreInfo = getCatalog().getDataStoreByName("pgDMMS");
-        // if (targetDataStoreInfo.)
-        List idList = dataConfig.getDataStoreIds();
-        for (Object anIdList : idList) {
-            String dsId = (String) anIdList;
-            if (dsId.equalsIgnoreCase("pgDMMS")) {
-                DataStoreConfig dsConf = dataConfig.getDataStore(dsId);
-                Map params = dsConf.getConnectionParams();
-                if (params.get("dbtype").equals("postgis")) {
-                    String ownerName = (String) params.get("user");
-                    targetDataStoreConf = dsConf;
-                    if (masterMode)
-                        resetPostgisViewMapping(executionContext, targetDataStoreConf, ownerName);
-                }
-                break;
-            }
-        }
+        GeoServer geoServer = getGeosServer(executionContext);
+        Catalog catalog = geoServer.getCatalog();
+
+        // DataStoreInfo targetDataStoreInfo = catalog.getDataStoreByName("pgDMMS");
 
         try {
+            DataStoreInfo targetDataStoreInfo = null;
+            JDBCDataStore jdbcDataStore = null;
+            List<DataStoreInfo> dataStoreInfos = catalog.getDataStores();
+            for (DataStoreInfo storeInfo : dataStoreInfos) {
+                if (storeInfo.getName().equalsIgnoreCase("pgDMMS")) {
+                    Map params = storeInfo.getConnectionParameters();
+                    if (params.get("dbtype").equals("postgis")) {
+                        String ownerName = (String) params.get("user");
+                        DataAccess access = storeInfo.getDataStore(null);
+                        if (access instanceof JDBCDataStore) {
+                            jdbcDataStore = (JDBCDataStore) access;
+                        }
+                        targetDataStoreInfo = storeInfo;
+                        LOGGER.info("found pgDMMS");
+                    }
+                }
+            }
+
             if (masterMode) {
                 if (LOGGER.isLoggable(Level.INFO))
                     LOGGER.info("XGeoResetDataConfigJob into MASTERMODE.");
+                DataAccess<? extends FeatureType, ? extends Feature> a = targetDataStoreInfo.getDataStore(null);
+
                 // MASTER NODE MODE
-                resetFeatureTypesMapping(executionContext, dataConfig, targetDataStoreConf);
-                resetGeoserverDataConfig(executionContext, targetDataStoreConf,
+                resetFeatureTypesMapping(executionContext, catalog, jdbcDataStore, targetDataStoreInfo);
+                resetGeoserverDataState(executionContext, jdbcDataStore,
                     DataReposVersionManager.VSSTATUS_LINKVIEW,
                     DataReposVersionManager.VSSTATUS_CONFIG, false);
 
-                resetGeoserverWMSConfig(executionContext, targetDataStoreConf, masterMode);
-                resetWMSVirtualLayerMapping(executionContext, targetDataStoreConf, masterMode);
-                resetGeoserverDataConfig(executionContext, targetDataStoreConf,
+                resetGeoserverWMSConfig(executionContext, catalog, masterMode);
+                resetWMSVirtualLayerMapping(executionContext, catalog, masterMode);
+                resetGeoserverDataState(executionContext, jdbcDataStore,
                     DataReposVersionManager.VSSTATUS_CONFIG,
                     DataReposVersionManager.VSSTATUS_USING, true);
                 lastUpdate = Calendar.getInstance().getTime();
@@ -229,8 +238,13 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 if (LOGGER.isLoggable(Level.INFO))
                     LOGGER.info("XGeoResetDataConfigJob into SALAVEMODE.");
                 // SALAVE NODE MODE
-                boolean needReset = syncFeatureTypesMapping(executionContext, dataConfig, targetDataStoreConf);
+
+                // TODO: Salave Node
+                // boolean needReset = syncFeatureTypesMapping(executionContext, catalog, targetDataStoreInfo);
+                boolean needReset = false;
                 if (needReset) {
+                    geoServer.reload();
+                    /*
                     updateGeoserver(executionContext);
                     updateValidation(executionContext);
                     if (LOGGER.isLoggable(Level.FINE))
@@ -263,9 +277,11 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                     loadValidation(executionContext);
                     if (LOGGER.isLoggable(Level.INFO))
                         LOGGER.info("resetGeoserverWMSConfig and resetWMSVirtualLayerMapping sucessful.");
+                    */
 
                     lastUpdate = new Date(System.currentTimeMillis());
                 }
+
                 if (lastUpdate == null) {
                     lastUpdate = new Date(System.currentTimeMillis());
                 }
@@ -273,12 +289,13 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
 
         if (LOGGER.isLoggable(Level.INFO))
             LOGGER.info("XGeoResetDataConfigJob internal execute completed.");
     }
-    */
 
     /**
      * 重新建立所有重新建立所有PostGIS中的資料庫視景
@@ -504,35 +521,37 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         connection.commit();
     }
 
-    /*
+    public static final String SEPARATOR = ":::";
+
     private void resetFeatureTypesMapping(JobExecutionContext executionContext,
-                                          DataInfo dataConfig, DataStoreConfigInfo dsConf)
+                                          Catalog catalog, JDBCDataStore dataStore, DataStoreInfo targetStoreInfo)
         throws IOException, JobExecutionException {
         assert executionContext != null;
 
         ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
-        DataStore dataStore = dsConf.findDataStore(servletContext);
-
         if (!checkCurrentRepositoryStatus(dataStore, DataReposVersionManager.VSSTATUS_LINKVIEW)) {
             return;
         }
 
-        Map styles = dataConfig.getStyles();
+        List<StyleInfo> styles = catalog.getStyles();
+
         XGeosDataConfigMapping mapping = getConfigMapping();
         HashMap<String, String> defaultStyles = buildDefaultStylesMapping(mapping);
 
         try {
             String[] dsFTypeNames = dataStore.getTypeNames();
-
             for (String featureTypeName : dsFTypeNames) {
-                String ftKey = dsConf.getId() + DataConfig.SEPARATOR + featureTypeName;
-                FeatureTypeConfig ftConfig = dataConfig.getFeatureTypeConfig(ftKey);
-                if (ftConfig == null) {
-                    if (!createFeatureTypeConfig(dataConfig, dsConf, dataStore, styles, featureTypeName, defaultStyles)) {
+                String ftKey = targetStoreInfo.getId() + SEPARATOR + featureTypeName;
+
+                // String ftKey = dsConf.getId() + DataConfig.SEPARATOR + featureTypeName;
+                FeatureTypeInfo ftInfo = catalog.getFeatureTypeByDataStore(targetStoreInfo, ftKey);
+
+                if (ftInfo == null) {
+                    if (!createFeatureTypeConfig(catalog, targetStoreInfo, dataStore, styles, featureTypeName, defaultStyles)) {
                         LOGGER.info("Create Feature Failed. [" + featureTypeName + "]");
                     }
                 } else {
-                    updateFeatureTypeConfig(ftConfig, dataStore, styles, defaultStyles);
+                    // updateFeatureTypeConfig(ftInfo, dataStore, styles, defaultStyles);
                 }
             }
         } finally {
@@ -540,19 +559,25 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         }
     }
 
-    private boolean createFeatureTypeConfig(DataConfig dataConfig, DataStoreConfig dsConf, DataStore dataStore,
-                                            Map styles, String featureTypeName, HashMap<String, String> defaultStyles)
+    private boolean createFeatureTypeConfig(Catalog dataConfig, DataStoreInfo dsConf, DataStore dataStore,
+                                            List<StyleInfo> styles,
+                                            String featureTypeName,
+                                            HashMap<String, String> defaultStyles)
         throws IOException, JobExecutionException {
-        FeatureTypeConfig ftConfig;
+        FeatureTypeInfo ftConfig;
         FeatureType featureType = dataStore.getSchema(featureTypeName);
-        ftConfig = new FeatureTypeConfig(dsConf.getId(), featureType, false);
+        CatalogFactory a = dataConfig.getFactory();
+        ftConfig = a.createFeatureType();
 
-        if (featureType.getDefaultGeometry() == null) {
+        /*
+        ftConfig = new FeatureTypeInfo(dsConf.getId(), featureType, false);
+
+        if (featureType.getGeometryDescriptor() == null) {
             LOGGER.warning("featureType=" + featureType.getTypeName() + " has not DefaultGeometry");
             return false;
         }
 
-        CoordinateReferenceSystem crs = featureType.getDefaultGeometry().getCoordinateSystem();
+        CoordinateReferenceSystem crs = featureType.getGeometryDescriptor().getCoordinateReferenceSystem();
         if (crs != null) {
             Set idents = crs.getIdentifiers();
 
@@ -572,15 +597,15 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             ftConfig.setSRS(SRSID_TWD97_ZONE121);
         }
 
-        Envelope latLongBox = new Envelope();
-        Envelope nativeBox = new Envelope();
+        ReferencedEnvelope latLongBox = new ReferencedEnvelope();
+        ReferencedEnvelope nativeBox = new ReferencedEnvelope();
 
         FeatureSource fs = dataStore.getFeatureSource(featureType.getTypeName());
         Envelope bboxNative = FeatureSourceUtils.getBoundingBoxEnvelope(fs);
         if (!setFeatureConfBBoxFromNative(bboxNative, ftConfig, featureType)) {
             if (!latLongBox.isNull()) {
-                ftConfig.setLatLongBBox(latLongBox);
-                ftConfig.setNativeBBox(nativeBox);
+                ftConfig.setLatLonBoundingBox(latLongBox);
+                ftConfig.setNativeBoundingBox(nativeBox);
             } else {
                 LOGGER.info("Cannot setLatLongBBox on " + ftConfig.toString());
             }
@@ -588,34 +613,39 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
         ftConfig.setDefaultStyle(getDefaultFeatureTypeStyleId(styles, defaultStyles, featureType));
 
-        if (ftConfig.getAlias() != null && !"".equals(ftConfig.getAlias()))
+        if (ftConfig.getAlias() != null && !"".equals(ftConfig.getAlias())) {
             dataConfig.addFeatureType(ftConfig.getDataStoreId() + ":" + ftConfig.getAlias(), ftConfig);
-        else
+            dataConfig.getFeatureTypeByName()
+        } else
             dataConfig.addFeatureType(ftConfig.getDataStoreId() + ":" + ftConfig.getName(), ftConfig);
+        */
+
         return true;
     }
 
-    protected boolean updateFeatureTypeConfig(FeatureTypeConfig ftConfig, DataStore dataStore,
+    protected boolean updateFeatureTypeConfig(FeatureTypeInfo ftConfig, DataStore dataStore,
                                               Map styles, HashMap<String, String> defaultStyles) throws IOException {
         FeatureType featureType = dataStore.getSchema(ftConfig.getName());
+        /*
         String currentStyle = ftConfig.getDefaultStyle();
         String defaultStyle = getDefaultFeatureTypeStyleId(styles, defaultStyles, featureType);
         if (!currentStyle.equals(defaultStyle)) {
             ftConfig.setDefaultStyle(defaultStyle);
             return true;
         }
+        */
         return false;
     }
 
     protected String getDefaultFeatureTypeStyleId(Map styles, HashMap<String, String> defaultStyles, FeatureType featureType) {
-        String ftName = featureType.getTypeName();
+        String ftName = featureType.getName().getLocalPart();
         boolean isNormalFeature = false;
         boolean isLandBased = false;
         boolean isIndex = false;
         boolean isSmallIndex = false;
         boolean isSymbol = false;
-        GeometryAttributeType geomAttrType = featureType.getDefaultGeometry();
-        Class geomType = geomAttrType.getBinding();
+        GeometryDescriptor geomAttrType = featureType.getGeometryDescriptor();
+        GeometryType geomType = geomAttrType.getType();
         if (defaultStyles.containsKey(ftName)) {
             String defaultStyleName = defaultStyles.get(ftName);
             String styleName = retrieveDefaultStyle(styles, defaultStyleName, "unknown");
@@ -636,7 +666,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         if (ftName.indexOf("lnd") != -1) {
             isLandBased = true;
         }
-        if (featureType.find("symbol") != -1) {
+        if (featureType.getName().getLocalPart().indexOf("symbol") != -1) {
             isSymbol = true;
         }
 
@@ -693,7 +723,6 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
         return "pgTPC_Symbol";
     }
-    */
 
     private static String retrieveDefaultStyle(Map styles, String styleName, String defaultStyleName) {
         if (styles.containsKey(styleName)) {
@@ -702,11 +731,12 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             return defaultStyleName;
     }
 
-    /*
-    protected void resetGeoserverWMSConfig(JobExecutionContext executionContext, DataStoreConfig dataStoreConf,
+    protected void resetGeoserverWMSConfig(JobExecutionContext executionContext, Catalog dataStoreConf,
                                            boolean masterMode)
         throws JobExecutionException, IOException {
+
         ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
+        /*
         DataStore dataStore = dataStoreConf.findDataStore(servletContext);
         if ((masterMode) && (!checkCurrentRepositoryStatus(dataStore, DataReposVersionManager.VSSTATUS_CONFIG))) {
             return;
@@ -747,13 +777,15 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             String defaultLayerNames = buildDefaultWMSLayerNames(DEFAULTNAMESPACE, configs);
             wmsConfig.getBaseMapLayers().put(key, defaultLayerNames);
         }
+        */
     }
 
-    protected void resetWMSVirtualLayerMapping(JobExecutionContext executionContext, DataStoreConfig dataStoreConf,
+    protected void resetWMSVirtualLayerMapping(JobExecutionContext executionContext, Catalog dataStoreConf,
                                                boolean masterMode)
         throws JobExecutionException, IOException {
         ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
 
+        /*
         DataStore dataStore = dataStoreConf.findDataStore(servletContext);
         if ((masterMode) && (!checkCurrentRepositoryStatus(dataStore, DataReposVersionManager.VSSTATUS_CONFIG))) {
             return;
@@ -885,8 +917,8 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 }
             }
         }
+        */
     }
-    */
 
     private String buildDefaultWMSLayerNames(String namespace, List xgeosConfigs) {
         StringBuilder sbLayers = new StringBuilder();
@@ -942,62 +974,68 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         return result;
     }
 
-    /*
-    protected void resetGeoserverDataConfig(JobExecutionContext executionContext, DataStoreConfig dataConfig,
-                                            short vsstatusBefore, short vsstatusAfter, boolean exclusive)
+    protected void resetGeoserverDataState(JobExecutionContext executionContext, JDBCDataStore dataStore,
+                                           short vsstatusBefore, short vsstatusAfter, boolean exclusive)
         throws JobExecutionException {
         ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
-        DataStore dataStore = null;
+        DataSource dataSource = null;
+        Connection connection = null;
         try {
-            dataStore = dataConfig.findDataStore(servletContext);
-            if (dataStore instanceof PostgisDataStore) {
-                PostgisDataStore pgDataStore = (PostgisDataStore) dataStore;
-                DataSource dataSource = pgDataStore.getDataSource();
-                Connection connection = dataSource.getConnection();
+            dataSource = dataStore.getDataSource();
+            connection = DataSourceUtils.getConnection(dataSource);
 
-                String currentTargetSchema = retrieveCurrentSchemaName(connection, vsstatusBefore);
+            String currentTargetSchema = retrieveCurrentSchemaName(connection, vsstatusBefore);
 
-                if (currentTargetSchema == null) {
-                    LOGGER.fine("Cannot found target schema in dataStore.");
-                    return;
-                }
-
-                String existTargetSchema = null;
-                if (exclusive)
-                    existTargetSchema = retrieveCurrentSchemaName(connection, vsstatusAfter);
-
-                updateGeoserver(executionContext);
-                updateValidation(executionContext);
-                LOGGER.fine("resetData-update sucessful.");
-
-                saveGeoserver(executionContext);
-                saveValidation(executionContext);
-                LOGGER.fine("resetData-save sucessful.");
-
-                loadGeoserver(executionContext);
-                loadValidation(executionContext);
-                LOGGER.fine("resetData-load sucessful.");
-
-                updateCurrentRepositoryStatus(connection, currentTargetSchema, vsstatusAfter);
-                if ((exclusive) && (existTargetSchema != null)) {
-                    updateCurrentRepositoryStatus(connection, existTargetSchema,
-                        DataReposVersionManager.VSSTATUS_AVAILABLE);
-                }
+            if (currentTargetSchema == null) {
+                LOGGER.fine("Cannot found target schema in dataStore.");
+                return;
             }
+
+            String existTargetSchema = null;
+            if (exclusive)
+                existTargetSchema = retrieveCurrentSchemaName(connection, vsstatusAfter);
+
+
+            GeoServer geoServer = getGeosServer(executionContext);
+            geoServer.reset();
+            /*
+            updateGeoserver(executionContext);
+            updateValidation(executionContext);
+            LOGGER.fine("resetData-update sucessful.");
+
+            saveGeoserver(executionContext);
+            saveValidation(executionContext);
+            LOGGER.fine("resetData-save sucessful.");
+
+            loadGeoserver(executionContext);
+            loadValidation(executionContext);
+            */
+            LOGGER.fine("resetData-load sucessful.");
+
+            updateCurrentRepositoryStatus(connection, currentTargetSchema, vsstatusAfter);
+            if ((exclusive) && (existTargetSchema != null)) {
+                updateCurrentRepositoryStatus(connection, existTargetSchema,
+                    DataReposVersionManager.VSSTATUS_AVAILABLE);
+            }
+        /*
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             throw new JobExecutionException("Update " + DataReposVersionManager.XGVERSIONTABLE_NAME +
                 " has error-", e);
+        */
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             throw new JobExecutionException("Update " + DataReposVersionManager.XGVERSIONTABLE_NAME +
                 " has error-", e);
         } finally {
+            if ((connection != null) && (dataSource != null)) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
+            }
             if (dataStore != null) dataStore.dispose();
         }
     }
 
-    private boolean setFeatureConfBBoxFromNative(Envelope bboxNative, FeatureTypeConfig typeConfig, FeatureType featureType)
+    private boolean setFeatureConfBBoxFromNative(ReferencedEnvelope bboxNative, FeatureTypeInfo typeConfig, FeatureType featureType)
         throws JobExecutionException {
         if ((bboxNative == null) || (bboxNative.isNull())) return false;
 
@@ -1006,8 +1044,8 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             CoordinateReferenceSystem crsDeclared = CRS.decode(srcSRS);
             CoordinateReferenceSystem original = null;
 
-            if (featureType.getDefaultGeometry() != null) {
-                original = featureType.getDefaultGeometry().getCoordinateSystem();
+            if (featureType.getGeometryDescriptor() != null) {
+                original = featureType.getGeometryDescriptor().getCoordinateReferenceSystem();
             }
 
             if (original == null) {
@@ -1018,18 +1056,20 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             // let's show coordinates in the declared crs, not in the native one, to
             // avoid confusion (since on screen we do have the declared one, the native is
             // not visible)
-            Envelope declaredEnvelope = bboxNative;
+            ReferencedEnvelope declaredEnvelope = bboxNative;
 
             if (!CRS.equalsIgnoreMetadata(original, crsDeclared)) {
-                MathTransform xform = CRS.findMathTransform(original, crsDeclared, true);
-                declaredEnvelope = JTS.transform(bboxNative, null, xform, 10); //convert data bbox to lat/long
+                // MathTransform xform = CRS.findMathTransform(original, crsDeclared, true);
+                // declaredEnvelope = JTS.transform(bboxNative, null, xform, 10); //convert data bbox to lat/long
+                declaredEnvelope = bboxNative.transform(crsDeclared, true, 10);
             }
 
-            typeConfig.setNativeBBox(declaredEnvelope);
+            typeConfig.setNativeBoundingBox(declaredEnvelope);
 
-            MathTransform xform = CRS.findMathTransform(original, crsLatLong, true);
-            Envelope xformed_envelope = JTS.transform(bboxNative, xform); //convert data bbox to lat/long
-            typeConfig.setLatLongBBox(xformed_envelope);
+            // MathTransform xform = CRS.findMathTransform(original, crsLatLong, true);
+            // Envelope xformed_envelope = JTS.transform(bboxNative, xform); //convert data bbox to lat/long
+            ReferencedEnvelope bboxLatLong = bboxNative.transform(crsLatLong, true);
+            typeConfig.setLatLonBoundingBox(bboxLatLong);
             return true;
         } catch (FactoryException e) {
             LOGGER.log(Level.INFO, e.getMessage(), e);
@@ -1039,7 +1079,6 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             return false;
         }
     }
-    */
 
     private String retrieveCurrentSchemaName(Connection connection, short status) throws SQLException {
         StringBuilder sbSQL = new StringBuilder("SELECT vsschema, vstimestamp, vsstatus FROM ");
@@ -1108,19 +1147,23 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             if (stmt != null) stmt.close();
         }
     }
-    /*
-    private boolean checkCurrentRepositoryStatus(DataStore dataStore, short status) {
+
+    private boolean checkCurrentRepositoryStatus(JDBCDataStore dataStore, short status) {
+        DataSource dataSource = null;
+        Connection connection = null;
+
         try {
-            if (dataStore instanceof PostgisDataStore) {
-                PostgisDataStore pgDataStore = (PostgisDataStore) dataStore;
-                DataSource dataSource = pgDataStore.getDataSource();
-                Connection connection = dataSource.getConnection();
-                return checkCurrentRepositoryStatus(connection, status);
+            dataSource = dataStore.getDataSource();
+            connection = DataSourceUtils.getConnection(dataSource);
+            return checkCurrentRepositoryStatus(connection, status);
+        // } catch (SQLException e) {
+        //     LOGGER.log(Level.WARNING, e.getMessage(), e);
+        } finally {
+            if ((connection != null) && (dataSource != null)) {
+                DataSourceUtils.releaseConnection(connection, dataSource);
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
         }
-        return false;
+        // return false;
     }
 
     private boolean checkCurrentRepositoryStatus(Connection connection, short status) {
@@ -1131,7 +1174,6 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             return false;
         }
     }
-    */
 
     /*
     private boolean syncFeatureTypesMapping(JobExecutionContext context, DataConfig dataConfig, DataStoreConfig dataStoreConf)

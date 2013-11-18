@@ -938,7 +938,7 @@ public class WMS implements ApplicationContextAware {
         // grab the time metadata
         DimensionInfo time = typeInfo.getMetadata().get(ResourceInfo.TIME, DimensionInfo.class);
         if (time == null || !time.isEnabled()) {
-            throw new ServiceException("Layer " + typeInfo.getPrefixedName()
+            throw new ServiceException("Layer " + typeInfo.prefixedName()
                     + " does not have time support enabled");
         }
 
@@ -987,7 +987,7 @@ public class WMS implements ApplicationContextAware {
         DimensionInfo elevation = typeInfo.getMetadata().get(ResourceInfo.ELEVATION,
                 DimensionInfo.class);
         if (elevation == null || !elevation.isEnabled()) {
-            throw new ServiceException("Layer " + typeInfo.getPrefixedName()
+            throw new ServiceException("Layer " + typeInfo.prefixedName()
                     + " does not have elevation support enabled");
         }
 
@@ -1036,7 +1036,7 @@ public class WMS implements ApplicationContextAware {
         // check the time metadata
         DimensionInfo time = typeInfo.getMetadata().get(ResourceInfo.TIME, DimensionInfo.class);
         if (time == null || !time.isEnabled()) {
-            throw new ServiceException("Layer " + typeInfo.getPrefixedName()
+            throw new ServiceException("Layer " + typeInfo.prefixedName()
                     + " does not have time support enabled");
         }
 
@@ -1058,7 +1058,7 @@ public class WMS implements ApplicationContextAware {
             throws IOException {
         // check the time metadata
         DimensionInfo time = coverage.getMetadata().get(ResourceInfo.TIME, DimensionInfo.class);
-        String name = coverage.getPrefixedName();
+        String name = coverage.prefixedName();
         if (time == null || !time.isEnabled()) {
             throw new ServiceException("Layer " + name + " does not have time support enabled");
         }
@@ -1078,7 +1078,7 @@ public class WMS implements ApplicationContextAware {
         DimensionInfo elevation = typeInfo.getMetadata().get(ResourceInfo.ELEVATION,
                 DimensionInfo.class);
         if (elevation == null || !elevation.isEnabled()) {
-            throw new ServiceException("Layer " + typeInfo.getPrefixedName()
+            throw new ServiceException("Layer " + typeInfo.prefixedName()
                     + " does not have time support enabled");
         }
 
@@ -1105,7 +1105,7 @@ public class WMS implements ApplicationContextAware {
         DimensionInfo elevation = coverage.getMetadata().get(ResourceInfo.ELEVATION,
                 DimensionInfo.class);
         if (elevation == null || !coverage.isEnabled()) {
-            throw new ServiceException("Layer " + coverage.getPrefixedName()
+            throw new ServiceException("Layer " + coverage.prefixedName()
                     + " does not have time support enabled");
         }
 
@@ -1131,7 +1131,7 @@ public class WMS implements ApplicationContextAware {
         } catch (IOException e) {
             throw new ServiceException(
                     "Could not get the feauture source to list time info for layer "
-                            + typeInfo.getPrefixedName(), e);
+                            + typeInfo.prefixedName(), e);
         }
 
         // build query to grab the dimension values

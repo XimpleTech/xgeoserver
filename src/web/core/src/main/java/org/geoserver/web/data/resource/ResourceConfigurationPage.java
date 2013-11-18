@@ -146,7 +146,7 @@ public class ResourceConfigurationPage extends GeoServerSecuredPage {
         this.returnPageClass = LayerPage.class;
         this.tabPanelCustomModels = new LinkedHashMap<Class<? extends LayerEditTabPanel>, IModel<?>>();
 
-        add(new Label("resourcename", getResourceInfo().getPrefixedName()));
+        add(new Label("resourcename", getResourceInfo().prefixedName()));
         Form theForm = new Form("resource", myResourceModel);
         add(theForm);
 

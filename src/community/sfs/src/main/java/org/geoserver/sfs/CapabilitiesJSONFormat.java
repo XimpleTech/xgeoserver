@@ -84,11 +84,11 @@ public class CapabilitiesJSONFormat extends StreamDataFormat {
 
         try {
             LinkedHashMap json = new LinkedHashMap();
-            json.put("name", resource.getPrefixedName());
+            json.put("name", resource.prefixedName());
             try {
                 json.put("bbox", toJSON(resource.boundingBox()));
             } catch(Exception e) {
-                throw ((IOException) new IOException("Failed to get the resource bounding box of:" + resource.getPrefixedName()).initCause(e));
+                throw ((IOException) new IOException("Failed to get the resource bounding box of:" + resource.prefixedName()).initCause(e));
             }
             json.put("crs", "urn:ogc:def:crs:EPSG:" + CRS.lookupEpsgCode(resource.getCRS(), false));
             json.put("axisorder", "xy");

@@ -289,7 +289,7 @@ public class KMLNetworkLinkTransformer extends TransformerBase {
 
         public void encodeGWCLink(GetMapRequest request, MapLayerInfo layer) {
             start("NetworkLink");
-            String prefixedName = layer.getResource().getPrefixedName();
+            String prefixedName = layer.getResource().prefixedName();
             element("name", "GWC-" + prefixedName);
 
             start("Link");

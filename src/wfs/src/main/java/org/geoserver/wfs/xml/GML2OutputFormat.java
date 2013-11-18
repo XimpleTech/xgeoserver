@@ -147,7 +147,7 @@ public class GML2OutputFormat extends WFSGetFeatureOutputFormat {
 
             if (ftNamespaces.containsKey(uri)) {
                 String location = (String) ftNamespaces.get(uri);
-                ftNamespaces.put(uri, location + "," + urlEncode(meta.getPrefixedName()));
+                ftNamespaces.put(uri, location + "," + urlEncode(meta.prefixedName()));
             } else {
                 // don't blindly assume it's a feature type, this class is used also by WMS FeatureInfo
                 // meaning it might be a coverage or a remote wms layer
@@ -289,7 +289,7 @@ public class GML2OutputFormat extends WFSGetFeatureOutputFormat {
     
     protected String typeSchemaLocation(GeoServerInfo global, FeatureTypeInfo meta, String baseUrl) {
         Map<String, String> params = params("service", "WFS", "version", "1.0.0", 
-                "request", "DescribeFeatureType", "typeName", meta.getPrefixedName());
+                "request", "DescribeFeatureType", "typeName", meta.prefixedName());
         return buildURL(baseUrl, "wfs", params, URLType.SERVICE);
     }
 }

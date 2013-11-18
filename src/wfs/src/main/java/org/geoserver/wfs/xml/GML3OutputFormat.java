@@ -231,7 +231,7 @@ public class GML3OutputFormat extends WFSGetFeatureOutputFormat {
                             encoder.setSchemaLocation(namespace, schemaURIs.get(namespace));
                         }
                     } else {
-                        typeNames.append(meta.getPrefixedName());
+                        typeNames.append(meta.prefixedName());
                         if (m.hasNext()) {
                             typeNames.append(",");
                         }

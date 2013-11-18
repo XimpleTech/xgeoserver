@@ -122,7 +122,7 @@ public class SiteMapXMLFormat extends StreamDataFormat {
             if (null == indexingEnabled || Boolean.FALSE.equals(indexingEnabled)) {
                 continue;
             }
-            final String layerName = info.getResource().getPrefixedName();
+            final String layerName = info.getResource().prefixedName();
 
             writeUrl(writer, metadata, layerName);
         }

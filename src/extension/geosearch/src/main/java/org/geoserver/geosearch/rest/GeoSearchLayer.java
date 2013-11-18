@@ -283,7 +283,7 @@ public class GeoSearchLayer extends AbstractResource {
     private String getDescription(LayerGroupInfo lgi) {
         StringBuilder desc = new StringBuilder();
         for (LayerInfo li : lgi.layers()) {
-            desc.append(li.getResource().getPrefixedName());
+            desc.append(li.getResource().prefixedName());
             desc.append(": ");
             String lidesc = li.getResource().getAbstract();
             if (lidesc != null) {

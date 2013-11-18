@@ -169,7 +169,7 @@ public class CapabilitiesTransformer extends TransformerBase {
 				start("w3ds:Layer");
 				element("ows:Title", info.getTitle());
 				element("ows:Abstract", info.getAbstract());
-				element("ows:Identifier", info.getPrefixedName());
+				element("ows:Identifier", info.prefixedName());
 				AttributesImpl bboxAtts = new AttributesImpl();
 				bboxAtts.addAttribute("", "crs", "crs", "", info.getSRS());
 				start("ows:BoundingBox", bboxAtts);

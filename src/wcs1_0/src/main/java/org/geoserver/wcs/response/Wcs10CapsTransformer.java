@@ -689,11 +689,11 @@ public class Wcs10CapsTransformer extends TransformerBase {
                 } catch (Exception e) {
                     if (skipMisconfigured) {
                         reset();
-                        LOGGER.log(Level.SEVERE, "Skipping coverage: " + cvInfo.getPrefixedName()
+                        LOGGER.log(Level.SEVERE, "Skipping coverage: " + cvInfo.prefixedName()
                                 + " as its capabilities generation failed", e);
                     } else {
                         throw new RuntimeException("Capabilities document generation failed on coverage "
-                                + cvInfo.getPrefixedName(), e);
+                                + cvInfo.prefixedName(), e);
                     }
                 }
             }
@@ -721,7 +721,7 @@ public class Wcs10CapsTransformer extends TransformerBase {
                     element("wcs:description", tmp);
                 }
 
-                tmp = cv.getPrefixedName();
+                tmp = cv.prefixedName();
 
                 if ((tmp != null) && (tmp != "")) {
                     element("wcs:name", tmp);

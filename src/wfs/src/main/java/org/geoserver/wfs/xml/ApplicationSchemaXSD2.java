@@ -52,7 +52,7 @@ public class ApplicationSchemaXSD2 extends XSD {
         StringBuilder sb = new StringBuilder();
         for (Set<FeatureTypeInfo> fts : featureTypes.values()) {
             for (FeatureTypeInfo ft : fts) {
-                sb.append(ft.getPrefixedName()).append(",");
+                sb.append(ft.prefixedName()).append(",");
             }
         }
         sb.setLength(sb.length()-1);

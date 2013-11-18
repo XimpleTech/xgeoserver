@@ -16,7 +16,7 @@ public class ResourceConfigurationPageTest extends GeoServerWicketTestSupport {
 
         login();
         tester.startPage(new ResourceConfigurationPage(layer, false));
-        tester.assertLabel("resourcename", layer.getResource().getPrefixedName());
+        tester.assertLabel("resourcename", layer.getResource().prefixedName());
         tester.assertComponent("resource:tabs:panel:theList:0:content", BasicResourceConfig.class);
     }
     

@@ -689,6 +689,16 @@
       </dependencies>
     </profile>
     <profile>
+      <id>jp2k</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.geoserver.extension</groupId>
+          <artifactId>jp2k</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>  
+    <profile>
       <id>gdal</id>
       <dependencies>
         <dependency>
@@ -994,6 +1004,7 @@
         <dependency>
           <groupId>org.geoserver.importer</groupId>
           <artifactId>importer-rest</artifactId>
+          <version>${project.version}</version>
         </dependency>
       </dependencies>
     </profile>
@@ -1028,6 +1039,15 @@
         <dependency>
           <groupId>org.geoserver.community</groupId>
           <artifactId>wfs-notification-plugin</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
+      <id>png</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.geoserver.community</groupId>
+          <artifactId>png</artifactId>
           <version>${project.version}</version>
         </dependency>
       </dependencies>

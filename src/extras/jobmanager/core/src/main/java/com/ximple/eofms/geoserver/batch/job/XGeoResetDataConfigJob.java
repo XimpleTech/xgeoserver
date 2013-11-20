@@ -15,13 +15,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import org.apache.commons.digester.Digester;
 import org.apache.commons.digester.xmlrules.DigesterLoader;
 import org.geoserver.catalog.AttributeTypeInfo;
@@ -43,6 +49,7 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.jdbc.JDBCDataStore;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
@@ -51,6 +58,7 @@ import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.GeometryType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.crs.GeographicCRS;
 import org.opengis.referencing.operation.TransformException;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -225,6 +233,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                     LOGGER.info("XGeoResetDataConfigJob into MASTERMODE.");
                 DataAccess<? extends FeatureType, ? extends Feature> a = targetDataStoreInfo.getDataStore(null);
                 catalogBuilder.setStore(targetDataStoreInfo);
+
                 // MASTER NODE MODE
                 resetGeoServerLayerConfiguration(executionContext, catalogBuilder, catalog, jdbcDataStore, targetDataStoreInfo);
                 resetGeoserverDataState(executionContext, jdbcDataStore,
@@ -513,18 +522,22 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
         XGeosDataConfigMapping mapping = getConfigMapping();
         HashMap<String, String> defaultStyles = buildDefaultStylesMapping(mapping);
-
+        Set<String> dynamicColorLayerNames = buildDynamicColorLayerNames(mapping, "pgOMS");
+        Connection connection = null;
         try {
+            // connection = dataStore.getConnection(Transaction.AUTO_COMMIT);
             String[] dsFTypeNames = dataStore.getTypeNames();
             for (String featureTypeName : dsFTypeNames) {
-                String ftKey = targetStoreInfo.getId() + SEPARATOR + featureTypeName;
-
+                // String ftKey = targetStoreInfo.getId() + SEPARATOR + featureTypeName;
                 // String ftKey = dsConf.getId() + DataConfig.SEPARATOR + featureTypeName;
-                FeatureTypeInfo ftInfo = catalog.getFeatureTypeByDataStore(targetStoreInfo, ftKey);
 
+                catalog.getLayerGroupsByWorkspace(DEFAULTNAMESPACE);
+                FeatureTypeInfo ftInfo = catalog.getFeatureTypeByDataStore(targetStoreInfo, featureTypeName);
+
+                boolean isDynamicLayer = dynamicColorLayerNames.contains(featureTypeName);
                 if (ftInfo == null) {
                     if (!createLayerFeatureTypeInfo(catalogBuilder, catalog, targetStoreInfo, dataStore,
-                        styles, featureTypeName, defaultStyles)) {
+                            styles, featureTypeName, defaultStyles, isDynamicLayer)) {
                         LOGGER.info("Create Feature Failed. [" + featureTypeName + "]");
                     }
                 } else {
@@ -532,15 +545,180 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 }
             }
         } finally {
+            /*
+            if ((connection !=null) && (dataStore != null)) {
+                dataStore.closeSafe(connection);
+            }
+            */
             // if (dataStore != null) dataStore.dispose();
         }
     }
 
-    private boolean createLayerFeatureTypeInfo(CatalogBuilder catalogBuilder, Catalog catalog, DataStoreInfo dsInfo,
-                                               DataStore dataStore,
-                                               List<StyleInfo> styles,
-                                               String featureTypeName,
-                                               HashMap<String, String> defaultStyles)
+    private boolean setupFeatureTypeBounds(FeatureTypeInfo featureType, SimpleFeatureSource featureSource) throws IOException {
+        if (featureType.getNativeBoundingBox() == null) {
+            ReferencedEnvelope bounds = getFeatureTypeNativeBounds(featureType, featureSource);
+            if (bounds == null) return false;
+            featureType.setNativeBoundingBox(bounds);
+        }
+
+        // setup the geographic bbox if missing and we have enough info
+        featureType.setLatLonBoundingBox(getFeatureTypeLatLonBounds(featureType.getNativeBoundingBox(), featureType.getCRS()));
+        return true;
+    }
+
+    private ReferencedEnvelope getFeatureTypeLatLonBounds(ReferencedEnvelope nativeBounds,
+                                                          CoordinateReferenceSystem declaredCRS) throws IOException {
+        if (nativeBounds != null && declaredCRS != null) {
+            // make sure we use the declared CRS, not the native one, the may differ
+            if (!CRS.equalsIgnoreMetadata(DefaultGeographicCRS.WGS84, declaredCRS)) {
+                // transform
+                try {
+                    ReferencedEnvelope bounds = new ReferencedEnvelope(nativeBounds, declaredCRS);
+                    return bounds.transform(DefaultGeographicCRS.WGS84, true);
+                } catch (Exception e) {
+                    throw (IOException) new IOException("transform error").initCause(e);
+                }
+            } else {
+                return new ReferencedEnvelope(nativeBounds, DefaultGeographicCRS.WGS84);
+            }
+        }
+        return null;
+    }
+
+    boolean buildEnvelopeAggregates(SimpleFeatureType featureType, StringBuffer sql) {
+        boolean hasGeom = false;
+        //walk through all geometry attributes and build the query
+        for (Iterator a = featureType.getAttributeDescriptors().iterator(); a.hasNext();) {
+            AttributeDescriptor attribute = (AttributeDescriptor) a.next();
+            if (attribute instanceof GeometryDescriptor) {
+                String geometryColumn = attribute.getLocalName();
+                sql.append("ST_AsText(ST_Force_2D(ST_Envelope(");
+                sql.append("ST_Extent(\"" + geometryColumn + "\"::geometry))))");
+                sql.append(",");
+                hasGeom = true;
+            }
+        }
+        sql.setLength(sql.length() - 1);
+        return hasGeom;
+    }
+
+    public Envelope decodeGeometryEnvelope(ResultSet rs, int column,
+            Connection cx) throws SQLException, IOException {
+        try {
+            String envelope = rs.getString(column);
+            if (envelope != null)
+                return new WKTReader().read(envelope).getEnvelopeInternal();
+            else
+                // empty one
+                return new Envelope();
+        } catch (ParseException e) {
+            throw (IOException) new IOException(
+                    "Error occurred parsing the bounds WKT").initCause(e);
+        }
+    }
+
+    private ReferencedEnvelope mergeEnvelope(ReferencedEnvelope base, ReferencedEnvelope merge)
+                        throws TransformException, FactoryException {
+        if(base == null || base.isNull()) {
+            return merge;
+        } else if(merge == null || merge.isNull()) {
+            return base;
+        } else {
+            // reproject and merge
+            final CoordinateReferenceSystem crsBase = base.getCoordinateReferenceSystem();
+            final CoordinateReferenceSystem crsMerge = merge.getCoordinateReferenceSystem();
+            if(crsBase == null) {
+                merge.expandToInclude(base);
+                return merge;
+            } else if(crsMerge == null) {
+                base.expandToInclude(base);
+                return base;
+            } else {
+                // both not null, are they equal?
+                if(!CRS.equalsIgnoreMetadata(crsBase, crsMerge)) {
+                    merge = merge.transform(crsBase, true);
+                }
+                base.expandToInclude(merge);
+                return base;
+            }
+        }
+    }
+
+    private ReferencedEnvelope getFeatureTypeNativeBounds(FeatureTypeInfo featureTypeInfo, SimpleFeatureSource data)
+        throws IOException {
+        ReferencedEnvelope bounds = null;
+        // bounds
+        JDBCDataStore dataStore = (JDBCDataStore) data.getDataStore();
+        SimpleFeatureType ftype = data.getSchema();
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT ");
+        if (!buildEnvelopeAggregates(ftype, sb)) {
+            return null;
+        }
+        sb.append(" FROM ");
+        sb.append("\"" + ftype.getTypeName() + "\"");
+
+        String sql = sb.toString();
+
+        Connection cx = dataStore.getConnection(Transaction.AUTO_COMMIT);
+        Statement st = null;
+        ResultSet rs = null;
+        try {
+            st = cx.createStatement();
+            rs = st.executeQuery(sql);
+
+            CoordinateReferenceSystem flatCRS = CRS.getHorizontalCRS(ftype
+                .getCoordinateReferenceSystem());
+            final int columns = rs.getMetaData().getColumnCount();
+            while (rs.next()) {
+                for (int i = 1; i <= columns; i++) {
+                    final Envelope envelope = decodeGeometryEnvelope(rs, i, st
+                        .getConnection());
+                    if (envelope != null) {
+                        if (envelope instanceof ReferencedEnvelope) {
+                            bounds = mergeEnvelope(bounds, (ReferencedEnvelope) envelope);
+                        } else {
+                            bounds = mergeEnvelope(bounds, new ReferencedEnvelope(envelope,
+                                    flatCRS));
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new IOException(e.getMessage(), e);
+        } catch (TransformException e) {
+            throw new IOException(e.getMessage(), e);
+        } catch (FactoryException e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            dataStore.closeSafe(rs);
+            dataStore.closeSafe(st);
+        }
+
+        // fix the native bounds if necessary, some datastores do
+        // not build a proper referenced envelope
+        CoordinateReferenceSystem crs = featureTypeInfo.getNativeCRS();
+        if (bounds != null && bounds.getCoordinateReferenceSystem() == null && crs != null) {
+            bounds = new ReferencedEnvelope(bounds, crs);
+        }
+
+        if (bounds != null) {
+            // expansion factor if the bounds are empty or one dimensional
+            double expandBy = 1; // 1 meter
+            if (bounds.getCoordinateReferenceSystem() instanceof GeographicCRS) {
+                expandBy = 0.0001;
+            }
+            if (bounds.getWidth() == 0 || bounds.getHeight() == 0) {
+                bounds.expandBy(expandBy);
+            }
+        }
+        return bounds;
+    }
+
+    private boolean createLayerFeatureTypeInfo(CatalogBuilder catalogBuilder, Catalog catalog,
+                                               DataStoreInfo dsInfo, DataStore dataStore,
+                                               List<StyleInfo> styles, String featureTypeName,
+                                               HashMap<String, String> defaultStyles, boolean isDynamicLayer)
         throws IOException, JobExecutionException {
 
         FeatureTypeInfo featureType =
@@ -549,7 +727,19 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         featureType.setNamespace(null);
 
         SimpleFeatureSource featureSource = dataStore.getFeatureSource(featureTypeName);
+        // SELECT ST_AsText(ST_force_2d(ST_Envelope(ST_Extent(geom)))) from "fsc-501-c1-l2-w1";
         catalogBuilder.setupBounds(featureType, featureSource);
+        // if (!setupFeatureTypeBounds(featureType, featureSource)) return false;
+
+        String featureTypeNameDyn = featureTypeName + "-dyn";
+        FeatureTypeInfo dynFeatureType = null;
+        if (isDynamicLayer) {
+            dynFeatureType = catalogBuilder.buildFeatureType(dataStore.getFeatureSource(featureTypeName));
+            dynFeatureType.setStore(null);
+            dynFeatureType.setNamespace(null);
+            dynFeatureType.setNativeBoundingBox(new ReferencedEnvelope(featureType.getNativeBoundingBox()));
+            dynFeatureType.setLatLonBoundingBox(new ReferencedEnvelope(featureType.getLatLonBoundingBox()));
+        }
 
         //add attributes
         CatalogFactory factory = catalog.getFactory();
@@ -562,23 +752,40 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         }
 
         LayerInfo layer = catalogBuilder.buildLayer((ResourceInfo)featureType);
+        layer.setName(featureTypeName);
         ResourceInfo r = layer.getResource();
+        LayerInfo dynamicLayer = null;
+        ResourceInfo dr = null;
+        if (isDynamicLayer) {
+            dynamicLayer = catalogBuilder.buildLayer((ResourceInfo)dynFeatureType);
+            dynamicLayer.setName(featureTypeNameDyn);
+            dr = dynamicLayer.getResource();
+        }
 
         //initialize resource references
         r.setStore(dsInfo);
         r.setName(featureTypeName);
         r.setNamespace(
             catalog.getNamespaceByPrefix(dsInfo.getWorkspace().getName()));
+        if (dr != null) {
+            dr.setStore(dsInfo);
+            dr.setName(featureTypeNameDyn);
+            dr.setNamespace(
+                catalog.getNamespaceByPrefix(dsInfo.getWorkspace().getName()));
+        }
 
         //srs
         if (r.getSRS() == null) {
-            LOGGER.info("featureType NO_CRS");
+            LOGGER.info("featureType NO_CRS:" + featureTypeName);
             return false;
         }
         else {
             //changed after setting srs manually, compute the lat long bounding box
             try {
                 computeLatLonBoundingBox(layer, false);
+                if (dynamicLayer != null) {
+                    computeLatLonBoundingBox(dynamicLayer, false);
+                }
             }
             catch(Exception e) {
                 LOGGER.log(Level.WARNING, "Error computing lat long bounding box", e);
@@ -587,6 +794,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
             //also since this resource has no native crs set the project policy to force declared
             layer.getResource().setProjectionPolicy(ProjectionPolicy.FORCE_DECLARED);
+            if (dynamicLayer != null) {
+                dynamicLayer.getResource().setProjectionPolicy(ProjectionPolicy.FORCE_DECLARED);
+            }
         }
 
         //bounds
@@ -597,18 +807,43 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
 
         String styleName = getDefaultFeatureTypeStyleId(styles, defaultStyles, featureType.getFeatureType());
-        StyleInfo styleInfo = catalog.getStyleByName("xtpc", styleName);
+        StyleInfo styleInfo = catalog.getStyleByName(DEFAULTNAMESPACE, styleName);
         if (styleInfo == null) {
-            LOGGER.info("featureType NO_STYLE");
+            styleInfo = catalog.getStyleByName(styleName);
+        }
+
+        if (styleInfo == null) {
+            LOGGER.warning("featureType NO_STYLE:" + featureTypeName + "-" + styleName);
             return false;
         }
         layer.setDefaultStyle(styleInfo);
+
+        if (dynamicLayer != null) {
+            StyleInfo dynStyleInfo = catalog.getStyleByName(DEFAULTNAMESPACE, styleName + "Dyn");
+            if (dynStyleInfo != null) {
+                dynamicLayer.setDefaultStyle(dynStyleInfo);
+            } else {
+                dynamicLayer.setDefaultStyle(null);
+                LOGGER.warning("dynamic FeatureType NO_STYLE:" + featureTypeNameDyn + "-" + styleName);
+            }
+            // dynamicLayer.setName(featureTypeName + "-dyn");
+        }
 
         r.setEnabled(true);
         catalog.add(r);
 
         layer.setEnabled(true);
         catalog.add(layer);
+
+        if ((dynamicLayer != null) && (dr != null)) {
+            if (dynamicLayer.getDefaultStyle() != null) {
+                dr.setEnabled(true);
+                catalog.add(dr);
+
+                dynamicLayer.setEnabled(true);
+                catalog.add(dynamicLayer);
+            }
+        }
         return true;
     }
 
@@ -688,6 +923,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             }
         } else if (Polygon.class.equals(bindingClass)) {
             if ((!isIndex) && (!isLandBased)) {
+                if (isNormalFeature) {
+                    return retrieveDefaultStyle(styles, "xtpc-symbol", "polygon");
+                }
                 return retrieveDefaultStyle(styles, "polygon", "polygon");
             } else if (isIndex) {
                 return retrieveDefaultStyle(styles, "xtpc_indexshape", "polygon");
@@ -816,7 +1054,26 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         HashMap<String, List<String>> layerGroupContext = new HashMap<String, List<String>>();
         for (String lgName : layerMapping.keySet()) {
             String layerset = layerMapping.get(lgName);
-            if (lgName.startsWith("pg")) {
+            if (lgName.startsWith("pgOMS")) {
+                ArrayList<String> layerGroupContainer = new ArrayList<String>();
+                String[] layerNames = null;
+                if (layerset != null) {
+                    layerNames = layerset.split(",");
+                } else {
+                    LOGGER.info("vl='" + lgName + "' is empty value.");
+                    continue;
+                }
+
+                for (String ln : layerNames) {
+                    String dynName = ln + "-dyn";
+                    if (existLayerNames.keySet().contains(dynName)) {
+                        layerGroupContainer.add(dynName);
+                    }
+                }
+
+                if (layerGroupContainer.size() > 0)
+                    layerGroupContext.put(lgName, layerGroupContainer);
+            } else if (lgName.startsWith("pg")) {
                 ArrayList<String> layerGroupContainer = new ArrayList<String>();
                 String[] layerNames = null;
                 if (layerset != null) {
@@ -914,11 +1171,31 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         return result;
     }
 
+    private Set<String> buildDynamicColorLayerNames(XGeosDataConfigMapping mapping, String groupName) {
+        TreeSet<String> names = new TreeSet<String>();
+        List rawName = (List) mapping.getMapping().get(groupName);
+        for (Object value : rawName) {
+            XGeosDataConfig xgeosConfig = (XGeosDataConfig) value;
+
+            StringBuilder sbView = new StringBuilder("fsc-");
+            sbView.append(xgeosConfig.getFSC()).append("-c");
+            sbView.append(xgeosConfig.getCOMP()).append("-l");
+            sbView.append(xgeosConfig.getLEV()).append("-w");
+            sbView.append(xgeosConfig.getWEIGHT());
+
+            String viewName = sbView.toString();
+            if (!names.contains(viewName)) {
+                names.add(viewName);
+            }
+        }
+        return names;
+    }
+
     protected void resetGeoserverDataState(JobExecutionContext executionContext, JDBCDataStore dataStore,
                                            short vsstatusBefore, short vsstatusAfter, boolean exclusive)
         throws JobExecutionException {
         ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
-        DataSource dataSource = null;
+        // DataSource dataSource = null;
         Connection connection = null;
         try {
             // dataSource = dataStore.getDataSource();
@@ -937,9 +1214,10 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 existTargetSchema = retrieveCurrentSchemaName(connection, vsstatusAfter);
 
 
-            GeoServer geoServer = getGeosServer(executionContext);
-            geoServer.reset();
-            LOGGER.fine("resetData-load sucessful.");
+            // GeoServer geoServer = getGeosServer(executionContext);
+            // geoServer.reload();
+            // geoServer.reset();
+            // LOGGER.fine("resetData-load sucessful.");
 
             updateCurrentRepositoryStatus(connection, currentTargetSchema, vsstatusAfter);
             if ((exclusive) && (existTargetSchema != null)) {
@@ -960,11 +1238,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             throw new JobExecutionException("Update " + DataReposVersionManager.XGVERSIONTABLE_NAME +
                 " has error-", e);
         } finally {
-            /*
-            if ((connection != null) && (dataSource != null)) {
-                DataSourceUtils.releaseConnection(connection, dataSource);
+            if ((connection != null) && (dataStore != null)) {
+                dataStore.closeSafe(connection);
             }
-            */
             // if (dataStore != null) dataStore.dispose();
         }
     }

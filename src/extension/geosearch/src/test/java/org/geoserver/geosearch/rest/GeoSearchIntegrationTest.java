@@ -43,7 +43,7 @@ public class GeoSearchIntegrationTest extends GeoServerSystemTestSupport {
             String namespaceURI = name.getNamespaceURI();
             String localPart = name.getLocalPart();
             FeatureTypeInfo typeInfo = catalog.getFeatureTypeByName(namespaceURI, localPart);
-            LayerInfo layer = catalog.getLayerByName(typeInfo.getPrefixedName());
+            LayerInfo layer = catalog.getLayerByName(typeInfo.prefixedName());
             layer.getMetadata().put(Properties.INDEXING_ENABLED, Boolean.TRUE);
             catalog.save(layer);
         }

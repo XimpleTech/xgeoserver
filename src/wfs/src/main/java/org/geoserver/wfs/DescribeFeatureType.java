@@ -125,7 +125,7 @@ public class DescribeFeatureType {
                     } catch (IOException ioe) {
                         if (skipMisconfigured) {
                             LOGGER.log(Level.WARNING,
-                                    "Skipping DescribeFeature for " + ftInfo.getPrefixedName()
+                                    "Skipping DescribeFeature for " + ftInfo.prefixedName()
                                         + " because we couldn't connect",
                                     ioe);
                         } else {

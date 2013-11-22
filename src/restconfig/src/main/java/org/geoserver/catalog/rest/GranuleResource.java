@@ -59,7 +59,7 @@ public class GranuleResource extends AbstractGranuleResource {
     protected Object handleObjectGet() throws Exception {
         SimpleFeatureCollection fc = (SimpleFeatureCollection) super.handleObjectGet();
         if(fc.size() == 0) {
-            throw new RestletException("Could not find a granule with id " + granuleId + " in coveage " + coverage.getPrefixedName(), Status.CLIENT_ERROR_NOT_FOUND);
+            throw new RestletException("Could not find a granule with id " + granuleId + " in coveage " + coverage.prefixedName(), Status.CLIENT_ERROR_NOT_FOUND);
         }
         return fc;
     }

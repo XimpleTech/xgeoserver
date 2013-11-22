@@ -270,8 +270,8 @@ O:      for (Filter f : filters) {
 
     PropertyName rewrite(FeatureTypeInfo featureType, String alias, PropertyName name, boolean prefix) {
         String n = name.getPropertyName();
-        if (n.startsWith(featureType.getPrefixedName()+"/")) {
-            n = n.substring((featureType.getPrefixedName()+"/").length());
+        if (n.startsWith(featureType.prefixedName()+"/")) {
+            n = n.substring((featureType.prefixedName()+"/").length());
         }
         else if (n.startsWith(featureType.getName()+"/")) {
             n = n.substring((featureType.getName()+"/").length());

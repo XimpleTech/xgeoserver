@@ -371,7 +371,7 @@ public class GetFeature {
         
                             if ( propName.evaluate(meta.getFeatureType()) == null) {
                                 String mesg = "Requested property: " + propName + " is " + "not available "
-                                    + "for " + meta.getPrefixedName() + ".  ";
+                                    + "for " + meta.prefixedName() + ".  ";
                                 
                                 if (meta.getFeatureType() instanceof SimpleFeatureType) {
                                     List<AttributeTypeInfo> atts = meta.attributes();
@@ -1072,8 +1072,8 @@ O:      for (String propName : query.getPropertyNames()) {
             //check for a full typename prefix
             for (int j = 0; j < featureTypes.size(); j++) {
                 FeatureTypeInfo featureType = featureTypes.get(j);
-                if (propName.startsWith(featureType.getPrefixedName()+"/")) {
-                    propNames.get(j).add(propName.substring((featureType.getPrefixedName()+"/").length()));
+                if (propName.startsWith(featureType.prefixedName()+"/")) {
+                    propNames.get(j).add(propName.substring((featureType.prefixedName()+"/").length()));
                     continue O;
                 }
                 if (propName.startsWith(featureType.getName()+"/")) {

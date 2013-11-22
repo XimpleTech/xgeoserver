@@ -104,7 +104,7 @@ class OpenLayersMapPanel extends Panel implements IHeaderContributor {
         context.put("maxx", bbox.getMaxX());
         context.put("maxy", bbox.getMaxY());
         context.put("id", getMarkupId());
-        context.put("layer", resource.getPrefixedName());
+        context.put("layer", resource.prefixedName());
         context.put("style", style.getName());
         if (style.getWorkspace() != null) {
           context.put("styleWorkspace", style.getWorkspace().getName());

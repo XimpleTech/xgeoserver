@@ -892,7 +892,7 @@ public class ResourcePool {
                                 //load the actual underlying attribute type
                                 PropertyDescriptor pd = ft.getDescriptor( attName );
                                 if ( pd == null || !( pd instanceof AttributeDescriptor) ) {
-                                    throw new IOException("the SimpleFeatureType " + info.getPrefixedName()
+                                    throw new IOException("the SimpleFeatureType " + info.prefixedName()
                                             + " does not contains the configured attribute " + attName
                                             + ". Check your schema configuration");
                                 }

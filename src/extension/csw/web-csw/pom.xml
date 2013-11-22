@@ -12,13 +12,13 @@
   <parent>
     <groupId>org.geoserver</groupId>
     <artifactId>csw</artifactId>
-    <version>2.4.1.x-SNAPSHOT</version>
+    <version>2.4.2.x</version>
   </parent>
 
   <groupId>org.geoserver.csw</groupId>
   <artifactId>web-csw</artifactId>
   <packaging>jar</packaging>
-  <version>2.4.1.x-SNAPSHOT</version>
+  <version>2.4.2.x</version>
   <name>CSW UI Module</name>
   
   <dependencies>

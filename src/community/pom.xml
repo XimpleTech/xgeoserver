@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.geoserver</groupId>
     <artifactId>geoserver</artifactId>
-    <version>2.4.1.x-SNAPSHOT</version>
+    <version>2.4.2.x</version>
   </parent>
 
   <groupId>org.geoserver</groupId>
@@ -49,6 +49,7 @@
           <descriptor>release/ext-libjpeg-turbo.xml</descriptor>
           <descriptor>release/ext-netcdf.xml</descriptor>
           <descriptor>release/ext-netcdf-out.xml</descriptor>
+          <descriptor>release/ext-png.xml</descriptor>
         </descriptors>
       </configuration>
      </plugin>
@@ -158,6 +159,7 @@
         <module>libjpeg-turbo</module>
         <module>netcdf</module>
         <module>netcdf-out</module>
+        <module>png</module>
       </modules>
     </profile>
     <profile>
@@ -295,6 +297,12 @@
       <id>wfs-notification</id>
       <modules>
         <module>wfs-notification</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>png</id>
+      <modules>
+        <module>png</module>
       </modules>
     </profile>
   </profiles>

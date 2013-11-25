@@ -56,7 +56,8 @@ public class BufferedImageTypesTest {
     }
 
 
-    @Test
+    // TODO: Ximple
+    // @Test
     public void compareImage() throws Exception {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         new PNGJMapResponse(null).writePNG(image, bos, 4, FilterType.FILTER_NONE);

@@ -84,10 +84,12 @@ import com.ximple.eofms.util.PrintfFormat;
 public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
     protected static Logger LOGGER = org.geotools.util.logging.Logging.getLogger("com.ximple.eofms.geoserver.batch");
 
-    private static final String SKIPCONFIGJOB = "SKIPCONFIGJOB";
-    private static final String MASTERMODE = "MASTERMODE";
-    private static final String EPSG = "EPSG:";
-    private static final String DEFAULTNAMESPACE = "xtpc";
+    protected static final String DYNOMS_SUFFIX = "-oms";
+
+    protected static final String SKIPCONFIGJOB = "SKIPCONFIGJOB";
+    protected static final String MASTERMODE = "MASTERMODE";
+    protected static final String EPSG = "EPSG:";
+    protected static final String DEFAULTNAMESPACE = "xtpc";
     private static final String XGEOSDATACONFIG_PATH = "xgeosdataconfig.xml";
     private static final String XGEOSRULES_NAME = "DefaultXGeosDataConfigRules.xml";
 
@@ -727,18 +729,22 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         featureType.setNamespace(null);
 
         SimpleFeatureSource featureSource = dataStore.getFeatureSource(featureTypeName);
+
         // SELECT ST_AsText(ST_force_2d(ST_Envelope(ST_Extent(geom)))) from "fsc-501-c1-l2-w1";
         catalogBuilder.setupBounds(featureType, featureSource);
         // if (!setupFeatureTypeBounds(featureType, featureSource)) return false;
 
-        String featureTypeNameDyn = featureTypeName + "-dyn";
+        String featureTypeNameDyn = featureTypeName + DYNOMS_SUFFIX;
         FeatureTypeInfo dynFeatureType = null;
+        SimpleFeatureSource dynFeatureSource = null;
         if (isDynamicLayer) {
-            dynFeatureType = catalogBuilder.buildFeatureType(dataStore.getFeatureSource(featureTypeName));
+            dynFeatureSource = dataStore.getFeatureSource(featureTypeNameDyn);
+            dynFeatureType = catalogBuilder.buildFeatureType(dynFeatureSource);
             dynFeatureType.setStore(null);
             dynFeatureType.setNamespace(null);
-            dynFeatureType.setNativeBoundingBox(new ReferencedEnvelope(featureType.getNativeBoundingBox()));
-            dynFeatureType.setLatLonBoundingBox(new ReferencedEnvelope(featureType.getLatLonBoundingBox()));
+            catalogBuilder.setupBounds(dynFeatureType, dynFeatureSource);
+            // dynFeatureType.setNativeBoundingBox(new ReferencedEnvelope(featureType.getNativeBoundingBox()));
+            // dynFeatureType.setLatLonBoundingBox(new ReferencedEnvelope(featureType.getLatLonBoundingBox()));
         }
 
         //add attributes
@@ -749,6 +755,16 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             att.setName(ad.getLocalName());
             att.setBinding(ad.getType().getBinding());
             featureType.getAttributes().add(att);
+        }
+
+        if ((dynFeatureType != null) && (dynFeatureSource != null)) {
+            schema = dynFeatureSource.getSchema();
+            for (AttributeDescriptor ad : schema.getAttributeDescriptors()) {
+                AttributeTypeInfo att = factory.createAttribute();
+                att.setName(ad.getLocalName());
+                att.setBinding(ad.getType().getBinding());
+                dynFeatureType.getAttributes().add(att);
+            }
         }
 
         LayerInfo layer = catalogBuilder.buildLayer((ResourceInfo)featureType);
@@ -1065,7 +1081,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 }
 
                 for (String ln : layerNames) {
-                    String dynName = ln + "-dyn";
+                    String dynName = ln + DYNOMS_SUFFIX;
                     if (existLayerNames.keySet().contains(dynName)) {
                         layerGroupContainer.add(dynName);
                     }

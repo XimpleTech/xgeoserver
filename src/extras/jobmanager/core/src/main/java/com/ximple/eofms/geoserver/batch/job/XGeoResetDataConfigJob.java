@@ -45,6 +45,7 @@ import org.geoserver.config.GeoServer;
 import org.geotools.data.DataAccess;
 import org.geotools.data.DataStore;
 import org.geotools.data.Transaction;
+import org.geotools.data.jdbc.JDBCUtils;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.jdbc.JDBCDataStore;
@@ -85,6 +86,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
     protected static Logger LOGGER = org.geotools.util.logging.Logging.getLogger("com.ximple.eofms.geoserver.batch");
 
     protected static final String DYNOMS_SUFFIX = "-oms";
+    protected static final String DEFAULT_DMMS_STORENAME = "pgDMMS";
 
     protected static final String SKIPCONFIGJOB = "SKIPCONFIGJOB";
     protected static final String MASTERMODE = "MASTERMODE";
@@ -216,7 +218,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             JDBCDataStore jdbcDataStore = null;
             List<DataStoreInfo> dataStoreInfos = catalog.getDataStores();
             for (DataStoreInfo storeInfo : dataStoreInfos) {
-                if (storeInfo.getName().equalsIgnoreCase("pgDMMS")) {
+                if (storeInfo.getName().equalsIgnoreCase(DEFAULT_DMMS_STORENAME)) {
                     Map params = storeInfo.getConnectionParameters();
                     if (params.get("dbtype").equals("postgis")) {
                         String ownerName = (String) params.get("user");
@@ -288,7 +290,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
      * @param dsConf           Geoserver的資料儲存連結
      * @param ownerName        資料庫視景擁有者名稱
      */
-    /*
+    /**
     private void resetPostgisViewMapping(JobExecutionContext executionContext, DataStoreInfo dsConf, String ownerName) {
         assert executionContext != null;
         ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
@@ -335,36 +337,6 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
         } finally {
             if (dataStore != null) dataStore.dispose();
-        }
-    }
-
-    private void retrieveAllRealTableName(Connection connection, String targetSchema,
-                                          ArrayList<String> realTableNames) throws SQLException {
-        ResultSet rsMeta = null;
-        try {
-            rsMeta = connection.getMetaData().getTables("", targetSchema, "fsc%", new String[]{"TABLE"});
-            while (rsMeta.next()) {
-                String tableName = rsMeta.getString(3);
-                realTableNames.add(tableName);
-            }
-            rsMeta.close();
-            rsMeta = null;
-
-            rsMeta = connection.getMetaData().getTables("", targetSchema, "index%", new String[]{"TABLE"});
-            while (rsMeta.next()) {
-                String tableName = rsMeta.getString(3);
-                realTableNames.add(tableName);
-            }
-            rsMeta.close();
-            rsMeta = null;
-
-            rsMeta = connection.getMetaData().getTables("", targetSchema, "lndtpc%", new String[]{"TABLE"});
-            while (rsMeta.next()) {
-                String tableName = rsMeta.getString(3);
-                realTableNames.add(tableName);
-            }
-        } finally {
-            if (rsMeta != null) rsMeta.close();
         }
     }
 
@@ -1127,6 +1099,40 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             }
             catalog.add(lg);
         }
+
+        LinkedList<String> indexViews = new LinkedList<String>();
+        LinkedList<String> lndtpcViews = new LinkedList<String>();
+        retrieveIndexNLndViewName(dataStore, null, indexViews, lndtpcViews);
+
+        LayerGroupInfo lg = null;
+        lg = factory.createLayerGroup();
+        lg.setName("pgLndtpcity");
+        lg.setTitle("pgLndtpcity");
+        lg.setWorkspace(targetDataStoreInfo.getWorkspace());
+        lg.setMode(LayerGroupInfo.Mode.SINGLE);
+        if (defaultNativeBBox != null) {
+            lg.setBounds(defaultNativeBBox);
+        }
+        for (String aLayerName : lndtpcViews) {
+            LayerInfo lyinfo = existLayerNames.get(aLayerName);
+            lg.getLayers().add(lyinfo);
+        }
+        catalog.add(lg);
+
+        lg = factory.createLayerGroup();
+        lg.setName("pgIndexshape");
+        lg.setTitle("pgIndexshape");
+        lg.setWorkspace(targetDataStoreInfo.getWorkspace());
+        lg.setMode(LayerGroupInfo.Mode.SINGLE);
+        if (defaultNativeBBox != null) {
+            lg.setBounds(defaultNativeBBox);
+        }
+        for (String aLayerName : indexViews) {
+            LayerInfo lyinfo = existLayerNames.get(aLayerName);
+            lg.getLayers().add(lyinfo);
+        }
+        catalog.add(lg);
+
     }
 
     private String buildDefaultLayerNames(String namespace, List xgeosConfigs) {
@@ -1400,6 +1406,66 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             return false;
+        }
+    }
+
+    private void retrieveAllRealTableName(Connection connection, String targetSchema,
+                                          ArrayList<String> realTableNames) throws SQLException {
+        ResultSet rsMeta = null;
+        try {
+            rsMeta = connection.getMetaData().getTables("", targetSchema, "fsc%", new String[]{"TABLE"});
+            while (rsMeta.next()) {
+                String tableName = rsMeta.getString(3);
+                realTableNames.add(tableName);
+            }
+            rsMeta.close();
+            rsMeta = null;
+
+            rsMeta = connection.getMetaData().getTables("", targetSchema, "index%", new String[]{"TABLE"});
+            while (rsMeta.next()) {
+                String tableName = rsMeta.getString(3);
+                realTableNames.add(tableName);
+            }
+            rsMeta.close();
+            rsMeta = null;
+
+            rsMeta = connection.getMetaData().getTables("", targetSchema, "lndtpc%", new String[]{"TABLE"});
+            while (rsMeta.next()) {
+                String tableName = rsMeta.getString(3);
+                realTableNames.add(tableName);
+            }
+        } finally {
+            if (rsMeta != null) rsMeta.close();
+        }
+    }
+
+    private void retrieveIndexNLndViewName(JDBCDataStore dataStore, String targetSchema,
+                                          List<String> indexViewNames, List<String> lndtpcViewNames)
+        throws IOException {
+
+        Connection connection = null;
+        ResultSet rsMeta = null;
+        try {
+            connection = dataStore.getConnection(Transaction.AUTO_COMMIT);
+
+            rsMeta = connection.getMetaData().getTables("", targetSchema, "index%", new String[]{"VIEW"});
+            while (rsMeta.next()) {
+                String tableName = rsMeta.getString(3);
+                indexViewNames.add(tableName);
+            }
+            rsMeta.close();
+            rsMeta = null;
+
+            rsMeta = connection.getMetaData().getTables("", targetSchema, "lndtpc%", new String[]{"VIEW"});
+            while (rsMeta.next()) {
+                String tableName = rsMeta.getString(3);
+                lndtpcViewNames.add(tableName);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e.getMessage(), e);
+        } finally {
+            JDBCUtils.close(rsMeta);
+            // JDBCUtils.close(connection, Transaction.AUTO_COMMIT, null);
         }
     }
 

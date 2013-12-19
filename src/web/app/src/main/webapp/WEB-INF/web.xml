@@ -55,8 +55,8 @@
     
     <!-- pick up all spring application contexts -->
     <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath*:/applicationContext.xml classpath*:/applicationSecurityContext.xml</param-value>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>classpath*:/applicationContext.xml classpath*:/applicationSecurityContext.xml</param-value>
     </context-param>
     
     <filter>
@@ -74,40 +74,40 @@
     </filter>
 
     <filter>
-     <filter-name>SessionDebugger</filter-name>
-     <filter-class>org.geoserver.filters.SessionDebugFilter</filter-class>
+      <filter-name>SessionDebugger</filter-name>
+      <filter-class>org.geoserver.filters.SessionDebugFilter</filter-class>
     </filter>
 
     <filter>
-    <filter-name>filterChainProxy</filter-name>     
-     <filter-class> org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+      <filter-name>filterChainProxy</filter-name>
+      <filter-class> org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
 
-  <filter>
-    <filter-name>GZIP Compression Filter</filter-name>
-    <filter-class>org.geoserver.filters.GZIPFilter</filter-class>
-    <init-param>
+    <filter>
+      <filter-name>GZIP Compression Filter</filter-name>
+      <filter-class>org.geoserver.filters.GZIPFilter</filter-class>
+      <init-param>
       <!-- The compressed-types parameter is a comma-separated list of regular expressions.
            If a mime type matches any of the regular expressions then it will be compressed.
-           -->
-      <param-name>compressed-types</param-name>
-      <param-value>text/.*,.*xml.*,application/json,application/x-javascript</param-value>
-    </init-param>
-  </filter>
+      -->
+        <param-name>compressed-types</param-name>
+        <param-value>text/.*,.*xml.*,application/json,application/x-javascript</param-value>
+      </init-param>
+    </filter>
 
-  <filter>
-    <filter-name>Request Logging Filter</filter-name>
-    <filter-class>org.geoserver.filters.LoggingFilter</filter-class>
-    <init-param>
-      <!-- The 'enabled' parameter is a boolean value, "true" (case-insensitive) for true or
+    <filter>
+      <filter-name>Request Logging Filter</filter-name>
+      <filter-class>org.geoserver.filters.LoggingFilter</filter-class>
+      <init-param>
+        <!-- The 'enabled' parameter is a boolean value, "true" (case-insensitive) for true or
            any other value for false.  If enabled, then the logging will be performed;
            otherwise the logging filter will have no effect.  If not specified, this
            parameter defaults to false.
-           -->
-      <param-name>enabled</param-name>
-      <param-value>false</param-value>
-    </init-param>
-    <init-param>
+        -->
+        <param-name>enabled</param-name>
+        <param-value>false</param-value>
+      </init-param>
+      <init-param>
       <!-- The 'log-request-bodies' parameter is a boolean value, "true" (case-insensitive) for
            true or any other value for false.  If enabled, then the logging will include the body
            of POST and PUT requests.  If not specified, this parameter defaults to false.
@@ -115,10 +115,10 @@
            not begin to process requests until the entire request body has been received by the
            server.
            -->
-      <param-name>log-request-bodies</param-name>
-      <param-value>false</param-value>
-    </init-param>
-  </filter>
+        <param-name>log-request-bodies</param-name>
+        <param-value>false</param-value>
+      </init-param>
+    </filter>
 
   <filter>
     <filter-name>Advanced Dispatch Filter</filter-name>

@@ -112,12 +112,12 @@
   </build>
   <pluginRepositories>
     <!-- Required for groovy-eclipse-compiler snapshot -->
-    <pluginRepository>
+    <!--pluginRepository>
       <id>nexus</id>
       <url>http://nexus.codehaus.org/snapshots/</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
-    </pluginRepository>
+    </pluginRepository-->
   </pluginRepositories>
 </project>

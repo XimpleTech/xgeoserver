@@ -22,7 +22,7 @@
   <version>2.4.4.x</version>
   <name>DXF output format</name>
 
-    <dependencies>
+  <dependencies>
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>wfs</artifactId>

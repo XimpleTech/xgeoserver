@@ -157,8 +157,7 @@ public abstract class GeoServerLoader {
                 initer.initialize( geoServer );
             }
             catch( Throwable t ) {
-                //TODO: log this
-                t.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Failed to run initializer " + initer, t);
             }
         }
     }
@@ -769,8 +768,7 @@ public abstract class GeoServerLoader {
                 LOGGER.info( "Loaded service '" +  s.getId() + "', " + (s.isEnabled()?"enabled":"disabled") );
             }
             catch( Throwable t ) {
-                //TODO: log this
-                t.printStackTrace();
+                LOGGER.log(Level.SEVERE, "Failed to load the service configuration in directory: " + directory.getPath(), t);
             }
         }
     }

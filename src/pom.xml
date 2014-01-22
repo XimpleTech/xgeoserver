@@ -13,7 +13,7 @@
  <groupId>org.geoserver</groupId>
  <artifactId>geoserver</artifactId>
  <packaging>pom</packaging>
- <version>2.4.3.x</version>
+ <version>2.4.4.x</version>
  <name>GeoServer</name>
 
  <scm>
@@ -1312,8 +1312,11 @@
       <descriptor>release/ext-inspire.xml</descriptor>
       <descriptor>release/ext-css.xml</descriptor>      
       <descriptor>release/ext-csw.xml</descriptor>
+      <descriptor>release/ext-dxf.xml</descriptor>
+      <descriptor>release/ext-importer.xml</descriptor>
+      <descriptor>release/ext-importer-bdb.xml</descriptor>
      </descriptors>
-     <finalName>geoserver-2.4.3.x</finalName>
+     <finalName>geoserver-2.4.4.x</finalName>
      <outputDirectory>${project.build.directory}/release</outputDirectory>
     </configuration>
    </plugin>
@@ -1594,8 +1597,8 @@
  </modules>
 
  <properties>
-  <gs.version>2.4.3.x</gs.version>
-  <gt.version>10.3.x</gt.version>
+  <gs.version>2.4.4.x</gs.version>
+  <gt.version>10.4.x</gt.version>
   <gwc.version>1.5.0</gwc.version>
   <spring.version>3.1.4.RELEASE</spring.version>
   <spring.security.version>3.1.2.RELEASE</spring.security.version>

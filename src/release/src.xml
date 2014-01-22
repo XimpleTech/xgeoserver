@@ -13,6 +13,7 @@
     <include>org.geoserver:security</include>
     <include>org.geoserver:wfs</include>
     <include>org.geoserver:wms</include>
+    <include>org.geoserver:kml</include>
     <include>org.geoserver:web</include>
     <include>org.geoserver:wcs</include>
     <include>org.geoserver:wcs1_0</include>
@@ -25,7 +26,7 @@
     <include>org.geoserver:extension</include>
    </includes>
    <sources>
-    <outputDirectory>geoserver-2.4.3.x/${artifactId}/</outputDirectory>
+    <outputDirectory>geoserver-2.4.4.x/${artifactId}/</outputDirectory>
     <excludes>
       <exclude>target</exclude>
       <exclude>**/target</exclude>
@@ -36,7 +37,7 @@
  <fileSets>
   <fileSet>
    <directory>.</directory>
-   <outputDirectory>geoserver-2.4.3.x/</outputDirectory>
+   <outputDirectory>geoserver-2.4.4.x/</outputDirectory>
    <includes>
     <include>pom.xml</include>
    </includes>
@@ -52,7 +53,7 @@
   </fileSet>
   <fileSet>
    <directory>target</directory>
-   <outputDirectory>geoserver-2.4.3.x</outputDirectory>
+   <outputDirectory>geoserver-2.4.4.x</outputDirectory>
    <includes>
     <include>VERSION.txt</include>
    </includes>

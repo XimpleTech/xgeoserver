@@ -11,7 +11,7 @@
  <parent>
   <groupId>org.geoserver</groupId>
   <artifactId>geoserver</artifactId>
-  <version>2.4.3.x</version>
+  <version>2.4.4.x</version>
  </parent>
  <groupId>org.geoserver</groupId>
  <artifactId>release</artifactId>
@@ -257,6 +257,36 @@
      <artifactId>csw-core</artifactId>
      <version>${project.version}</version>
    </dependency> 
+   <dependency>
+     <groupId>org.geoserver.extension</groupId>
+     <artifactId>dxf-core</artifactId>
+     <version>${project.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.geoserver.extension</groupId>
+     <artifactId>dxf-wps</artifactId>
+     <version>${project.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.geoserver.importer</groupId>
+     <artifactId>importer-core</artifactId>
+     <version>${project.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.geoserver.importer</groupId>
+     <artifactId>importer-rest</artifactId>
+     <version>${project.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.geoserver.importer</groupId>
+     <artifactId>importer-bdb</artifactId>
+     <version>${project.version}</version>
+   </dependency>
+   <dependency>
+     <groupId>org.geoserver.importer</groupId>
+     <artifactId>importer-web</artifactId>
+     <version>${project.version}</version>
+   </dependency>
  </dependencies>
  <build>
   <plugins>

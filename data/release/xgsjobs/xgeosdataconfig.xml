@@ -1982,7 +1982,7 @@
     <COMP>5</COMP>
     <LEV>2</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg11KVMAINHV</PG>
@@ -1990,7 +1990,7 @@
     <COMP>5</COMP>
     <LEV>1</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg11KVMAINHV</PG>
@@ -14326,7 +14326,7 @@
     <COMP>5</COMP>
     <LEV>4</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>
@@ -14334,7 +14334,7 @@
     <COMP>5</COMP>
     <LEV>3</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>
@@ -14342,7 +14342,7 @@
     <COMP>5</COMP>
     <LEV>1</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>
@@ -14350,7 +14350,7 @@
     <COMP>5</COMP>
     <LEV>2</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>

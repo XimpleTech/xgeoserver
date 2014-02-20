@@ -86,6 +86,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
     protected static Logger LOGGER = org.geotools.util.logging.Logging.getLogger("com.ximple.eofms.geoserver.batch");
 
     protected static final String DYNOMS_SUFFIX = "-oms";
+    protected static final String FLOWOMS_SUFFIX = "-flow-oms";
     protected static final String DEFAULT_DMMS_STORENAME = "pgDMMS";
 
     protected static final String SKIPCONFIGJOB = "SKIPCONFIGJOB";
@@ -497,6 +498,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         XGeosDataConfigMapping mapping = getConfigMapping();
         HashMap<String, String> defaultStyles = buildDefaultStylesMapping(mapping);
         Set<String> dynamicColorLayerNames = buildDynamicColorLayerNames(mapping, "pgOMS");
+        Set<String> dynamicFlowLayerNames = buildDynamicFlowLayerNames(mapping, "pgOMS");
         Connection connection = null;
         try {
             // connection = dataStore.getConnection(Transaction.AUTO_COMMIT);
@@ -509,9 +511,10 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 FeatureTypeInfo ftInfo = catalog.getFeatureTypeByDataStore(targetStoreInfo, featureTypeName);
 
                 boolean isDynamicLayer = dynamicColorLayerNames.contains(featureTypeName);
+                boolean isDynamicFlowLayer = dynamicFlowLayerNames.contains(featureTypeName);
                 if (ftInfo == null) {
                     if (!createLayerFeatureTypeInfo(catalogBuilder, catalog, targetStoreInfo, dataStore,
-                            styles, featureTypeName, defaultStyles, isDynamicLayer)) {
+                            styles, featureTypeName, defaultStyles, isDynamicLayer, isDynamicFlowLayer)) {
                         LOGGER.info("Create Feature Failed. [" + featureTypeName + "]");
                     }
                 } else {
@@ -692,7 +695,8 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
     private boolean createLayerFeatureTypeInfo(CatalogBuilder catalogBuilder, Catalog catalog,
                                                DataStoreInfo dsInfo, DataStore dataStore,
                                                List<StyleInfo> styles, String featureTypeName,
-                                               HashMap<String, String> defaultStyles, boolean isDynamicLayer)
+                                               HashMap<String, String> defaultStyles,
+                                               boolean isDynamicLayer, boolean isDynamicFlowLayer)
         throws IOException, JobExecutionException {
 
         FeatureTypeInfo featureType =
@@ -719,6 +723,17 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             // dynFeatureType.setLatLonBoundingBox(new ReferencedEnvelope(featureType.getLatLonBoundingBox()));
         }
 
+        String featureTypeNameFlow = featureTypeName + FLOWOMS_SUFFIX;
+        FeatureTypeInfo flowFeatureType = null;
+        SimpleFeatureSource flowFeatureSource = null;
+        if (isDynamicFlowLayer) {
+            flowFeatureSource = dataStore.getFeatureSource(featureTypeNameFlow);
+            flowFeatureType = catalogBuilder.buildFeatureType(flowFeatureSource);
+            flowFeatureType.setStore(null);
+            flowFeatureType.setNamespace(null);
+            catalogBuilder.setupBounds(flowFeatureType, flowFeatureSource);
+        }
+
         //add attributes
         CatalogFactory factory = catalog.getFactory();
         SimpleFeatureType schema = featureSource.getSchema();
@@ -739,15 +754,33 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             }
         }
 
+        if ((flowFeatureType != null) && (flowFeatureSource != null)) {
+            schema = flowFeatureSource.getSchema();
+            for (AttributeDescriptor ad : schema.getAttributeDescriptors()) {
+                AttributeTypeInfo att = factory.createAttribute();
+                att.setName(ad.getLocalName());
+                att.setBinding(ad.getType().getBinding());
+                flowFeatureType.getAttributes().add(att);
+            }
+        }
+
         LayerInfo layer = catalogBuilder.buildLayer((ResourceInfo)featureType);
         layer.setName(featureTypeName);
         ResourceInfo r = layer.getResource();
         LayerInfo dynamicLayer = null;
+        LayerInfo flowLayer = null;
         ResourceInfo dr = null;
+        ResourceInfo drFlow = null;
         if (isDynamicLayer) {
             dynamicLayer = catalogBuilder.buildLayer((ResourceInfo)dynFeatureType);
             dynamicLayer.setName(featureTypeNameDyn);
             dr = dynamicLayer.getResource();
+        }
+
+        if (isDynamicFlowLayer) {
+            flowLayer = catalogBuilder.buildLayer((ResourceInfo)flowFeatureType);
+            flowLayer.setName(featureTypeNameFlow);
+            drFlow = flowLayer.getResource();
         }
 
         //initialize resource references
@@ -759,6 +792,12 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             dr.setStore(dsInfo);
             dr.setName(featureTypeNameDyn);
             dr.setNamespace(
+                catalog.getNamespaceByPrefix(dsInfo.getWorkspace().getName()));
+        }
+        if (drFlow != null) {
+            drFlow.setStore(dsInfo);
+            drFlow.setName(featureTypeNameFlow);
+            drFlow.setNamespace(
                 catalog.getNamespaceByPrefix(dsInfo.getWorkspace().getName()));
         }
 
@@ -774,6 +813,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 if (dynamicLayer != null) {
                     computeLatLonBoundingBox(dynamicLayer, false);
                 }
+                if (flowLayer != null) {
+                    computeLatLonBoundingBox(flowLayer, false);
+                }
             }
             catch(Exception e) {
                 LOGGER.log(Level.WARNING, "Error computing lat long bounding box", e);
@@ -784,6 +826,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             layer.getResource().setProjectionPolicy(ProjectionPolicy.FORCE_DECLARED);
             if (dynamicLayer != null) {
                 dynamicLayer.getResource().setProjectionPolicy(ProjectionPolicy.FORCE_DECLARED);
+            }
+            if (flowLayer != null) {
+                flowLayer.getResource().setProjectionPolicy(ProjectionPolicy.FORCE_DECLARED);
             }
         }
 
@@ -812,9 +857,18 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 dynamicLayer.setDefaultStyle(dynStyleInfo);
             } else {
                 dynamicLayer.setDefaultStyle(null);
-                LOGGER.warning("dynamic FeatureType NO_STYLE:" + featureTypeNameDyn + "-" + styleName);
+                LOGGER.warning("dynamic FeatureType NO_STYLE:" + featureTypeNameDyn + "-" + styleName + "Dyn");
             }
-            // dynamicLayer.setName(featureTypeName + "-dyn");
+        }
+
+        if (flowLayer != null) {
+            StyleInfo flowStyleInfo = catalog.getStyleByName(DEFAULTNAMESPACE, styleName + "FlowDyn");
+            if (flowStyleInfo != null) {
+                flowLayer.setDefaultStyle(flowStyleInfo);
+            } else {
+                flowLayer.setDefaultStyle(null);
+                LOGGER.warning("flow FeatureType NO_STYLE:" + featureTypeNameFlow + "-" + styleName + "FlowDyn");
+            }
         }
 
         r.setEnabled(true);
@@ -830,6 +884,15 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
                 dynamicLayer.setEnabled(true);
                 catalog.add(dynamicLayer);
+            }
+        }
+        if ((flowLayer != null) && (drFlow != null)) {
+            if (flowLayer.getDefaultStyle() != null) {
+                drFlow.setEnabled(true);
+                catalog.add(drFlow);
+
+                flowLayer.setEnabled(true);
+                catalog.add(flowLayer);
             }
         }
         return true;
@@ -1044,6 +1107,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             String layerset = layerMapping.get(lgName);
             if (lgName.startsWith("pgOMS")) {
                 ArrayList<String> layerGroupContainer = new ArrayList<String>();
+                ArrayList<String> flowlayerGroupContainer = new ArrayList<String>();
                 String[] layerNames = null;
                 if (layerset != null) {
                     layerNames = layerset.split(",");
@@ -1054,13 +1118,26 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
                 for (String ln : layerNames) {
                     String dynName = ln + DYNOMS_SUFFIX;
+                    if (ln.startsWith("fsc-4")) {
+                        // Skip fsc-4XX
+                        dynName = ln;
+                    }
+
                     if (existLayerNames.keySet().contains(dynName)) {
                         layerGroupContainer.add(dynName);
                     }
+                    String flowName = ln + FLOWOMS_SUFFIX;
+                    if (existLayerNames.keySet().contains(flowName)) {
+                        flowlayerGroupContainer.add(flowName);
+                    }
                 }
 
-                if (layerGroupContainer.size() > 0)
+                if (layerGroupContainer.size() > 0) {
                     layerGroupContext.put(lgName, layerGroupContainer);
+                }
+                if (flowlayerGroupContainer.size() > 0) {
+                    layerGroupContext.put("pgFlowOMS", flowlayerGroupContainer);
+                }
             } else if (lgName.startsWith("pg")) {
                 ArrayList<String> layerGroupContainer = new ArrayList<String>();
                 String[] layerNames = null;
@@ -1208,6 +1285,28 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             String viewName = sbView.toString();
             if (!names.contains(viewName)) {
                 names.add(viewName);
+            }
+        }
+        return names;
+    }
+
+    private Set<String> buildDynamicFlowLayerNames(XGeosDataConfigMapping mapping, String groupName) {
+        TreeSet<String> names = new TreeSet<String>();
+        List rawName = (List) mapping.getMapping().get(groupName);
+        for (Object value : rawName) {
+            XGeosDataConfig xgeosConfig = (XGeosDataConfig) value;
+
+            if (xgeosConfig.getFSC() == 106) {
+                StringBuilder sbView = new StringBuilder("fsc-");
+                sbView.append(xgeosConfig.getFSC()).append("-c");
+                sbView.append(xgeosConfig.getCOMP()).append("-l");
+                sbView.append(xgeosConfig.getLEV()).append("-w");
+                sbView.append(xgeosConfig.getWEIGHT());
+
+                String viewName = sbView.toString();
+                if (!names.contains(viewName)) {
+                    names.add(viewName);
+                }
             }
         }
         return names;

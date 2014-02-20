@@ -1982,7 +1982,7 @@
     <COMP>5</COMP>
     <LEV>2</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg11KVMAINHV</PG>
@@ -1990,7 +1990,7 @@
     <COMP>5</COMP>
     <LEV>1</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg11KVMAINHV</PG>
@@ -2294,7 +2294,7 @@
     <COMP>0</COMP>
     <LEV>23</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-symbol</FTYPE>
+    <FTYPE>xtpc-polyline</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg11KVMAINHV</PG>
@@ -5242,14 +5242,6 @@
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg22KVMAINHV</PG>
-    <FSC>115</FSC>
-    <COMP>93</COMP>
-    <LEV>48</LEV>
-    <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-polyline2</FTYPE>
-  </XGeosDataConfig>
-  <XGeosDataConfig>
-    <PG>pg22KVMAINHV</PG>
     <FSC>117</FSC>
     <COMP>0</COMP>
     <LEV>27</LEV>
@@ -5974,15 +5966,7 @@
     <COMP>6</COMP>
     <LEV>48</LEV>
     <WEIGHT>1</WEIGHT>
-    <FTYPE>xtpc-symbol</FTYPE>
-  </XGeosDataConfig>
-  <XGeosDataConfig>
-    <PG>pg22KVSUBHV</PG>
-    <FSC>115</FSC>
-    <COMP>6</COMP>
-    <LEV>48</LEV>
-    <WEIGHT>1</WEIGHT>
-    <FTYPE>xtpc-symbol</FTYPE>
+    <FTYPE>xtpc-text2</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pg22KVSUBHV</PG>
@@ -6702,7 +6686,7 @@
     <COMP>1</COMP>
     <LEV>2</LEV>
     <WEIGHT>1</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgFIBER</PG>
@@ -11198,7 +11182,7 @@
     <COMP>4</COMP>
     <LEV>47</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-symbol</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgLVUG</PG>
@@ -11606,7 +11590,7 @@
     <COMP>1</COMP>
     <LEV>23</LEV>
     <WEIGHT>0</WEIGHT>
-    <FTYPE>xtpc-symbol</FTYPE>
+    <FTYPE>xtpc-polyline</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgLVUG</PG>
@@ -14326,7 +14310,7 @@
     <COMP>5</COMP>
     <LEV>4</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-text</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>
@@ -14334,7 +14318,7 @@
     <COMP>5</COMP>
     <LEV>3</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-text</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>
@@ -14342,7 +14326,7 @@
     <COMP>5</COMP>
     <LEV>1</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-text</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>
@@ -14350,7 +14334,7 @@
     <COMP>5</COMP>
     <LEV>2</LEV>
     <WEIGHT>2</WEIGHT>
-    <FTYPE>xtpc-text2</FTYPE>
+    <FTYPE>xtpc-text</FTYPE>
   </XGeosDataConfig>
   <XGeosDataConfig>
     <PG>pgOMS</PG>

@@ -4,8 +4,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.geoserver.config.GeoServer;
-import org.geoserver.wms.WMS;
-import org.geoserver.wms.WMSInfo;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

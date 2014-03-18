@@ -1112,6 +1112,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 ArrayList<String> layerGroupContainer = new ArrayList<String>();
                 ArrayList<String> flowlayerGroupContainer = new ArrayList<String>();
                 ArrayList<String> ownerlayerGroupContainer = new ArrayList<String>();
+                ArrayList<String> civilLayerGroupContainer = new ArrayList<String>();
                 String[] layerNames = null;
                 if (layerset != null) {
                     layerNames = layerset.split(",");
@@ -1127,6 +1128,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                     }
 
                     if (ln.startsWith("fsc-4")) {
+                        civilLayerGroupContainer.add(ln);
                         // Skip fsc-4XX
                         dynName = ln;
                     }
@@ -1149,6 +1151,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 }
                 if (flowlayerGroupContainer.size() > 0) {
                     layerGroupContext.put("pgFlowOMS", flowlayerGroupContainer);
+                }
+                if (civilLayerGroupContainer.size() > 0) {
+                    layerGroupContext.put("pgCivilOMS", civilLayerGroupContainer);
                 }
             } else if (lgName.startsWith("pg")) {
                 ArrayList<String> layerGroupContainer = new ArrayList<String>();

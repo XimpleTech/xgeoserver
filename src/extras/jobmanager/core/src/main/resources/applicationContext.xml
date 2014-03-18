@@ -24,6 +24,17 @@
     <property name="durability" value="true"/>
   </bean>
 
+  <bean name="xgeosResetThemeConfigJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <property name="jobClass" value="com.ximple.eofms.jobs.OracleConvertThemes2PostGISJob"/>
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="MASTERMODE" value="true"/>
+        <entry key="SKIPCONFIGJOB" value="false"/>
+      </map>
+    </property>
+    <property name="durability" value="true"/>
+  </bean>
+
   <bean name="xgeosGarbageCollectorJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
     <property name="jobClass" value="com.ximple.eofms.geoserver.batch.job.XGeosGarbageCollectorJob"/>
     <property name="durability" value="true"/>
@@ -59,12 +70,21 @@
     <property name="repeatInterval" value="5000"/>
   </bean>
 
+  <bean id="resetThemeTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+    <property name="jobDetail" ref="xgeosResetThemeConfigJob"/>
+    <!-- 15 seconds -->
+    <property name="startDelay" value="10000"/>
+    <!-- repeat every 5 seconds -->
+    <property name="repeatInterval" value="5000"/>
+  </bean>
+
   <!-- Scheduler Bean -->
   <bean id="geosScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
     <property name="triggers">
       <list>
         <ref bean="simpleTrigger"/>
         <ref bean="resetDataTrigger"/>
+        <ref bean="resetThemeTrigger"/>
         <!--ref bean="cronImportDataTrigger"/-->
         <!--ref bean="cronResetDataTrigger"/-->
       </list>

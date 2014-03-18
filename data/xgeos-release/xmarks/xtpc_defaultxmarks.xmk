@@ -11769,4 +11769,31 @@
       <lineto x="0.503940f" y="0.003941f"/>
     </graphpath>
   </xmark>
+  
+  <xmark name="OCT110-159">
+    <graphpath>
+      <pathrule>"WIND_EVEN_ODD"</pathrule>
+      <moveto x="-0.492123f" y="-0.338579f"/>
+      <lineto x="0.507877f" y="-0.338579f"/>
+      <moveto x="0.007877f" y="0.484256f"/>
+      <lineto x="0.507877f" y="-0.338579f"/>
+      <moveto x="0.007877f" y="0.484256f"/>
+      <lineto x="-0.492123f" y="-0.338579f"/>
+      <moveto x="0.055121f" y="-0.051177f"/>
+      <lineto x="-0.090549f" y="-0.051177f"/>
+      <moveto x="-0.090549f" y="-0.204720f"/>
+      <lineto x="-0.090549f" y="0.094492f"/>
+      <moveto x="-0.090549f" y="0.094492f"/>
+      <lineto x="0.055121f" y="0.094492f"/>
+      <moveto x="0.055121f" y="0.094492f"/>
+      <lineto x="0.106302f" y="0.047248f"/>
+      <moveto x="0.106302f" y="0.047248f"/>
+      <lineto x="0.106302f" y="0.000004f"/>
+      <moveto x="0.106302f" y="0.000004f"/>
+      <lineto x="0.055121f" y="-0.051177f"/>
+      <moveto x="0.055121f" y="-0.051177f"/>
+      <lineto x="0.106302f" y="-0.204720f"/>
+    </graphpath>
+  </xmark>
+
 </xmarks>

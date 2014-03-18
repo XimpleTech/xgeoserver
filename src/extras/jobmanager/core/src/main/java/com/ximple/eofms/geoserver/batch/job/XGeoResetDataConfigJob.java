@@ -951,7 +951,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             if (isSymbol) {
                 return retrieveDefaultStyle(styles, "xtpc-symbol", "point");
             } else if (isIndex) {
-                return retrieveDefaultStyle(styles, "xtpc-tpclidText", "point");
+                return retrieveDefaultStyle(styles, "xtpc-indexshapep", "point");
             } else {
                 return retrieveDefaultStyle(styles, "xtpc-text", "point");
             }
@@ -979,7 +979,10 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                 }
                 return retrieveDefaultStyle(styles, "polygon", "polygon");
             } else if (isIndex) {
-                return retrieveDefaultStyle(styles, "xtpc_indexshape", "polygon");
+                if (isSmallIndex)
+                    return retrieveDefaultStyle(styles, "xtpc-indexshapes", "polygon");
+
+                return retrieveDefaultStyle(styles, "xtpc-indexshape", "polygon");
             } else if (isLandBased) {
                 return retrieveDefaultStyle(styles, "xtpc-lndcityPolygon", "polygon");
             }
@@ -1108,6 +1111,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             if (lgName.startsWith("pgOMS")) {
                 ArrayList<String> layerGroupContainer = new ArrayList<String>();
                 ArrayList<String> flowlayerGroupContainer = new ArrayList<String>();
+                ArrayList<String> ownerlayerGroupContainer = new ArrayList<String>();
                 String[] layerNames = null;
                 if (layerset != null) {
                     layerNames = layerset.split(",");
@@ -1118,6 +1122,10 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
                 for (String ln : layerNames) {
                     String dynName = ln + DYNOMS_SUFFIX;
+                    if (existLayerNames.keySet().contains(dynName)) {
+                        ownerlayerGroupContainer.add(dynName);
+                    }
+
                     if (ln.startsWith("fsc-4")) {
                         // Skip fsc-4XX
                         dynName = ln;
@@ -1126,6 +1134,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
                     if (existLayerNames.keySet().contains(dynName)) {
                         layerGroupContainer.add(dynName);
                     }
+
                     String flowName = ln + FLOWOMS_SUFFIX;
                     if (existLayerNames.keySet().contains(flowName)) {
                         flowlayerGroupContainer.add(flowName);
@@ -1134,6 +1143,9 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
 
                 if (layerGroupContainer.size() > 0) {
                     layerGroupContext.put(lgName, layerGroupContainer);
+                }
+                if (ownerlayerGroupContainer.size() > 0) {
+                    layerGroupContext.put("pgOwnerOMS", ownerlayerGroupContainer);
                 }
                 if (flowlayerGroupContainer.size() > 0) {
                     layerGroupContext.put("pgFlowOMS", flowlayerGroupContainer);
@@ -1324,6 +1336,7 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             connection = dataStore.getConnection(Transaction.AUTO_COMMIT);
 
             String currentTargetSchema = retrieveCurrentSchemaName(connection, vsstatusBefore);
+            String currentTargetTheme = retrieveCurrentThemeName(connection, vsstatusBefore);
 
             if (currentTargetSchema == null) {
                 LOGGER.fine("Cannot found target schema in dataStore.");
@@ -1331,8 +1344,11 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             }
 
             String existTargetSchema = null;
-            if (exclusive)
+            String existTargetTheme = null;
+            if (exclusive) {
                 existTargetSchema = retrieveCurrentSchemaName(connection, vsstatusAfter);
+                existTargetTheme = retrieveCurrentThemeName(connection, vsstatusAfter);
+            }
 
 
             // GeoServer geoServer = getGeosServer(executionContext);
@@ -1341,16 +1357,13 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
             // LOGGER.fine("resetData-load sucessful.");
 
             updateCurrentRepositoryStatus(connection, currentTargetSchema, vsstatusAfter);
+            updateCurrentThemeStatus(connection, currentTargetTheme, vsstatusAfter);
             if ((exclusive) && (existTargetSchema != null)) {
                 updateCurrentRepositoryStatus(connection, existTargetSchema,
                     DataReposVersionManager.VSSTATUS_AVAILABLE);
+                updateCurrentThemeStatus(connection, existTargetTheme,
+                    DataReposVersionManager.VSSTATUS_AVAILABLE);
             }
-        /*
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, e.getMessage(), e);
-            throw new JobExecutionException("Update " + DataReposVersionManager.XGVERSIONTABLE_NAME +
-                " has error-", e);
-        */
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             throw new JobExecutionException("Update " + DataReposVersionManager.XGVERSIONTABLE_NAME +
@@ -1568,61 +1581,58 @@ public class XGeoResetDataConfigJob extends GeoserverConfigJobBean {
         }
     }
 
-    /*
-    private boolean syncFeatureTypesMapping(JobExecutionContext context, DataConfig dataConfig, DataStoreConfig dataStoreConf)
-        throws IOException, JobExecutionException {
-        assert context != null;
+    private void updateCurrentThemeStatus(Connection connection, String themeTableName, short newStatus)
+            throws SQLException {
+        StringBuilder sbSQL = new StringBuilder("UPDATE ");
+        sbSQL.append(DataReposVersionManager.XPTVERSIONTABLE_NAME).append(' ');
+        sbSQL.append(" SET vptstatus = ");
+        sbSQL.append(newStatus);
+        sbSQL.append(", vpttimestamp = CURRENT_TIMESTAMP WHERE vptname = '");
+        sbSQL.append(themeTableName).append("'");
 
-        ServletContext servletContext = ContextLoader.getCurrentWebApplicationContext().getServletContext();
-        DataStore dataStore = dataStoreConf.findDataStore(servletContext);
-        boolean needCheckSync = false;
-
+        Statement stmt = null;
         try {
-            if (dataStore instanceof PostgisDataStore) {
-                PostgisDataStore pgDataStore = (PostgisDataStore) dataStore;
-                DataSource dataSource = pgDataStore.getDataSource();
-                Connection connection = dataSource.getConnection();
+            stmt = connection.createStatement();
+            stmt.executeUpdate(sbSQL.toString());
+        } finally {
+            if (stmt != null) stmt.close();
+        }
+    }
 
-                // String currentTargetSchema = retrieveCurrentSchemaName(connection, vsstatusBefore);
-                Timestamp last = retrieveCurrentSchemaTimestamp(connection, DataReposVersionManager.VSSTATUS_USING);
-                if (last == null) return false;
-                if (lastUpdate != null) {
-                    needCheckSync = last.after(lastUpdate);
-                } else {
-                    needCheckSync = true;
-                }
 
-                if (!needCheckSync) return false;
-                lastUpdate = Calendar.getInstance().getTime();
-
-                Map styles = dataConfig.getStyles();
-                XGeosDataConfigMapping mapping = getConfigMapping();
-                HashMap<String, String> defaultStyles = buildDefaultStylesMapping(mapping);
-
-                try {
-                    String[] dsFTypeNames = dataStore.getTypeNames();
-
-                    for (String featureTypeName : dsFTypeNames) {
-                        String ftKey = dataStoreConf.getId() + DataConfig.SEPARATOR + featureTypeName;
-                        FeatureTypeConfig ftConfig = dataConfig.getFeatureTypeConfig(ftKey);
-                        if (ftConfig == null) {
-                            if (createLayerFeatureTypeInfo(dataConfig, dataStoreConf, dataStore, styles,
-                                featureTypeName, defaultStyles)) {
-                                needCheckSync = needCheckSync | true;
-                            }
-                        } else {
-                            needCheckSync |= updateFeatureTypeConfig(ftConfig, dataStore, styles, defaultStyles);
-                        }
-                    }
-                } finally {
-                    if (dataStore != null) dataStore.dispose();
-                }
-            }
+    private boolean checkCurrentThemeStatus(Connection connection, short status) {
+        try {
+            return (retrieveCurrentThemeName(connection, status) != null);
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, e.getMessage(), e);
             return false;
         }
-        return needCheckSync;
     }
-    */
+
+
+    private String retrieveCurrentThemeName(Connection connection, short status) throws SQLException {
+        StringBuilder sbSQL = new StringBuilder("SELECT ");
+        sbSQL.append("vptname, vpttimestamp, vptstatus FROM ");
+        sbSQL.append(DataReposVersionManager.XPTVERSIONTABLE_NAME);
+        sbSQL.append(" WHERE vptstatus = ");
+        sbSQL.append(status);
+        sbSQL.append("ORDER BY vptid");
+
+        String result = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            stmt = connection.createStatement();
+            rs = stmt.executeQuery(sbSQL.toString());
+            // get first result
+            if (rs.next()) {
+                result = rs.getString(1);
+            }
+            return result;
+        } finally {
+            JDBCUtils.close(rs);
+            JDBCUtils.close(stmt);
+        }
+    }
 }

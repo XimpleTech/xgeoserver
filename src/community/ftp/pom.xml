@@ -1,0 +1,54 @@
+<project>
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.geoserver</groupId>
+      <artifactId>community</artifactId>
+      <version>2.4.4.x</version>
+   </parent>
+   <groupId>org.geoserver.community</groupId>
+   <artifactId>ftp</artifactId>
+   <packaging>jar</packaging>
+   <version>2.4.4.x</version>
+   <name>GeoServer Embedded FTP server</name>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.geoserver</groupId>
+         <artifactId>main</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.ftpserver</groupId>
+         <artifactId>ftpserver-core</artifactId>
+         <version>1.0.6</version>
+      </dependency>
+
+      <!-- Testing -->
+      <dependency>
+         <groupId>org.geoserver</groupId>
+         <artifactId>main</artifactId>
+         <classifier>tests</classifier>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>com.mockrunner</groupId>
+         <artifactId>mockrunner-jdk1.5-j2ee1.3</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>xmlunit</groupId>
+         <artifactId>xmlunit</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easymock</groupId>
+         <artifactId>easymock</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.easymock</groupId>
+         <artifactId>easymockclassextension</artifactId>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+</project>

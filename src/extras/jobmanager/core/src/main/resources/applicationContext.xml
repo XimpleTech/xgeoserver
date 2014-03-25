@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2001 - 2013 OpenPlans - www.openplans.org. All rights reserved.
+ This code is licensed under the GPL 2.0 license, available at the root
+ application directory.
+ -->
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+  <!--bean id="absreactGeoserverQuartzJob" class="com.ximple.eofms.geoserver.batch.job.GeoserverQuartzJobBean"
+        abstract="true">
+    <property name="geoServer" ref="geoServer"/>
+  </bean-->
+
+  <!-- Job Beans -->
+  <bean name="xgeosResetDataConfigJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <property name="jobClass" value="com.ximple.eofms.geoserver.batch.job.XGeoResetDataConfigJob"/>
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="MASTERMODE" value="true"/>
+        <entry key="SKIPCONFIGJOB" value="false"/>
+      </map>
+    </property>
+    <property name="durability" value="true"/>
+  </bean>
+
+  <bean name="xgeosResetThemeConfigJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <property name="jobClass" value="com.ximple.eofms.jobs.OracleConvertThemes2PostGISJob"/>
+    <property name="jobDataAsMap">
+      <map>
+        <entry key="MASTERMODE" value="true"/>
+        <entry key="SKIPCONFIGJOB" value="false"/>
+      </map>
+    </property>
+    <property name="durability" value="true"/>
+  </bean>
+
+  <bean name="xgeosGarbageCollectorJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <property name="jobClass" value="com.ximple.eofms.geoserver.batch.job.XGeosGarbageCollectorJob"/>
+    <property name="durability" value="true"/>
+  </bean>
+
+  <!-- Trigger Beans -->
+  <bean id="cronResetDataTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+    <property name="jobDetail" ref="xgeosResetDataConfigJob"/>
+    <!-- run every morning at 7 PM -->
+    <property name="cronExpression" value="0 0 02 * * ?"/>
+  </bean>
+
+  <!--bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+    <property name="jobDetail" ref="xgeosGarbageCollectorJob"/>
+    <- 15 seconds ->
+    <property name="startDelay" value="15000"/>
+    <- repeat every 10 seconds ->
+    <property name="repeatInterval" value="10000"/>
+  </bean-->
+  <bean id="simpleTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+    <property name="jobDetail" ref="xgeosGarbageCollectorJob"/>
+    <!-- 15 seconds -->
+    <property name="startDelay" value="15000"/>
+    <!-- repeat every 10 seconds -->
+    <property name="repeatInterval" value="10000"/>
+  </bean>
+
+  <bean id="resetDataTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+    <property name="jobDetail" ref="xgeosResetDataConfigJob"/>
+    <!-- 15 seconds -->
+    <property name="startDelay" value="10000"/>
+    <!-- repeat every 5 seconds -->
+    <property name="repeatInterval" value="5000"/>
+  </bean>
+
+  <bean id="resetThemeTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+    <property name="jobDetail" ref="xgeosResetThemeConfigJob"/>
+    <!-- 15 seconds -->
+    <property name="startDelay" value="10000"/>
+    <!-- repeat every 5 seconds -->
+    <property name="repeatInterval" value="5000"/>
+  </bean>
+
+  <!-- Scheduler Bean -->
+  <bean id="geosScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+    <property name="triggers">
+      <list>
+        <ref bean="simpleTrigger"/>
+        <ref bean="resetDataTrigger"/>
+        <ref bean="resetThemeTrigger"/>
+        <!--ref bean="cronImportDataTrigger"/-->
+        <!--ref bean="cronResetDataTrigger"/-->
+      </list>
+    </property>
+    <property name="applicationContextSchedulerContextKey">
+      <value>applicationContext</value>
+    </property>
+  </bean>
+
+  <bean id="jobManager" class="com.ximple.eofms.geoserver.batch.job.JobManager">
+    <constructor-arg ref="geosScheduler"/>
+  </bean>
+</beans>

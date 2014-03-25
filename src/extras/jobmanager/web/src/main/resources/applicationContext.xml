@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+  <!--
+    wicket ui stuff
+   -->
+  <!--bean id="batchJobsMenuPage" class="org.geoserver.web.MenuPageInfo"-->
+  <bean id="batchJobsMenuPage" class="org.geoserver.web.ToolLinkInfo">
+    <property name="id" value="batchJobs" />
+    <!--property name="category" ref="dataCategory"/-->
+    <property name="titleKey" value="BatchJobPage.menu" />
+    <property name="descriptionKey" value="BatchJobPage.description" />
+    <property name="componentClass" value="com.ximple.eofms.geoserver.batch.web.ScheduledBatchJobPage" />
+    <!--property name="order" value="50"/-->
+    <!--property name="icon" value="map_add.png"/-->
+  </bean>
+
+</beans>

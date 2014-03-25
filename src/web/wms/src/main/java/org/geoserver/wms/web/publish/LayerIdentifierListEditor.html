@@ -1,0 +1,27 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+<head></head>
+<body>
+<wicket:panel>
+  <div wicket:id="container">
+    <table wicket:id="table">
+      <tr>
+        <th width="94em"><wicket:message key="authority">Authority</wicket:message></th>
+        <th width="95%"><wicket:message key="identifier">Identifier</wicket:message></th>
+        <th></th>
+      </tr>
+      <tr wicket:id="identifiers">
+        <td><div wicket:id="authFeedbak" style="width:100%;"><select wicket:id="authority" style="width: 23em;"></select></div></td>
+        <td><div wicket:id="idFeedbak" style="width:100%;"><input wicket:id="identifier" type="text" class="text" style="width:90%;"></input></div></td>
+        <td><a href="#" wicket:id="removeLink"><wicket:message key="remove">Remove</wicket:message></a></td>
+      </tr>
+    </table>
+    <p wicket:id="noIdentifiers"></p>
+  </div>
+  <div>
+   <span>
+    <button wicket:id="addIdentifier"><wicket:message key="addIdentifier">Add Authority URL</wicket:message></button>
+   </span>
+  </div>
+</wicket:panel>
+</body>
+</html>

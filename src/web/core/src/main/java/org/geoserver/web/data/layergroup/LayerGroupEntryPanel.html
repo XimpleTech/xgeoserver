@@ -1,0 +1,20 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd">
+  <body>
+    <wicket:panel>
+      <ul>
+       <li><label><wicket:message key="layers">Layers</wicket:message></label></li>
+       <li><a class="add-link" wicket:id="addLayer"><wicket:message key="addLayer">Add Layer...</wicket:message></a></li>
+       <li><a class="add-link" wicket:id="addLayerGroup"><wicket:message key="addLayerGroup">Add Layer Group...</wicket:message></a></li>       
+       <li>
+         <div wicket:id="layers"></div>
+       </li>
+     </ul>
+     <div wicket:id="popup"></div>
+    </wicket:panel>
+    
+    <wicket:fragment wicket:id="defaultStyle">
+        <input type="checkbox" wicket:id="checkbox"/>
+    </wicket:fragment>
+  </body>
+</html>
+
